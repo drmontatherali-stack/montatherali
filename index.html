@@ -159,7 +159,7 @@ const upd = (id, o) => db.collection('units').doc(id).update(o).catch(e => alert
 const log = (u, type, o) => db.collection('log').add({unitId: u.id, code: codeOf(u), type, date: today(), at: firebase.firestore.FieldValue.serverTimestamp(), ...o}).catch(e => alert('تعذر تسجيل الحركة: ' + e.message));
 
 const S = {waiting:'بانتظار الموعد', counting:'تحت الإنجاز', ready:'جاهز للتبليغ', notready:'غير جاهز', postponed:'مؤجل', received:'تم الاستلام'};
-const F = [['active','النشطة'],['alert','⚠ تنبيه'],['today','مواعيد اليوم'],['waiting','بانتظار'],['counting','تحت الإنجاز'],['ready','جاهز'],['notready','غير جاهز'],['postponed','مؤجل'],['received','مستلمة']];
+const F = [['active','النشطة'],['alert','⚠ تنبيه'],['cleanlate','🧹 تنظيف متأخر'],['readylate','⏰ جاهزية متأخرة'],['today','مواعيد اليوم'],['waiting','بانتظار'],['counting','تحت الإنجاز'],['ready','جاهز'],['notready','غير جاهز'],['postponed','مؤجل'],['received','مستلمة']];
 let units = [], cleaned = [], extraC = [], view = 'units', filter = 'active', q = '', unsub = null;
 const CONTRACTORS = ['احمد عواد','جاسم زراك','عمر بولات','يوسف حسن','اسعد هادي','علي الكوفي','عادل عرار','محمد عرار','سمير حنون','اكام بهاء','اوات جمال','علي محمد حسين','طاهر عبد الاله','ثامر عطار','علي هويدي'];
 const SECTORS = ['الاول','الثاني','الثالث','الرابع','الخامس','السادس'];
@@ -168,7 +168,7 @@ const getC = () => v('c') === '__new' ? v('cn') : v('c');
 const saveContractor = o => { if (o.contractor && !allC().includes(o.contractor)) db.collection('contractors').doc(encodeURIComponent(o.contractor)).set({name: o.contractor}).catch(() => {}); };
 let fl = {c: '', s: '', cl: '', rd: ''}, fOpen = false, fSig = '';
 const fCount = () => Object.values(fl).filter(Boolean).length;
-const isClean = u => !!u.precleaned || cleaned.some(c => nz(c.code) === nz(codeOf(u)));
+const isClean = u => !!u.precleaned || !!u.cleanDone || cleaned.some(c => nz(c.code) === nz(codeOf(u)));
 const isReady = u => ['ready', 'postponed', 'received'].includes(u.status);
 function fmatch(u) {
   if (fl.c && (fl.c === '__direct' ? u.type !== 'direct' : u.contractor !== fl.c)) return false;
@@ -180,9 +180,29 @@ function fmatch(u) {
 const setF = (k, val) => { fl[k] = val; render(); };
 const clearF = () => { fl = {c: '', s: '', cl: '', rd: ''}; render(); };
 const toggleF = () => { fOpen = !fOpen; render(); };
+const ld = {u: false, c: false};
+let alertShown = false;
+function markClean(id) {
+  const u = find(id);
+  if (!confirm('تأكيد: تم تنظيف الدار ' + codeOf(u) + '؟')) return;
+  upd(id, {cleanDone: today()});
+  log(u, 'clean', {});
+}
+function goAlert(k) {
+  fl = {c: '', s: '', cl: '', rd: ''}; filter = k; q = ''; $('#q').value = ''; view = 'units';
+  $('#modal').style.display = 'none'; render(); window.scrollTo(0, 0);
+}
+function maybeAlert() {
+  if (alertShown || !ld.u || !ld.c) return;
+  alertShown = true;
+  const cl = units.filter(cleanLate).length, rl = units.filter(readyLate).length, ew = units.filter(earlyWarn).length;
+  if (!cl && !rl && !ew) return;
+  const row = (n, txt, k, c) => n ? `<div class="cnt ${c}" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${txt}: <b>${n}</b></span><button class="b" onclick="goAlert('${k}')">عرض</button></div>` : '';
+  modal('⚠ تنبيهات اليوم', row(cl, '🧹 دور وصل موعد تنظيفها ولم تُنظّف', 'cleanlate', 'er') + row(rl, '⏰ دور وصل موعد جاهزيتها ولم تجهز', 'readylate', 'er') + row(ew, '⚠ دور باقي يومان أو أقل على موعد جاهزيتها', 'alert', 'wn'), () => {}, 'إغلاق');
+}
 const codeOf = u => u.code || ((u.block || '') + (u.house ? '/' + u.house : ''));
 const nz = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).toLowerCase().replace(/\s+/g, '');
-const FC = {active:'#3730a3', alert:'#dc2626', today:'#7c3aed', waiting:'#64748b', counting:'#4338ca', ready:'#16a34a', notready:'#e11d48', postponed:'#d97706', received:'#0d9488'};
+const FC = {active:'#3730a3', alert:'#dc2626', cleanlate:'#b91c1c', readylate:'#c2410c', today:'#7c3aed', waiting:'#64748b', counting:'#4338ca', ready:'#16a34a', notready:'#e11d48', postponed:'#d97706', received:'#0d9488'};
 const TECHS = [['المهندس', 'محمد عبد الامير'], ['الفني', 'علي نعمان'], ['الفني', 'منتظر علي']];
 const techSel = () => `<label>الفني / المهندس<select id="f_tc"><option value="">— اختر —</option>${TECHS.map(([r, n]) => `<option value="${r}: ${n}">${r}: ${n}</option>`).join('')}</select></label>`;
 
@@ -197,22 +217,27 @@ auth.onAuthStateChanged(user => {
   if (user && !unsub) {
     const er = e => alert('خطأ في قراءة البيانات: ' + e.message);
     const subs = [
-      db.collection('units').onSnapshot(s => { units = s.docs.map(d => ({id: d.id, ...d.data()})); render(); }, er),
-      db.collection('cleaned').onSnapshot(s => { cleaned = s.docs.map(d => ({id: d.id, ...d.data()})); render(); }, er),
+      db.collection('units').onSnapshot(s => { units = s.docs.map(d => ({id: d.id, ...d.data()})); ld.u = true; render(); }, er),
+      db.collection('cleaned').onSnapshot(s => { cleaned = s.docs.map(d => ({id: d.id, ...d.data()})); ld.c = true; render(); }, er),
       db.collection('contractors').onSnapshot(s => { extraC = s.docs.map(d => d.data().name).filter(Boolean); }, er)];
     unsub = () => subs.forEach(f => f());
   }
-  if (!user && unsub) { unsub(); unsub = null; units = []; cleaned = []; }
+  if (!user && unsub) { unsub(); unsub = null; units = []; cleaned = []; ld.u = ld.c = false; alertShown = false; }
 });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
 
 /* ---------- الحسابات ---------- */
 const dayNo = u => Math.max(1, diff(u.inspectionDate, today()) + 1);
-const isAlert = u => u.status === 'counting' && (DAYS - dayNo(u)) <= WARN_LEFT;
+const cleanLate = u => u.type === 'direct' && u.status === 'waiting' && !isClean(u) && !!u.appointment && u.appointment <= today();
+const readyLate = u => u.status === 'counting' && dayNo(u) >= DAYS;
+const earlyWarn = u => u.status === 'counting' && dayNo(u) >= DAYS - WARN_LEFT && dayNo(u) < DAYS;
+const isAlert = u => cleanLate(u) || readyLate(u) || earlyWarn(u);
 function match(u, f) {
   const s = u.status;
   if (f === 'active') return s !== 'received';
   if (f === 'alert') return isAlert(u);
+  if (f === 'cleanlate') return cleanLate(u);
+  if (f === 'readylate') return readyLate(u);
   if (f === 'today') return (s === 'waiting' || s === 'postponed') && u.appointment === today();
   return s === f;
 }
@@ -222,19 +247,20 @@ function counter(u) {
   if (u.status !== 'counting') return '';
   const d = dayNo(u), left = DAYS - d;
   let c = 'ok', t = `يوم ${d} من ${DAYS}`;
-  if (d > DAYS) { c = 'er'; t = `متأخر ${d - DAYS} يوم — سجّل نتيجة الفحص`; }
+  if (d >= DAYS) { c = 'er'; t = d === DAYS ? '⏰ وصل اليوم موعد الجاهزية — سجّل نتيجة الفحص' : `⏰ متأخر ${d - DAYS} يوم — سجّل نتيجة الفحص`; }
   else if (left <= WARN_LEFT) { c = 'wn'; t = `⚠ يوم ${d} من ${DAYS} — ` + (left === 0 ? 'اليوم موعد الفحص النهائي' : `باقي ${left} يوم`); }
   return `<div class="cnt ${c}"><div class="bar"><i style="width:${Math.min(d, DAYS) * 100 / DAYS}%"></i></div>${t}</div>`;
 }
 function card(u) {
   const type = u.type === 'direct' ? 'تنفيذ مباشر' : 'مقاول: ' + esc(u.contractor || '-') + ' — القطاع: ' + esc(u.sector || '-');
-  const dates = [['الحضور', u.arrival], ['الموعد', u.appointment], ['الكشف', u.inspectionDate], ['الاستلام', u.receiptDate]]
+  const dates = [['الحضور', u.arrival], ['الموعد', u.appointment], ['التنظيف', u.cleanDone], ['الكشف', u.inspectionDate], ['الاستلام', u.receiptDate]]
     .filter(x => x[1]).map(x => `<span>${x[0]}: <b>${x[1]}</b></span>`).join('');
   const m = u.msgs || [0, 0, 0], md = u.msgDates || [];
   const msgs = `<div class="msgs"><button class="b wa" onclick="wa('${u.id}')">واتساب</button>` +
     [0, 1, 2].map(i => `<label class="ck"><input type="checkbox" ${m[i] ? 'checked' : ''} onchange="tick('${u.id}',${i},this.checked)">رسالة ${i + 1}${md[i] ? `<small>${md[i]}</small>` : ''}</label>`).join('') + `</div>`;
   const s = u.status;
   let acts = '';
+  if (s === 'waiting' && u.type === 'direct' && !isClean(u)) acts += `<button class="b ok" onclick="markClean('${u.id}')">🧹 تم التنظيف</button>`;
   if (s === 'waiting') acts += `<button class="b pr" onclick="inspect('${u.id}')">تسجيل الكشف</button>`;
   if (s === 'counting') acts += `<button class="b pr" onclick="check('${u.id}')">فحص اليوم ${DAYS}</button>`;
   if (s === 'notready') acts += `<button class="b pr" onclick="check('${u.id}')">إعادة فحص</button>`;
@@ -245,11 +271,12 @@ function card(u) {
     <div class="info"><span>${type}</span><span>هاتف: <b dir="ltr">${esc(u.phone)}</b></span></div>
     <div class="info">${dates}</div>
     ${u.notReceivedReason && s === 'postponed' ? `<div class="info"><span>سبب عدم الاستلام: <b>${esc(u.notReceivedReason)}</b></span></div>` : ''}
-    ${counter(u)}
+    ${cleanLate(u) ? `<div class="cnt er">🧹 وصل موعد التنظيف (${u.appointment}) ولم يتم تنظيف الدار</div>` : ''}${counter(u)}
     ${s !== 'received' ? msgs : ''}
     <div class="acts">${acts}</div></div>`;
 }
 function render() {
+  maybeAlert();
   $('#tab_units').innerHTML = '📋 الدور <small>' + units.filter(u => u.status !== 'received').length + '</small>';
   $('#tab_cleaned').innerHTML = '✨ الدور المنظفة مسبقاً <small>' + cleaned.length + '</small>';
   $('#tab_units').className = view === 'units' ? 'on' : '';
@@ -409,7 +436,7 @@ function inspect(id) {
     () => {
       if (!v('d')) { alert('اكتب تاريخ الكشف'); return false; }
       if (!v('tc')) { alert('اختر الفني أو المهندس'); return false; }
-      upd(id, {status: 'counting', inspectionDate: v('d'), inspectionTech: v('tc')});
+      upd(id, {status: 'counting', inspectionDate: v('d'), inspectionTech: v('tc'), ...(u.type === 'direct' && !u.cleanDone ? {cleanDone: v('d')} : {})});
       log(u, 'inspection', {tech: v('tc'), text: $('#f_tx').value.trim(), date: v('d')});
     });
 }
@@ -454,7 +481,7 @@ function notReceived(id) {
 async function history(id) {
   const u = find(id);
   modal('سجل ' + esc(codeOf(u)), '<div id="hl">جاري التحميل…</div>', () => {}, 'إغلاق');
-  const T = {inspection: 'تسجيل الكشف', check: 'فحص', received: 'تم الاستلام', postponed: 'لم يستلم'};
+  const T = {inspection: 'تسجيل الكشف', check: 'فحص', received: 'تم الاستلام', postponed: 'لم يستلم', clean: 'تم التنظيف'};
   try {
     const s = await db.collection('log').where('unitId', '==', id).get();
     const rows = s.docs.map(d => d.data()).sort((a, b) => (b.at?.toMillis?.() || Date.now()) - (a.at?.toMillis?.() || Date.now()));
