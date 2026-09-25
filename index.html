@@ -204,7 +204,7 @@
         .filter-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1; }
         .filter-group label { font-weight: 700; color: var(--text-muted); font-size: 0.88rem; }
 
-        select, input[type="text"], input[type="date"] {
+        select, input[type="text"], input[type="date"], input[type="number"] {
             background: rgba(5, 11, 20, 0.7);
             border: 1px solid var(--glass-border);
             color: var(--text-main);
@@ -361,6 +361,22 @@
             background: rgba(56, 189, 248, 0.1);
             transform: scale(1.02);
         }
+
+        .calendar-nav-btn {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid var(--primary-blue);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .calendar-nav-btn:hover {
+            background: var(--primary-blue);
+            color: #000;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -488,10 +504,27 @@
 
 <!-- Modals -->
 <div id="calendarModal" class="modal">
-    <div class="modal-content" style="max-width: 900px;">
+    <div class="modal-content" style="max-width: 950px;">
         <span class="close-btn" onclick="closeCalendarModal()">&times;</span>
-        <h3 style="margin-bottom: 20px; color: #fff;">📅 التقويم الهندسي التفاعلي الشامل</h3>
-        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">اضغط على أي يوم في التقويم لعرض تفاصيل أحداث ومواعيد الدور بذلك اليوم (تسليم، تنظيف، كشف، قيد العمل)</p>
+        <h3 style="margin-bottom: 15px; color: #fff;">📅 التقويم الهندسي التفاعلي الشامل</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">يمكنك التنقل بين الأنماط والأشهر والسنوات بمرونة متكاملة لمتابعة كافة مواعيد الدور المستمرة والعابرة للأشهر والسنوات.</p>
+        
+        <!-- عناصر تحكم للتقويم (التنقل بين الأشهر والسنوات) -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(5, 11, 20, 0.6); padding: 12px 18px; border-radius: 16px; border: 1px solid var(--glass-border); flex-wrap: wrap; gap: 10px;">
+            <button class="calendar-nav-btn" onclick="changeCalendarMonth(-1)">◀ الشهر السابق</button>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <select id="calendar-month-select" onchange="onCalendarPickerChange()" style="padding: 6px 12px;"></select>
+                <input type="number" id="calendar-year-input" onchange="onCalendarPickerChange()" style="width: 100px; padding: 6px 12px;" min="2020" max="2100">
+                <button class="calendar-nav-btn" style="padding: 6px 12px;" onclick="resetCalendarToToday()">اليوم</button>
+            </div>
+            <button class="calendar-nav-btn" onclick="changeCalendarMonth(1)">الشهر التالي ▶</button>
+        </div>
+
+        <!-- أسماء أيام الأسبوع -->
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-weight: 800; color: var(--primary-blue); margin-bottom: 8px;">
+            <div>الأحد</div><div>الإثنين</div><div>الثلاثاء</div><div>الأربعاء</div><div>الخميس</div><div>الجمعة</div><div>السبت</div>
+        </div>
+
         <div id="calendar-view-container" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; max-height: 450px; overflow-y: auto;"></div>
     </div>
 </div>
@@ -689,6 +722,15 @@
     let sectorsChartObj = null;
     let contractorsChartObj = null;
 
+    // متغيرات التقويم الهندسي المرن
+    let calendarCurrentYear = new Date().getFullYear();
+    let calendarCurrentMonth = new Date().getMonth(); // 0-11
+    const arabicMonths = [
+        "يناير (كانون الثاني)", "فبراير (شباط)", "مارس (آذار)", "أبريل (نيسان)", 
+        "مايو (أيار)", "يونيو (حزيران)", "يوليو (تموز)", "أغسطس (آب)", 
+        "سبتمبر (أيلول)", "أكتوبر (تشرين الأول)", "نوفمبر (تشرين الثاني)", "ديسمبر (كانون الأول)"
+    ];
+
     dbRef.on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -746,17 +788,81 @@
         }
     }
 
-    // التقويم الهندسي التفاعلي الشامل مع إمكانية ضغط الأيام لرؤية تفاصيل الأحداث
-    function openCalendarModal() {
-        const container = document.getElementById('calendar-view-container');
-        container.innerHTML = "";
+    // إعداد القوائم المنسدلة للتقويم (الأشهر والسنوات)
+    function setupCalendarControls() {
+        const monthSelect = document.getElementById('calendar-month-select');
+        const yearInput = document.getElementById('calendar-year-input');
+        
+        if (monthSelect) {
+            monthSelect.innerHTML = "";
+            arabicMonths.forEach((m, idx) => {
+                monthSelect.innerHTML += `<option value="${idx}">${m}</option>`;
+            });
+            monthSelect.value = calendarCurrentMonth;
+        }
+        if (yearInput) {
+            yearInput.value = calendarCurrentYear;
+        }
+    }
+
+    function changeCalendarMonth(delta) {
+        calendarCurrentMonth += delta;
+        if (calendarCurrentMonth > 11) {
+            calendarCurrentMonth = 0;
+            calendarCurrentYear++;
+        } else if (calendarCurrentMonth < 0) {
+            calendarCurrentMonth = 11;
+            calendarCurrentYear--;
+        }
+        setupCalendarControls();
+        renderCalendarGrid();
+    }
+
+    function onCalendarPickerChange() {
+        const monthSelect = document.getElementById('calendar-month-select');
+        const yearInput = document.getElementById('calendar-year-input');
+        if (monthSelect && yearInput) {
+            calendarCurrentMonth = parseInt(monthSelect.value);
+            calendarCurrentYear = parseInt(yearInput.value) || new Date().getFullYear();
+            renderCalendarGrid();
+        }
+    }
+
+    function resetCalendarToToday() {
         const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        calendarCurrentYear = now.getFullYear();
+        calendarCurrentMonth = now.getMonth();
+        setupCalendarControls();
+        renderCalendarGrid();
+    }
+
+    // التقويم الهندسي التفاعلي الشامل للعمل مع كل الأشهر والسنوات المتعددة
+    function openCalendarModal() {
+        setupCalendarControls();
+        renderCalendarGrid();
+        document.getElementById('calendarModal').style.display = 'flex';
+    }
+
+    function renderCalendarGrid() {
+        const container = document.getElementById('calendar-view-container');
+        if (!container) return;
+        container.innerHTML = "";
+
+        const daysInMonth = new Date(calendarCurrentYear, calendarCurrentMonth + 1, 0).getDate();
+        const firstDayOfWeek = new Date(calendarCurrentYear, calendarCurrentMonth, 1).getDay(); // 0 = الأحد
+
+        // إدراج مربعات فارغة لمراعاة اليوم الأول من الأسبوع
+        for (let pad = 0; pad < firstDayOfWeek; pad++) {
+            const emptyBox = document.createElement('div');
+            emptyBox.style.background = 'transparent';
+            emptyBox.style.border = 'none';
+            container.appendChild(emptyBox);
+        }
 
         for (let i = 1; i <= daysInMonth; i++) {
-            const dStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            const mStr = String(calendarCurrentMonth + 1).padStart(2, '0');
+            const dNumStr = String(i).padStart(2, '0');
+            const dStr = `${calendarCurrentYear}-${mStr}-${dNumStr}`;
             let dayEventsCount = 0;
             
             houseRecords.forEach(r => {
@@ -773,6 +879,7 @@
             }
             if (dStr === todayStr) {
                 box.style.border = '2px solid #10b981';
+                box.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.4)';
             }
 
             box.onclick = () => showDayEvents(dStr);
@@ -783,8 +890,8 @@
             `;
             container.appendChild(box);
         }
-        document.getElementById('calendarModal').style.display = 'flex';
     }
+
     function closeCalendarModal() { document.getElementById('calendarModal').style.display = 'none'; }
 
     function showDayEvents(dateStr) {
@@ -805,7 +912,7 @@
         });
 
         if (events.length === 0) {
-            content.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد أي مواعيد أو أحداث مهندسية مسجلة لهذا اليوم.</p>`;
+            content.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد أي مواعيد أو أحداث هندسية مسجلة لهذا اليوم.</p>`;
         } else {
             events.forEach(e => {
                 content.innerHTML += `<div style="background:rgba(5, 11, 20, 0.6); padding:12px; border-radius:14px; margin-bottom:10px; border:1px solid var(--glass-border); color:#fff;">${e}</div>`;
