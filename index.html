@@ -9,7 +9,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- مكتبة SheetJS لتصدير ملفات Excel احترافية مرتبة -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
         :root {
@@ -223,10 +224,10 @@
         .btn-contractors-score { background: linear-gradient(135deg, rgba(6, 182, 212, 0.9), rgba(8, 145, 178, 0.9)); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(34, 211, 238, 0.4); padding: 12px 18px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(6, 182, 212, 0.35); }
         .btn-calendar-view { background: linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(217, 119, 6, 0.9)); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(251, 191, 36, 0.4); padding: 12px 18px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35); }
         .btn-whatsapp-daily { background: rgba(16, 185, 129, 0.9); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(52, 211, 153, 0.4); padding: 12px 18px; border-radius: 16px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.25s; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35); }
-        .btn-pdf-export { background: rgba(71, 85, 105, 0.9); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(148, 163, 184, 0.4); padding: 12px 18px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; }
+        .btn-excel-export { background: rgba(16, 185, 129, 0.9); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(52, 211, 153, 0.4); padding: 12px 18px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35); }
         .btn-add { background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: 1px solid rgba(255, 255, 255, 0.25); padding: 13px 28px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 8px 25px rgba(56, 189, 248, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.35); }
 
-        .btn-daily-checklist:hover, .btn-precleaned-manage:hover, .btn-contractors-score:hover, .btn-calendar-view:hover, .btn-whatsapp-daily:hover, .btn-pdf-export:hover, .btn-add:hover {
+        .btn-daily-checklist:hover, .btn-precleaned-manage:hover, .btn-contractors-score:hover, .btn-calendar-view:hover, .btn-whatsapp-daily:hover, .btn-excel-export:hover, .btn-add:hover {
             transform: translateY(-3px);
             filter: brightness(1.2);
             box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 20px rgba(255,255,255,0.25);
@@ -344,6 +345,22 @@
         }
 
         .signature-pad { border: 2px dashed var(--glass-border-glow); background: rgba(5, 11, 20, 0.7); width: 100%; height: 160px; border-radius: 16px; cursor: crosshair; backdrop-filter: blur(12px); }
+        
+        .calendar-day-box {
+            background: rgba(5, 11, 20, 0.5);
+            border: 1px solid var(--glass-border);
+            padding: 10px;
+            border-radius: 14px;
+            min-height: 85px;
+            backdrop-filter: blur(12px);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .calendar-day-box:hover {
+            border-color: var(--primary-blue);
+            background: rgba(56, 189, 248, 0.1);
+            transform: scale(1.02);
+        }
     </style>
 </head>
 <body>
@@ -412,7 +429,7 @@
                 <button class="btn-contractors-score" onclick="openContractorScorecardModal()">📊 أداء المقاولين</button>
                 <button class="btn-calendar-view" onclick="openCalendarModal()">📅 التقويم الهندسي</button>
                 <button class="btn-whatsapp-daily" onclick="sendDailySummaryWhatsApp()">💬 تقرير اليوم الشامل</button>
-                <button class="btn-pdf-export" onclick="exportToPDF()">📄 تصدير PDF</button>
+                <button class="btn-excel-export" onclick="exportToExcel()">📊 تصدير Excel مرتب</button>
             </div>
 
             <label>البحث الذكي:</label>
@@ -471,10 +488,19 @@
 
 <!-- Modals -->
 <div id="calendarModal" class="modal">
-    <div class="modal-content" style="max-width: 800px;">
+    <div class="modal-content" style="max-width: 900px;">
         <span class="close-btn" onclick="closeCalendarModal()">&times;</span>
-        <h3 style="margin-bottom: 20px; color: #fff;">📅 التقويم الهندسي التفاعلي</h3>
-        <div id="calendar-view-container" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; max-height: 400px; overflow-y: auto;"></div>
+        <h3 style="margin-bottom: 20px; color: #fff;">📅 التقويم الهندسي التفاعلي الشامل</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">اضغط على أي يوم في التقويم لعرض تفاصيل أحداث ومواعيد الدور بذلك اليوم (تسليم، تنظيف، كشف، قيد العمل)</p>
+        <div id="calendar-view-container" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; max-height: 450px; overflow-y: auto;"></div>
+    </div>
+</div>
+
+<div id="dayEventsModal" class="modal">
+    <div class="modal-content" style="max-width: 650px;">
+        <span class="close-btn" onclick="closeDayEventsModal()">&times;</span>
+        <h3 style="margin-bottom: 15px; color: #38bdf8;" id="day-events-title">📅 أحداث ومواعيد اليوم</h3>
+        <div id="day-events-content" style="max-height: 380px; overflow-y: auto; line-height: 1.8;"></div>
     </div>
 </div>
 
@@ -598,8 +624,8 @@
     <div class="modal-content" style="text-align: center;">
         <span class="close-btn" onclick="closeWhatsappNotifyModal()">&times;</span>
         <h3 style="margin-bottom: 10px; color: #10b981;">✅ تم التدقيق والحفظ بنجاح!</h3>
-        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;" id="whatsapp-notify-subtitle">اختر الشخص لإرسال التفاصيل إليه:</p>
-        <div id="whatsapp-buttons-container"></div>
+        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;" id="whatsapp-notify-subtitle">اختر الشخص لإرسال التفاصيل إليه عبر واتساب:</p>
+        <div id="whatsapp-buttons-container" style="display:flex; flex-direction:column; gap:10px;"></div>
     </div>
 </div>
 
@@ -666,8 +692,6 @@
     dbRef.on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            // السجلات صارت مخزنة كـ object لكل دار بمعرفها الخاص (id) بدل مصفوفة واحدة،
-            // حتى تحديث دار وحدة ما يكتب فوق باقي الدور
             houseRecords = data.records ? Object.values(data.records) : [];
             if (data.contractors) contractorsList = data.contractors;
             if (data.preCleaned) preCleanedHouses = data.preCleaned;
@@ -675,7 +699,6 @@
         }
     });
 
-    // دوال المزامنة الجزئية مع Firebase: تكتب فقط الجزء المتغيّر بدل الشجرة كاملة
     function syncRecord(rec) {
         saveLocalAndRender();
         dbRef.child('records/' + rec.id).set(rec);
@@ -723,6 +746,7 @@
         }
     }
 
+    // التقويم الهندسي التفاعلي الشامل مع إمكانية ضغط الأيام لرؤية تفاصيل الأحداث
     function openCalendarModal() {
         const container = document.getElementById('calendar-view-container');
         container.innerHTML = "";
@@ -733,28 +757,63 @@
 
         for (let i = 1; i <= daysInMonth; i++) {
             const dStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-            let dayHouses = [];
+            let dayEventsCount = 0;
+            
             houseRecords.forEach(r => {
-                const t = r.secondHandoverDate || r.handoverDate || r.houseReadyDate || r.cleaningEndDate || '';
-                if (t === dStr) dayHouses.push(r.houseNo);
+                if (r.arrivalDate === dStr || r.cleaningStartDate === dStr || r.cleaningEndDate === dStr || r.contractorStartDate === dStr || r.houseReadyDate === dStr || r.inspectionDate === dStr || r.handoverDate === dStr || r.secondHandoverDate === dStr) {
+                    dayEventsCount++;
+                }
             });
 
             const box = document.createElement('div');
-            box.style.background = dayHouses.length > 0 ? 'rgba(56, 189, 248, 0.18)' : 'rgba(5, 11, 20, 0.5)';
-            box.style.border = '1px solid var(--glass-border)';
-            box.style.padding = '10px';
-            box.style.borderRadius = '14px';
-            box.style.minHeight = '75px';
-            box.style.backdropFilter = 'blur(12px)';
+            box.className = 'calendar-day-box';
+            if (dayEventsCount > 0) {
+                box.style.background = 'rgba(56, 189, 248, 0.18)';
+                box.style.border = '1px solid var(--primary-blue)';
+            }
+            if (dStr === todayStr) {
+                box.style.border = '2px solid #10b981';
+            }
+
+            box.onclick = () => showDayEvents(dStr);
+
             box.innerHTML = `
-                <div style="font-weight:800; color:${dStr === todayStr ? '#38bdf8' : '#fff'}; margin-bottom:4px;">${i}</div>
-                <div style="font-size:0.75rem; color:#fbbf24; line-height:1.4;">${dayHouses.join(', ')}</div>
+                <div style="font-weight:900; color:${dStr === todayStr ? '#10b981' : '#fff'}; margin-bottom:4px; font-size:1rem;">${i}</div>
+                <div style="font-size:0.75rem; color:#fbbf24; font-weight:700;">${dayEventsCount > 0 ? `📌 ${dayEventsCount} أحداث` : ''}</div>
             `;
             container.appendChild(box);
         }
         document.getElementById('calendarModal').style.display = 'flex';
     }
     function closeCalendarModal() { document.getElementById('calendarModal').style.display = 'none'; }
+
+    function showDayEvents(dateStr) {
+        document.getElementById('day-events-title').innerText = `📅 الأحداث والمواعيد ليوم: ${dateStr}`;
+        const content = document.getElementById('day-events-content');
+        content.innerHTML = "";
+        let events = [];
+
+        houseRecords.forEach(r => {
+            if (r.arrivalDate === dateStr) events.push(`👤 <strong>حضور مستفيد:</strong> الدار ${r.houseNo} - القطاع: ${r.sectorNo} - المستفيد: ${r.ownerName}`);
+            if (r.cleaningStartDate === dateStr) events.push(`🧹 <strong>بدء التنظيف:</strong> الدار ${r.houseNo} - القطاع: ${r.sectorNo}`);
+            if (r.cleaningEndDate === dateStr) events.push(`⏳ <strong>انتهاء التنظيف:</strong> الدار ${r.houseNo} - القطاع: ${r.sectorNo}`);
+            if (r.contractorStartDate === dateStr) events.push(`👷‍♂️ <strong>بدء عمل المقاول:</strong> الدار ${r.houseNo} - المقاول: ${r.contractorName}`);
+            if (r.houseReadyDate === dateStr && r.executionType === 'تنفيذ مقاولين') events.push(`🏠 <strong>موعد جهوزية الدار:</strong> الدار ${r.houseNo} - المقاول: ${r.contractorName}`);
+            if (r.inspectionDate === dateStr) events.push(`🔍 <strong>موعد الكشف الفني:</strong> الدار ${r.houseNo} - المستفيد: ${r.ownerName}`);
+            if (r.handoverDate === dateStr) events.push(`⏱️ <strong>موعد التسليم الـ 10 أيام:</strong> الدار ${r.houseNo} - المستفيد: ${r.ownerName}`);
+            if (r.secondHandoverDate === dateStr) events.push(`🔄 <strong>موعد التسليم الثاني:</strong> الدار ${r.houseNo} - السبب: ${r.notReadyReason || '-'}`);
+        });
+
+        if (events.length === 0) {
+            content.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد أي مواعيد أو أحداث مهندسية مسجلة لهذا اليوم.</p>`;
+        } else {
+            events.forEach(e => {
+                content.innerHTML += `<div style="background:rgba(5, 11, 20, 0.6); padding:12px; border-radius:14px; margin-bottom:10px; border:1px solid var(--glass-border); color:#fff;">${e}</div>`;
+            });
+        }
+        document.getElementById('dayEventsModal').style.display = 'flex';
+    }
+    function closeDayEventsModal() { document.getElementById('dayEventsModal').style.display = 'none'; }
 
     let canvas, ctx, drawing = false;
     function initCanvas() {
@@ -929,16 +988,49 @@
         window.open(`https://wa.me/?text=${encodeURIComponent(msgText)}`, '_blank');
     }
 
-    function exportToPDF() {
-        const element = document.getElementById('printable-area');
-        const opt = {
-            margin:       1,
-            filename:     `AlAmirat_Report_Zero_${todayStr}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-        html2pdf().from(element).save();
+    // تصدير ملف Excel احترافي ومرتب بالكامل
+    function exportToExcel() {
+        if (houseRecords.length === 0) {
+            alert("⚠️ لا توجد بيانات مسجلة لتصديرها إلى Excel!");
+            return;
+        }
+
+        const dataForExcel = houseRecords.map((rec, idx) => {
+            const logic = calculateRecordStatus(rec);
+            const isPreCleaned = preCleanedHouses.some(item => item.trim() === rec.houseNo.trim());
+            
+            return {
+                "ت": idx + 1,
+                "رقم الدار والبلوك": rec.houseNo || '-',
+                "اسم المستفيد": rec.ownerName || '-',
+                "رقم الهاتف": rec.phoneNo || '-',
+                "القطاع": rec.sectorNo || '-',
+                "نوع التنفيذ": rec.executionType || '-',
+                "المقاول": rec.contractorName || '-',
+                "الحالة": logic.statusText,
+                "تاريخ الحضور": rec.arrivalDate || '-',
+                "تاريخ بدء العمل/التنظيف": rec.cleaningStartDate || rec.contractorStartDate || '-',
+                "موعد انتهاء التنظيف": rec.cleaningEndDate || '-',
+                "تاريخ الكشف": rec.inspectionDate || '-',
+                "موعد التسليم الـ 10 أيام": rec.handoverDate || rec.houseReadyDate || '-',
+                "موعد التسليم الثاني": rec.secondHandoverDate || '-',
+                "سبب تأخير التسليم الثاني": rec.notReadyReason || '-'
+            };
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "تقرير الدور الهندسي");
+
+        // ضبط عرض الأعمدة بشكل تلقائي ومرتب
+        const colWidths = [
+            { wch: 5 }, { wch: 15 }, { wch: 22 }, { wch: 16 }, { wch: 15 },
+            { wch: 15 }, { wch: 18 }, { wch: 22 }, { wch: 14 }, { wch: 22 },
+            { wch: 18 }, { wch: 14 }, { wch: 22 }, { wch: 18 }, { wch: 30 }
+        ];
+        worksheet['!cols'] = colWidths;
+
+        XLSX.writeFile(workbook, `AlAmirat_Report_${todayStr}.xlsx`);
     }
 
     function onExecutionTypeChange() {
@@ -1214,8 +1306,22 @@
                 rec.inspectionDate = inspDate; rec.handoverDate = addDays(inspDate, 10);
                 syncRecordFields(rec.id, { inspectionDate: rec.inspectionDate, handoverDate: rec.handoverDate });
                 closeStatusModal();
+                
+                // إرسال واتساب فور تحديد التنظيف والكشف بالتنفيذ المباشر
+                triggerDirectExecutionWhatsApp(rec);
             }
         }
+    }
+
+    function triggerDirectExecutionWhatsApp(rec) {
+        const msg = `🚨 *تبليغ موعد الكشف والتسليم - التنفيذ المباشر*\n` +
+                    `🏠 الدار: ${rec.houseNo} (${rec.sectorNo})\n` +
+                    `👤 المستفيد: ${rec.ownerName}\n` +
+                    `🧹 تم إكمال التنظيف بنجاح.\n` +
+                    `🔍 تاريخ الكشف المعتمد: ${rec.inspectionDate}\n` +
+                    `⏱️ موعد التسليم النهائـي: ${rec.handoverDate}`;
+        
+        openWhatsappNotifyDialog(msg, rec.phoneNo);
     }
 
     function updateReadyFlag(val) {
@@ -1269,6 +1375,21 @@
     }
     function closeAddModal() { document.getElementById('addRecordModal').style.display = 'none'; }
     function closeWhatsappNotifyModal() { document.getElementById('whatsappNotifyModal').style.display = 'none'; }
+
+    function openWhatsappNotifyDialog(msgText, ownerPhone) {
+        const container = document.getElementById('whatsapp-buttons-container');
+        container.innerHTML = "";
+
+        if (ownerPhone) {
+            container.innerHTML += `<button class="btn-primary" style="background:#10b981;" onclick="window.open('https://wa.me/${ownerPhone}?text=${encodeURIComponent(msgText)}', '_blank')">📲 إرسال إلى المستفيد (${ownerPhone})</button>`;
+        }
+
+        targetTeam.forEach(member => {
+            container.innerHTML += `<button class="btn-primary" style="background:rgba(56,189,248,0.2); border:1px solid var(--primary-blue);" onclick="window.open('https://wa.me/${member.phone}?text=${encodeURIComponent(msgText)}', '_blank')">💬 إرسال إلى: ${member.name}</button>`;
+        });
+
+        document.getElementById('whatsappNotifyModal').style.display = 'flex';
+    }
 
     function editRecord(id) {
         const rec = houseRecords.find(r => r.id === id);
@@ -1340,6 +1461,17 @@
         }
         if (recordToSync) syncRecord(recordToSync);
         closeAddModal();
+
+        // إرسال واتساب تلقائي عند تسليم بيانات تنفيذ المقاولين
+        if (executionType === "تنفيذ مقاولين") {
+            const msg = `🏗️ *إحالة دار جديد للمقاول - تنفيذ مقاولين*\n` +
+                        `🏠 الدار: ${houseNo} (${sectorNo})\n` +
+                        `👷‍♂️ المقاول المكلف: ${contractorName}\n` +
+                        `👤 المستفيد: ${ownerName}\n` +
+                        `📅 تاريخ البدء: ${contractorStartDate}\n` +
+                        `⏳ موعد جهوزية الدار المتوقع: ${houseReadyDate}`;
+            openWhatsappNotifyDialog(msg, phoneNo);
+        }
     }
 
     function deleteRecord(id) {
