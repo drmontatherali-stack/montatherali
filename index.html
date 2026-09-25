@@ -13,7 +13,7 @@
 body{margin:0;font-family:"Segoe UI",Tahoma,system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:15px}
 header{background:var(--pr);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5;gap:8px}
 header b{font-size:17px}
-.wrap{max-width:900px;margin:0 auto;padding:12px}
+.wrap{max-width:1360px;margin:0 auto;padding:12px}
 input,select,textarea{width:100%;padding:9px;border:1px solid var(--bd);border-radius:6px;font:inherit;background:#fff;margin-top:4px}
 label{display:block;margin:10px 0;font-size:14px;color:var(--mu)}
 label.ck{display:inline-flex;align-items:center;gap:5px;margin:2px 8px 2px 0;color:var(--tx)}
@@ -57,10 +57,10 @@ label.ck input{width:auto;margin:0}
 
 /* ===== الواجهة الجديدة ===== */
 :root{--bg:#e6e9f9;--pr:#3730a3;--ok:#16a34a;--er:#dc2626;--wn:#d97706;--gold:#dcb673}
-body{font-family:"Cairo","Segoe UI",Tahoma,sans-serif;background:linear-gradient(180deg,#d9ddf7 0,#eef0fc 320px,#f6f7fd 100%);min-height:100vh}
+body{font-family:"Cairo","Segoe UI",Tahoma,sans-serif;background:linear-gradient(160deg,#ccd0f2 0,#e3e6f8 260px,#f4f5fb 620px);min-height:100vh}
 #top{position:sticky;top:0;z-index:10;box-shadow:0 6px 18px rgba(30,27,107,.25)}
-#top>*{max-width:900px;margin:0 auto}
-header{position:static;background:linear-gradient(135deg,#15134f 0,#2b2792 55%,#4338ca 100%);border-bottom:4px solid var(--gold);padding:10px 18px}
+#top>*{max-width:1360px;margin:0 auto}
+header{position:static;background:linear-gradient(120deg,#0c0a33 0,#241f78 45%,#3730a3 75%,#4c3fc9 100%);border-bottom:5px solid var(--gold);box-shadow:0 2px 0 rgba(220,182,115,.35) inset;padding:12px 22px}
 .brand{display:flex;align-items:center;gap:12px}
 .brand img{width:78px;height:78px;flex:none}
 .brand h1{margin:0;font-size:23px;font-weight:800;color:#fff;line-height:1.25}
@@ -74,19 +74,26 @@ header{position:static;background:linear-gradient(135deg,#15134f 0,#2b2792 55%,#
 .chip{--c:#3730a3;border:2px solid var(--c);color:var(--c);background:#fff;font-weight:700}
 .chip.on{background:var(--c);color:#fff}
 .chip small{background:rgba(0,0,0,.12);border-radius:9px;padding:0 6px;margin-right:3px}
-.wrap{padding:10px 12px 32px;max-width:900px;margin:0 auto}
-.card{border-radius:12px;box-shadow:0 3px 10px rgba(30,27,107,.1);border-right:6px solid #94a3b8;margin-bottom:10px}
-@media(min-width:860px){#list.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}#list.grid2>.card{margin-bottom:0}#list.grid2>.mu,#list.grid2>.cnt{grid-column:1/-1}}
-.grp{margin-bottom:14px}
-.grphead{background:#dfe2f8;color:#2b2792;font-weight:800;padding:6px 10px;border-radius:8px 8px 0 0}
-.grp .logrow:last-child{border-radius:0 0 8px 8px}
-.logrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:#fff;border:1px solid #e3e5f5;border-top:0;padding:8px 10px;font-size:14px}
+.wrap{padding:10px 14px 32px;max-width:1360px;margin:0 auto}
+.card{border-radius:14px;box-shadow:0 4px 14px rgba(43,39,146,.14);border:1px solid #e4e6f7;border-right:7px solid #94a3b8;margin-bottom:10px;background:linear-gradient(180deg,#fff,#fcfcff)}
+@media(min-width:860px){#list.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}#list.grid2>.card{margin-bottom:0}#list.grid2>.mu,#list.grid2>.cnt{grid-column:1/-1}}
+@media(min-width:1300px){#list.grid2{grid-template-columns:1fr 1fr 1fr}}
+
+.logwrap{overflow-x:auto;border-radius:12px;box-shadow:0 4px 14px rgba(43,39,146,.14);border:1px solid #e4e6f7}
+table.logtbl{border-collapse:collapse;width:100%;min-width:920px;background:#fff;font-size:13.5px}
+table.logtbl thead th{position:sticky;top:0;background:linear-gradient(120deg,#0c0a33,#241f78 60%,#3730a3);color:#fff;padding:9px 6px;font-weight:700;border-bottom:3px solid var(--gold);white-space:nowrap}
+table.logtbl td{padding:7px 6px;text-align:center;border-bottom:1px solid #edeef8;white-space:nowrap}
+table.logtbl tbody tr:nth-child(even):not(.grow){background:#f7f7fd}
+table.logtbl tr.grow td{background:#dfe2f8;color:#2b2792;font-weight:800;text-align:right;padding:7px 12px}
+table.logtbl input[type=date]{padding:4px;font-size:12.5px;border-radius:6px;margin:0;width:auto}
+table.logtbl small{color:var(--mu);font-size:10.5px}
+
 .st-waiting{border-right-color:#64748b}.st-counting{border-right-color:#4338ca}.st-ready{border-right-color:#16a34a}.st-notready{border-right-color:#dc2626}.st-postponed{border-right-color:#d97706}.st-received{border-right-color:#0d9488}
-.code{font-size:22px;font-weight:800;color:#2b2792;background:#eceefc;padding:1px 12px;border-radius:8px}
+.code{font-size:22px;font-weight:800;color:#2b2792;background:linear-gradient(135deg,#eceefc,#e0e3fa);padding:2px 13px;border-radius:8px;border:1px solid #d7daf4}
 .badge{font-weight:700;padding:4px 12px}
 .s-waiting{background:#64748b}.s-counting{background:#4338ca}.s-ready{background:#16a34a}.s-notready{background:#dc2626}.s-postponed{background:#d97706}.s-received{background:#0d9488}
 .b{font-weight:600}
-.b.pr{background:linear-gradient(135deg,#2b2792,#4f46e5);border-color:#2b2792}
+.b.pr{background:linear-gradient(135deg,#2b2792,#4f46e5);border-color:#2b2792;box-shadow:0 2px 6px rgba(43,39,146,.3)}
 .b.ok{background:#16a34a;border-color:#16a34a}
 .info b{color:#2b2792}
 #login{border-right:1px solid var(--bd)}
@@ -97,6 +104,7 @@ header{position:static;background:linear-gradient(135deg,#15134f 0,#2b2792 55%,#
 .tabs small{background:#dfe2f8;border-radius:9px;padding:0 7px;margin-right:4px}
 .pc{background:#0891b2;margin-inline-end:6px}
 #fpanel{display:none;grid-template-columns:1fr 1fr;gap:4px 10px;background:#fff;border:2px solid #0f766e;border-radius:12px;padding:8px 12px 12px;margin-bottom:12px}
+.subchips{display:none;flex-wrap:wrap;gap:6px;background:#f4f0ff;border:2px dashed #7c3aed;border-radius:12px;padding:8px;margin-bottom:12px}
 #fpanel label{margin:6px 0 0}
 #fpanel select{padding:8px}
 </style>
@@ -123,7 +131,7 @@ header{position:static;background:linear-gradient(135deg,#15134f 0,#2b2792 55%,#
     </div>
     <div id="chips"></div>
   </div>
-  <div class="wrap"><div id="fpanel"></div><div id="list"></div></div>
+  <div class="wrap"><div id="dpanel" class="subchips"></div><div id="fpanel"></div><div id="list"></div></div>
 </div>
 <div id="modal"></div>
 <div id="zoom"></div>
@@ -165,7 +173,7 @@ const upd = (id, o) => db.collection('units').doc(id).update(o).catch(e => alert
 const log = (u, type, o) => db.collection('log').add({unitId: u.id, code: codeOf(u), type, date: today(), at: firebase.firestore.FieldValue.serverTimestamp(), ...o}).catch(e => alert('تعذر تسجيل الحركة: ' + e.message));
 
 const S = {waiting:'بانتظار الموعد', counting:'تحت الإنجاز', ready:'جاهز للتبليغ', notready:'غير جاهز', postponed:'مؤجل', received:'تم الاستلام'};
-const F = [['active','النشطة'],['cleanlate','🧹 تنظيف اليوم'],['readylate','⏰ جهوزية اليوم'],['received','مستلمة']];
+const F = [['active','النشطة'],['dates','⏰ مواعيد اليوم'],['received','مستلمة']];
 let units = [], cleaned = [], extraC = [], view = 'units', filter = 'active', q = '', unsub = null;
 const CONTRACTORS = ['احمد عواد','جاسم زراك','عمر بولات','يوسف حسن','اسعد هادي','علي الكوفي','عادل عرار','محمد عرار','سمير حنون','اكام بهاء','اوات جمال','علي محمد حسين','طاهر عبد الاله','ثامر عطار','علي هويدي'];
 const SECTORS = ['الاول','الثاني','الثالث','الرابع','الخامس','السادس'];
@@ -201,14 +209,17 @@ function goAlert(k) {
 function maybeAlert() {
   if (alertShown || !ld.u || !ld.c) return;
   alertShown = true;
-  const cl = units.filter(cleanLate).length, rl = units.filter(readyLate).length, ew = units.filter(earlyWarn).length;
-  if (!cl && !rl && !ew) return;
+  const co = units.filter(CO).length, ro = units.filter(RO).length, ct = units.filter(CT).length, rt = units.filter(RT).length;
+  if (!co && !ro && !ct && !rt) return;
   const row = (n, txt, k, c) => n ? `<div class="cnt ${c}" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${txt}: <b>${n}</b></span><button class="b" onclick="goAlert('${k}')">عرض</button></div>` : '';
-  modal('⚠ تنبيهات اليوم', row(cl, '🧹 دور وصل موعد تنظيفها ولم تُنظّف', 'cleanlate', 'er') + row(rl, '⏰ دور وصل موعد جاهزيتها ولم تجهز', 'readylate', 'er') + row(ew, '⚠ دور باقي يومان أو أقل على موعد جاهزيتها', 'alert', 'wn'), () => {}, 'إغلاق');
+  modal('⚠ تنبيهات اليوم',
+    row(co, '🧹 عبرت موعد تنظيفها وغير نظيفة', 'co', 'er') + row(ro, '⏰ عبرت موعد تسليمها وغير جاهزة', 'ro', 'er') +
+    row(ct, '🧹 موعد تنظيفها اليوم', 'ct', 'wn') + row(rt, '⏰ موعد جاهزيتها اليوم', 'rt', 'wn'),
+    () => {}, 'إغلاق');
 }
 const codeOf = u => u.code || ((u.block || '') + (u.house ? '/' + u.house : ''));
 const nz = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).toLowerCase().replace(/\s+/g, '');
-const FC = {active:'#3730a3', alert:'#dc2626', cleanlate:'#b91c1c', readylate:'#c2410c', received:'#0d9488'};
+const FC = {active:'#3730a3', alert:'#dc2626', dates:'#7c3aed', ct:'#b91c1c', co:'#7f1d1d', rt:'#c2410c', ro:'#9a3412', received:'#0d9488'};
 const TECHS = [['المهندس', 'محمد عبد الامير'], ['الفني', 'علي نعمان'], ['الفني', 'منتظر علي']];
 const techSel = () => `<label>الفني / المهندس<select id="f_tc"><option value="">— اختر —</option>${TECHS.map(([r, n]) => `<option value="${r}: ${n}">${r}: ${n}</option>`).join('')}</select></label>`;
 
@@ -238,14 +249,19 @@ const cleanLate = u => u.type === 'direct' && u.status === 'waiting' && !isClean
 const readyLate = u => u.status === 'counting' && dayNo(u) >= DAYS;
 const earlyWarn = u => u.status === 'counting' && dayNo(u) >= DAYS - WARN_LEFT && dayNo(u) < DAYS;
 const isAlert = u => cleanLate(u) || readyLate(u) || earlyWarn(u);
-const readyDue = u => readyLate(u) || earlyWarn(u);
+/* مواعيد اليوم: أربع فئات دقيقة */
+const CT = u => cleanLate(u) && u.appointment === today();               // تنظيف اليوم بالضبط
+const CO = u => cleanLate(u) && u.appointment < today();                 // تنظيف متأخر (تجاوز الموعد)
+const RT = u => u.status === 'counting' && dayNo(u) === DAYS;            // جهوزية اليوم بالضبط
+const RO = u => (u.status === 'counting' && dayNo(u) > DAYS) || u.status === 'notready'; // جهوزية متأخرة
+const DATE_KEYS = {ct: CT, co: CO, rt: RT, ro: RO};
+const datesUnion = u => CT(u) || CO(u) || RT(u) || RO(u);
 function match(u, f) {
   const s = u.status;
   if (f === 'active') return s !== 'received';
   if (f === 'alert') return isAlert(u);
-  if (f === 'cleanlate') return cleanLate(u);
-  if (f === 'readylate') return readyDue(u);
-  if (f === 'today') return (s === 'waiting' || s === 'postponed') && u.appointment === today();
+  if (f === 'dates') return datesUnion(u);
+  if (DATE_KEYS[f]) return DATE_KEYS[f](u);
   return s === f;
 }
 
@@ -260,7 +276,7 @@ function counter(u) {
 }
 function card(u) {
   const type = u.type === 'direct' ? 'تنفيذ مباشر' : 'مقاول: ' + esc(u.contractor || '-') + ' — القطاع: ' + esc(u.sector || '-');
-  const dates = [['الحضور', u.arrival], ['الموعد', u.appointment], ['التنظيف', u.cleanDone], ['الكشف', u.inspectionDate], ['الاستلام', u.receiptDate]]
+  const dates = [['الحضور', u.arrival], ['الموعد', u.type === 'direct' ? u.appointment : ''], ['التنظيف', u.cleanDone], ['الكشف', u.inspectionDate], ['الاستلام', u.receiptDate]]
     .filter(x => x[1]).map(x => `<span>${x[0]}: <b>${x[1]}</b></span>`).join('');
   const m = u.msgs || [0, 0, 0], md = u.msgDates || [];
   const msgs = `<div class="msgs"><button class="b wa" onclick="wa('${u.id}')">واتساب</button>` +
@@ -300,6 +316,12 @@ function render() {
   const nf = fCount(), t = nz(q), sel = (a, b) => a === b ? 'selected' : '';
   $('#chips').innerHTML = `<button class="chip ${nf ? 'on' : ''}" style="--c:#0f766e" onclick="toggleF()">🔽 فرز${nf ? ' (' + nf + ')' : ''}</button>` +
     F.map(([k, l]) => `<button class="chip ${filter === k ? 'on' : ''}" style="--c:${FC[k]}" onclick="filter='${k}';render()">${l} <small>${units.filter(u => fmatch(u) && match(u, k)).length}</small></button>`).join('');
+  const dShow = ['dates', 'ct', 'co', 'rt', 'ro'].includes(filter);
+  $('#dpanel').style.display = dShow ? 'flex' : 'none';
+  if (dShow) {
+    const dOpts = [['dates', 'الكل'], ['ct', '🧹 تنظيف اليوم'], ['co', '🧹 تنظيف متأخر'], ['rt', '⏰ جهوزية اليوم'], ['ro', '⏰ جهوزية متأخرة']];
+    $('#dpanel').innerHTML = dOpts.map(([k, l]) => `<button class="chip ${filter === k ? 'on' : ''}" style="--c:${FC[k]}" onclick="filter='${k}';render()">${l} <small>${units.filter(u => fmatch(u) && match(u, k)).length}</small></button>`).join('');
+  }
   const fp = $('#fpanel');
   fp.style.display = fOpen ? 'grid' : 'none';
   const sig = JSON.stringify([allC(), fl]);
@@ -326,18 +348,31 @@ function renderLog() {
   const t = nz(q);
   const arr = units.filter(u => !t || [codeOf(u), u.phone, u.contractor, u.sector].map(nz).join(' ').includes(t));
   const groups = {};
-  arr.forEach(u => { const g = codeOf(u).includes('.') ? codeOf(u).split('.')[0] : (codeOf(u) || 'بدون رقم'); (groups[g] = groups[g] || []).push(u); });
-  const gk = Object.keys(groups).sort((a, b) => a.localeCompare(b, 'en', {numeric: true}));
+  arr.forEach(u => { const g = u.type === 'contractor' ? (esc(u.contractor || 'غير محدد') + ' — القطاع ' + esc(u.sector || 'غير محدد')) : 'تنفيذ مباشر'; (groups[g] = groups[g] || []).push(u); });
+  const gk = Object.keys(groups).sort((a, b) => (a === 'تنفيذ مباشر' ? -1 : b === 'تنفيذ مباشر' ? 1 : a.localeCompare(b, 'ar')));
+  const cols = '<col style="width:36px"><col style="width:90px"><col style="width:90px"><col><col style="width:96px"><col style="width:126px"><col style="width:60px"><col style="width:74px"><col style="width:74px"><col style="width:74px"><col style="width:60px">';
+  const head = `<tr><th>#</th><th>رقم الدار</th><th>القطاع</th><th>المقاول</th><th>الحالة</th><th>موعد التسليم</th><th>واتساب</th><th>تبليغ1</th><th>تبليغ2</th><th>تبليغ3</th><th>استلم</th></tr>`;
+  const msgCell = (u, i) => { const m = u.msgs || [0, 0, 0], d = (u.msgDates || [])[i]; return `<td><label class="ck" style="margin:0;flex-direction:column;gap:2px"><input type="checkbox" ${m[i] ? 'checked' : ''} onchange="tick('${u.id}',${i},this.checked)">${d ? `<small>${d}</small>` : ''}</label></td>`; };
+  const row = (u, n) => `<tr>
+      <td class="mu">${n}</td>
+      <td><b class="code" style="font-size:14px;cursor:pointer" onclick="history('${u.id}')" title="عرض السجل">${esc(codeOf(u))}</b></td>
+      <td>${u.type === 'contractor' ? esc(u.sector || '-') : '-'}</td>
+      <td>${u.type === 'contractor' ? esc(u.contractor || '-') : 'مباشر'}</td>
+      <td><span class="badge s-${u.status}" style="cursor:pointer" onclick="editUnit('${u.id}')" title="تعديل">${S[u.status]}</span></td>
+      <td><input type="date" value="${u.appointment || ''}" onchange="upd('${u.id}',{appointment:this.value})"></td>
+      <td><button class="b wa" style="padding:5px 8px" onclick="wa('${u.id}')" title="واتساب">💬</button></td>
+      ${[0, 1, 2].map(i => msgCell(u, i)).join('')}
+      <td style="text-align:center">${u.status === 'received' ? '<span style="color:var(--ok);font-size:18px">✓</span>' : `<input type="checkbox" onclick="event.preventDefault();receive('${u.id}')">`}</td>
+    </tr>`;
+  const body = gk.map(g => {
+    const rows = groups[g].sort((a, b) => codeOf(a).localeCompare(codeOf(b), 'en', {numeric: true}));
+    return `<tr class="grow"><td colspan="11">📁 ${g} <small>(${rows.length})</small></td></tr>` + rows.map((u, i) => row(u, i + 1)).join('');
+  }).join('');
   $('#list').innerHTML = `<div class="cnt ok" style="margin-bottom:10px">📖 سجل جميع الدور: <b>${units.length}</b>${t ? ' — نتائج البحث: <b>' + arr.length + '</b>' : ''}</div>` +
-    (gk.map(g => `<div class="grp"><div class="grphead">📁 ${esc(g)} <small>(${groups[g].length})</small></div>` +
-      groups[g].sort((a, b) => codeOf(a).localeCompare(codeOf(b), 'en', {numeric: true})).map(u => `<div class="logrow">
-        <b class="code" style="font-size:15px">${esc(codeOf(u))}</b>
-        <span class="badge s-${u.status}">${S[u.status]}</span>
-        <span class="mu">${u.type === 'direct' ? 'مباشر' : esc(u.contractor || '-') + (u.sector ? ' - ' + esc(u.sector) : '')}</span>
-        <span dir="ltr">${esc(u.phone)}</span>
-        <span class="acts" style="margin:0"><button class="b" onclick="editUnit('${u.id}')">تعديل</button><button class="b" onclick="history('${u.id}')">السجل</button></span>
-      </div>`).join('') + `</div>`).join('') || '<p class="mu">لا توجد نتائج</p>');
+    (arr.length ? `<div class="logwrap"><table class="logtbl"><colgroup>${cols}</colgroup><thead>${head}</thead><tbody>${body}</tbody></table></div>` : '<p class="mu">لا توجد نتائج</p>');
 }
+
+
 
 /* ---------- الدور المنظفة مسبقاً ---------- */
 function setView(x) { view = x; render(); window.scrollTo(0, 0); }
