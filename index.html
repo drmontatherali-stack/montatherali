@@ -205,8 +205,14 @@
 
         .whatsapp-icon { color: #25d366; font-size: 1.2rem; text-decoration: none; margin-left: 8px; display: inline-block; }
         .whatsapp-icon:hover { transform: scale(1.2); }
-        .camera-icon-btn { background: rgba(56, 189, 248, 0.15); border: 1px solid var(--primary-blue); color: var(--primary-blue); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+        .camera-icon-btn { background: rgba(56, 189, 248, 0.15); border: 1px solid var(--primary-blue); color: var(--primary-blue); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; animation: pulse 1.5s infinite; }
         .camera-icon-btn:hover { background: var(--primary-blue); color: #fff; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
 
         .checkbox-container { display: inline-flex; gap: 5px; align-items: center; }
         .notif-box { width: 18px; height: 18px; cursor: pointer; }
@@ -378,8 +384,8 @@
                     <th>موعد انتهاء التنظيف</th>
                     <th>تاريخ الكشف</th>
                     <th>موعد التسليم الـ 10 أيام</th>
-                    <th>موعد التسليم الثاني والسبب</th>
-                    <th>صورة الملاحظات</th>
+                    <th id="th-second-handover" style="display:none;">موعد التسليم الثاني والسبب</th>
+                    <th id="th-camera" style="display:none;">صورة الملاحظات</th>
                     <th>واتساب والتبليغ (3 مرات)</th>
                     <th>تعديل</th>
                 </tr>
@@ -833,6 +839,16 @@
         tbody.innerHTML = "";
 
         let cAll = 0, cCleanCompleted = 0, cCleanUncompleted = 0, cReadyAll = 0, cNotReadyOverdue = 0;
+        let hasAnyNotReadyRecord = false; // للتحكم بإظهار أو إخفاء أعمدة التسليم الثاني والكاميرا في رأس الجدول
+
+        // فحص أولي لمعرفة هل يوجد أي دار حالته "غير جاهز" (له موعد تسليم ثاني أو تم إعطاؤه إيعاز غير جاهز)
+        houseRecords.forEach(rec => {
+            if (rec.secondHandoverDate) hasAnyNotReadyRecord = true;
+        });
+
+        // إظهار أو إخفاء أعمدة الجدول ديناميكياً بناءً على وجود حالات "غير جاهز"
+        document.getElementById('th-second-handover').style.display = hasAnyNotReadyRecord ? '' : 'none';
+        document.getElementById('th-camera').style.display = hasAnyNotReadyRecord ? '' : 'none';
 
         houseRecords.forEach((rec, idx) => {
             cAll++;
@@ -880,14 +896,23 @@
                     finalHandover = rec.houseReadyDate || '-';
                 }
 
-                let secondHandoverDisplay = finalHandover;
-                if (rec.secondHandoverDate) {
-                    secondHandoverDisplay = `<span style="color:#f59e0b;">${rec.secondHandoverDate}</span><br><small style="color:var(--text-muted);">السبب: ${rec.notReadyReason || '-'}</small>`;
-                }
+                // بناء خلية موعد التسليم الثاني (تظهر فقط إذا كان الدار غير جاهز وله موعد ثاني)
+                let secondHandoverTd = '';
+                let cameraTd = '';
 
-                let cameraCellHtml = `<button class="camera-icon-btn" onclick="triggerCamera(${rec.id})" title="التقاط أو رفع صورة الملاحظات">📷 تصوير</button>`;
-                if (rec.noteImage) {
-                    cameraCellHtml = `<button class="camera-icon-btn" style="background:rgba(16,185,129,0.15); border-color:#10b981; color:#10b981;" onclick="viewImage('${rec.noteImage}')" title="عرض الصورة">🖼️ عرض</button>`;
+                if (hasAnyNotReadyRecord) {
+                    if (rec.secondHandoverDate) {
+                        secondHandoverTd = `<td><span style="color:#f59e0b; font-weight:800;">${rec.secondHandoverDate}</span><br><small style="color:var(--text-muted);">السبب: ${rec.notReadyReason || '-'}</small></td>`;
+                        
+                        let cameraBtn = `<button class="camera-icon-btn" onclick="triggerCamera(${rec.id})" title="التقاط أو رفع صورة الملاحظات">📷 تصوير</button>`;
+                        if (rec.noteImage) {
+                            cameraBtn = `<button class="camera-icon-btn" style="background:rgba(16,185,129,0.15); border-color:#10b981; color:#10b981;" onclick="viewImage('${rec.noteImage}')" title="عرض الصورة">🖼️ عرض</button>`;
+                        }
+                        cameraTd = `<td>${cameraBtn}</td>`;
+                    } else {
+                        secondHandoverTd = `<td style="color:var(--text-muted); text-align:center;">-</td>`;
+                        cameraTd = `<td style="color:var(--text-muted); text-align:center;">-</td>`;
+                    }
                 }
 
                 const phone = rec.phoneNo || '';
@@ -916,8 +941,8 @@
                     <td>${endWorkDate}</td>
                     <td>${inspectionDisplay}</td>
                     <td>${finalHandover}</td>
-                    <td>${secondHandoverDisplay}</td>
-                    <td>${cameraCellHtml}</td>
+                    ${secondHandoverTd}
+                    ${cameraTd}
                     <td><div class="checkbox-container">${checkboxesHtml}</div></td>
                     <td>
                         <button class="action-btn" onclick="editRecord(${rec.id})" title="تعديل">✏️</button>
@@ -1033,7 +1058,6 @@
                 saveAndRefresh();
                 closeStatusModal();
 
-                // بناء الرسالة بالتسلسل الجديد (البلوك والدار، المقاول، القطاع، التواريخ، ثم اسم المستفيد ورقم الهاتف)
                 const msg = `📋 *تفاصيل كشف وتجهيز دار (تنفيذ مباشر) - مجمع الأميرات 2*\n\n` +
                             `🏠 *البلوك والدار:* ${rec.houseNo}\n` +
                             `👷‍♂️ *المقاول:* ${rec.contractorName || 'تنفيذ مباشر'}\n` +
@@ -1052,12 +1076,15 @@
         }
     }
 
+    // إعطاء إيعاز غير جاهز: يفتح حقل موعد التسليم الثاني وطلب السبب وتفعيل الكاميرا
     function updateReadyFlag(val) {
         const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
         if (!rec) return;
 
         if (val === true) {
             rec.isReady = true;
+            rec.secondHandoverDate = ""; // مسح الموعد الثاني إذا أصبح جاهزاً
+            rec.notReadyReason = "";
             saveAndRefresh();
             closeStatusModal();
         } else {
@@ -1070,6 +1097,7 @@
                     rec.notReadyReason = reason;
                     saveAndRefresh();
                     closeStatusModal();
+                    alert("⚠️ تم تحديد الدار غير جاهز. ظهر الآن 'موعد التسليم الثاني' و 'أيقونة الكاميرا' لالتقاط صورة الملاحظات.");
                 }
             }
         }
@@ -1216,7 +1244,6 @@
                 notifications: [null, null, null]
             });
 
-            // رسالة دور المقاولين بالترتيب الجديد المطلوب
             if (executionType === "تنفيذ مقاولين") {
                 const msg = `📋 *تفاصيل دار مقاولين جديدة - مجمع الأميرات 2*\n\n` +
                             `🏠 *البلوك والدار:* ${houseNo}\n` +
