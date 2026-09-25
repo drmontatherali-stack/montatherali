@@ -880,13 +880,11 @@
                     finalHandover = rec.houseReadyDate || '-';
                 }
 
-                // عرض موعد التسليم الثاني والسبب إن وجد
                 let secondHandoverDisplay = finalHandover;
                 if (rec.secondHandoverDate) {
                     secondHandoverDisplay = `<span style="color:#f59e0b;">${rec.secondHandoverDate}</span><br><small style="color:var(--text-muted);">السبب: ${rec.notReadyReason || '-'}</small>`;
                 }
 
-                // زر الكاميرا
                 let cameraCellHtml = `<button class="camera-icon-btn" onclick="triggerCamera(${rec.id})" title="التقاط أو رفع صورة الملاحظات">📷 تصوير</button>`;
                 if (rec.noteImage) {
                     cameraCellHtml = `<button class="camera-icon-btn" style="background:rgba(16,185,129,0.15); border-color:#10b981; color:#10b981;" onclick="viewImage('${rec.noteImage}')" title="عرض الصورة">🖼️ عرض</button>`;
@@ -1035,20 +1033,25 @@
                 saveAndRefresh();
                 closeStatusModal();
 
+                // بناء الرسالة بالتسلسل الجديد (البلوك والدار، المقاول، القطاع، التواريخ، ثم اسم المستفيد ورقم الهاتف)
                 const msg = `📋 *تفاصيل كشف وتجهيز دار (تنفيذ مباشر) - مجمع الأميرات 2*\n\n` +
-                            `🏠 *رقم البلوك والدار:* ${rec.houseNo}\n` +
-                            `📍 *القطاع:* ${rec.sectorNo}\n` +
+                            `🏠 *البلوك والدار:* ${rec.houseNo}\n` +
+                            `👷‍♂️ *المقاول:* ${rec.contractorName || 'تنفيذ مباشر'}\n` +
+                            `📍 *القطاع:* ${rec.sectorNo}\n\n` +
+                            `📅 *التواريخ والتسلسل:*\n` +
+                            `- تاريخ الحضور: ${rec.arrivalDate || '-'}\n` +
+                            `- تاريخ بدء التنظيف: ${rec.cleaningStartDate || '-'}\n` +
+                            `- تاريخ انتهاء التنظيف: ${rec.cleaningEndDate || '-'}\n` +
+                            `- تاريخ الكشف: ${rec.inspectionDate}\n` +
+                            `⏳ موعد التسليم النهائي (10 أيام): ${rec.handoverDate}\n\n` +
                             `👤 *اسم المستفيد:* ${rec.ownerName}\n` +
-                            `📞 *رقم الهاتف:* ${rec.phoneNo || 'غير محدد'}\n` +
-                            `🔍 *تاريخ الكشف المحدد:* ${rec.inspectionDate}\n` +
-                            `⏳ *موعد التسليم النهائي (10 أيام):* ${rec.handoverDate}`;
+                            `📞 *رقم الهاتف:* ${rec.phoneNo || 'غير محدد'}`;
                 
                 showTeamWhatsAppModal(msg, `تم تحديد الكشف وإكمال التنظيف للدار (${rec.houseNo}). اختر الشخص لإرسال التفاصيل إليه عبر واتساب مباشرة:`);
             }
         }
     }
 
-    // هنا تم تفعيل إدخال موعد التسليم الثاني وذكر السبب عند اختيار "غير جاهز"
     function updateReadyFlag(val) {
         const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
         if (!rec) return;
@@ -1058,7 +1061,6 @@
             saveAndRefresh();
             closeStatusModal();
         } else {
-            // إذا كان غير جاهز، نطلب موعد التسليم الثاني وسبب عدم التسليم
             const secondDate = prompt("أدخل موعد التسليم الثاني الجديد (تاريخ):", addDays(todayStr, 5));
             if (secondDate) {
                 const reason = prompt("اذكر سبب عدم التسليم (الملاحظات):", "وجود نواقص أو أعمال غير مكتملة");
@@ -1075,7 +1077,6 @@
 
     function closeStatusModal() { document.getElementById('statusCheckModal').style.display = "none"; }
 
-    // دوال التعامل مع الكاميرا ورفع الصور مباشرة
     function triggerCamera(id) {
         activeRecordIdForCamera = id;
         document.getElementById('cameraFileInput').click();
@@ -1094,7 +1095,7 @@
                 saveAndRefresh();
                 alert("✅ تم رفع وحفظ صورة الملاحظات بنجاح!");
             }
-            event.target.value = ""; // إعادة تعيين الحقل
+            event.target.value = "";
         };
         reader.readAsDataURL(file);
     }
@@ -1215,16 +1216,18 @@
                 notifications: [null, null, null]
             });
 
+            // رسالة دور المقاولين بالترتيب الجديد المطلوب
             if (executionType === "تنفيذ مقاولين") {
                 const msg = `📋 *تفاصيل دار مقاولين جديدة - مجمع الأميرات 2*\n\n` +
-                            `🏠 *رقم البلوك والدار:* ${houseNo}\n` +
-                            `📍 *القطاع:* ${sectorNo}\n` +
+                            `🏠 *البلوك والدار:* ${houseNo}\n` +
+                            `👷‍♂️ *المقاول:* ${contractorName}\n` +
+                            `📍 *القطاع:* ${sectorNo}\n\n` +
+                            `📅 *التواريخ والتسلسل:*\n` +
+                            `- تاريخ الحضور: ${arrivalDate}\n` +
+                            `- تاريخ عمل المقاول: ${contractorStartDate}\n` +
+                            `⏳ تاريخ جهوزية الدار والتسليم (10 أيام): ${houseReadyDate}\n\n` +
                             `👤 *اسم المستفيد:* ${ownerName}\n` +
-                            `📞 *رقم الهاتف:* ${phoneNo || 'غير محدد'}\n` +
-                            `👷‍♂️ *المقاول المسؤول:* ${contractorName}\n` +
-                            `📅 *تاريخ الحضور:* ${arrivalDate}\n` +
-                            `📅 *تاريخ عمل المقاول:* ${contractorStartDate}\n` +
-                            `⏳ *تاريخ الجهوزية والتسليم (10 أيام):* ${houseReadyDate}`;
+                            `📞 *رقم الهاتف:* ${phoneNo || 'غير محدد'}`;
                 
                 showTeamWhatsAppModal(msg, `تم حفظ دار المقاولين (${houseNo}) بنجاح. اختر الشخص لإرسال التفاصيل إليه عبر واتساب مباشرة:`);
             }
