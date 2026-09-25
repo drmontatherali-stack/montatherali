@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مجمع الأميرات 2 - مكتب التسليم الفني</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- مكتبات Firebase للمزامنة اللحظية بين الأجهزة -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         :root {
             --bg-primary: #070b14;
@@ -45,35 +50,6 @@
             margin: 0 auto;
         }
 
-        /* توقيع المصمم */
-        .designer-header-tag {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 18px;
-        }
-
-        .designer-badge {
-            background: linear-gradient(135deg, rgba(30, 27, 75, 0.8), rgba(15, 23, 42, 0.9));
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            padding: 6px 20px;
-            border-radius: 30px;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
-            font-size: 0.88rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .designer-badge strong {
-            color: #38bdf8;
-            font-family: 'Outfit', sans-serif;
-            font-size: 1rem;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
         /* Header Bar */
         header {
             background: linear-gradient(135deg, #0b1120 0%, #171e38 100%);
@@ -85,6 +61,8 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         header h1 {
@@ -97,13 +75,60 @@
             color: var(--primary-blue);
         }
 
+        /* تجميعة توقيع المصمم مع تاريخ اليوم */
+        .header-info-box {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .designer-title-large {
+            font-family: 'Outfit', 'Cairo', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 8px 20px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .designer-title-large strong {
+            color: #ffffff;
+            font-weight: 900;
+        }
+
         .date-badge {
-            background: rgba(56, 189, 248, 0.1);
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            color: var(--primary-blue);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .date-badge span {
+            color: #38bdf8;
+            font-weight: 800;
+        }
+
+        .sync-indicator {
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid #10b981;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             font-weight: 700;
         }
 
@@ -122,7 +147,6 @@
             border-radius: 16px;
             transition: all 0.25s ease-in-out;
             cursor: pointer;
-            position: relative;
         }
 
         .metric-card:hover {
@@ -213,7 +237,7 @@
             box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
         }
 
-        /* الجدول والتنبيها البصرية */
+        /* الجدول والتنبيهات البصرية */
         .table-container {
             background-color: var(--bg-secondary);
             border: 1px solid var(--border-color);
@@ -251,14 +275,9 @@
             background-color: var(--bg-card);
         }
 
-        /* تظليل أحمر فوري للدار المتأخرة لتنبيهك فورا */
         tbody tr.row-overdue-alert {
             background-color: rgba(239, 68, 68, 0.12) !important;
             border-right: 4px solid #ef4444 !important;
-        }
-
-        tbody tr.row-overdue-alert:hover {
-            background-color: rgba(239, 68, 68, 0.22) !important;
         }
 
         td {
@@ -285,7 +304,6 @@
             background-color: rgba(239, 68, 68, 0.2);
             color: #f87171;
             border: 1px solid #ef4444;
-            animation: pulse 2s infinite;
         }
 
         .badge-ready {
@@ -422,24 +440,30 @@
 </head>
 <body>
 
-<div class="designer-header-tag">
-    <div class="designer-badge">
-        <span>✨</span> Design by <strong>montather ali</strong>
-    </div>
-</div>
-
 <div class="app-container">
     <header>
         <div>
             <h1><span>مجمع الأميرات 2</span> - مكتب التسليم الفني</h1>
-            <small style="color: var(--text-muted); font-size: 0.88rem;">نظام المتابعة اليومية لإنهاء الدور وعدم التأخير</small>
+            <small style="color: var(--text-muted); font-size: 0.88rem;">نظام المتابعة والمزامنة اللحظية بين المستخدمين</small>
         </div>
-        <div class="date-badge">
-            تاريخ اليوم: <span id="current-date-display"></span>
+
+        <div class="header-info-box">
+            <!-- توقيع المصمم بخط كبير بارز -->
+            <div class="designer-title-large">
+                <span>✨</span> Design by <strong>montather ali</strong>
+            </div>
+
+            <div class="date-badge">
+                تاريخ اليوم: <span id="current-date-display"></span>
+            </div>
+
+            <div class="sync-indicator" id="sync-status">
+                🟢 المزامنة السحابية متصلة ومفعّلة
+            </div>
         </div>
     </header>
 
-    <!-- المستطيلات الإحصائية المحدثة بدقة -->
+    <!-- المستطيلات الإحصائية -->
     <div class="metrics-grid">
         <div class="metric-card alert-card" onclick="setFilterStatus('uncompleted_cleaning')">
             <div class="title" style="color: #ef4444;">⚠️ تجاوزت موعد التنظيف (تجاوزت يومين)</div>
@@ -471,7 +495,7 @@
         </div>
     </div>
 
-    <!-- شريط التصفية واللائحة اليومية المباشرة -->
+    <!-- شريط التصفية واللائحة اليومية -->
     <div class="filter-section">
         <div class="filter-group">
             <button class="btn-daily-checklist" onclick="setFilterStatus('daily_checklist')">
@@ -578,7 +602,6 @@
                 </select>
             </div>
 
-            <!-- حقول تظهر بعد اختيار نوع التنفيذ -->
             <div id="contractor-group" class="form-group hidden-field">
                 <label>اسم المقاول</label>
                 <select id="contractorName" class="form-control" onchange="checkNewContractorOption(this)">
@@ -597,7 +620,6 @@
                 </select>
             </div>
 
-            <!-- تواريخ التنفيذ المباشر -->
             <div id="direct-dates-group" class="hidden-field">
                 <div class="form-group">
                     <label>تاريخ التنظيف (بعد يوم تلقائياً)</label>
@@ -609,7 +631,6 @@
                 </div>
             </div>
 
-            <!-- تواريخ التنفيذ مقاولين -->
             <div id="contractor-dates-group" class="hidden-field">
                 <div class="form-group">
                     <label>تاريخ عمل المقاول (بعد يوم تلقائياً)</label>
@@ -621,7 +642,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn-primary" style="margin-top: 10px;">حفظ الدار بالسجل</button>
+            <button type="submit" class="btn-primary" style="margin-top: 10px;">حفظ الدار بالسجل والمزامنة</button>
         </form>
     </div>
 </div>
@@ -639,6 +660,23 @@
 </div>
 
 <script>
+    // ----------------------------------------------------------------
+    // إعدادات المزامنة اللحظية المباشرة (مشروع alameeratproject الخاص بك)
+    // ----------------------------------------------------------------
+    const firebaseConfig = {
+        apiKey: "AIzaSyBVFREknn-F4IQ5VJj5ZKuHtomvZVteox4",
+        authDomain: "alameeratproject.firebaseapp.com",
+        databaseURL: "https://alameeratproject-default-rtdb.firebaseio.com",
+        projectId: "alameeratproject",
+        storageBucket: "alameeratproject.firebasestorage.app",
+        messagingSenderId: "334982200776",
+        appId: "1:334982200776:web:22985ae897260cd3aed4fd",
+        measurementId: "G-TW6HW4ELTN"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const dbRef = firebase.database().ref('amirat_houses_db');
+
     let contractorsList = JSON.parse(localStorage.getItem('contractorsList')) || [
         "أحمد عواد", "عادل عرار", "محمد عرار", "جاسم زراك", "دياري كريم", 
         "علي الكوفي", "علي هويدي", "علي محمد حسين", "طه عبد الله", "اكام بهاء", 
@@ -649,6 +687,19 @@
 
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('current-date-display').innerText = todayStr;
+
+    // الاستماع للتغييرات اللحظية من أي مستخدم آخر مباشرة
+    dbRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            houseRecords = data.records || [];
+            if (data.contractors) contractorsList = data.contractors;
+            localStorage.setItem('houseRecords', JSON.stringify(houseRecords));
+            localStorage.setItem('contractorsList', JSON.stringify(contractorsList));
+            populateContractorsDropdown();
+            renderTable();
+        }
+    });
 
     function addDays(dateStr, days) {
         if (!dateStr) return "";
@@ -677,7 +728,7 @@
                 const trimmed = newName.trim();
                 if (!contractorsList.includes(trimmed)) {
                     contractorsList.push(trimmed);
-                    localStorage.setItem('contractorsList', JSON.stringify(contractorsList));
+                    saveAndRefresh();
                 }
                 populateContractorsDropdown();
                 selectElement.value = trimmed;
@@ -734,14 +785,12 @@
         if (start) document.getElementById('houseReadyDate').value = addDays(start, 10);
     }
 
-    // حساب الحالة ومتابعة التأخير بدقة موحدة للنوعين
     function calculateRecordStatus(rec) {
         let statusText = "";
         let badgeClass = "";
         let isCleaningOverdue = false;
         let isHandoverOverdue = false;
 
-        // 1. التنفيذ المباشر
         if (rec.executionType === "تنفيذ مباشر") {
             if (rec.isCleaned) {
                 statusText = "تم التنظيف وبانتظار الكشف";
@@ -759,9 +808,7 @@
                     badgeClass = "badge-waiting";
                 }
             }
-        } 
-        // 2. تنفيذ مقاولين
-        else if (rec.executionType === "تنفيذ مقاولين") {
+        } else if (rec.executionType === "تنفيذ مقاولين") {
             if (rec.isReady) {
                 statusText = "الدار جاهزة للإنهاء والإنحاز";
                 badgeClass = "badge-ready";
@@ -777,7 +824,6 @@
             }
         }
 
-        // فحص موعد التسليم الـ 10 أيام لجميع الدور في حال تم تحديد موعد التسليم
         if (rec.handoverDate && rec.handoverDate < todayStr && !rec.isReady) {
             statusText = "🚨 عبرت موعد التسليم النهائي (10 أيام)";
             badgeClass = "badge-overdue";
@@ -787,7 +833,6 @@
         return { statusText, badgeClass, isCleaningOverdue, isHandoverOverdue };
     }
 
-    // عرض السجل مع التنبيه الفوري بالتظليل الأحمر
     function renderTable() {
         const tbody = document.getElementById('table-body');
         const searchVal = document.getElementById('search-input').value.toLowerCase();
@@ -804,7 +849,6 @@
         houseRecords.forEach((rec, idx) => {
             const logic = calculateRecordStatus(rec);
 
-            // الإحصائيات الفلية
             const isTodayCleaning = (rec.executionType === "تنفيذ مباشر" && rec.cleaningEndDate === todayStr && !rec.isCleaned);
             const isTodayReadiness = (rec.houseReadyDate === todayStr || rec.inspectionDate === todayStr);
 
@@ -818,7 +862,6 @@
             if (rec.executionType === "تنفيذ مباشر" && rec.isCleaned) cReadyInspection++;
             if (rec.isReady) cReadyAll++;
 
-            // الفلترة
             const matchesSearch = rec.houseNo.toLowerCase().includes(searchVal) || rec.ownerName.toLowerCase().includes(searchVal);
             const matchesExec = execFilter === "all" || rec.executionType === execFilter;
             const matchesContractor = contractorFilter === "all" || rec.contractorName === contractorFilter;
@@ -826,7 +869,6 @@
 
             let matchesStatus = true;
             if (statusFilter === "daily_checklist") {
-                // لائحة المتابعة اليومية: تشمل كل ما هو مطلوب اليوم + كل الدور المتأخرة
                 matchesStatus = (isTodayCleaning || isTodayReadiness || logic.isCleaningOverdue || logic.isHandoverOverdue);
             } else if (statusFilter === "today_cleaning") matchesStatus = isTodayCleaning;
             else if (statusFilter === "today_readiness") matchesStatus = isTodayReadiness;
@@ -838,8 +880,6 @@
 
             if (matchesSearch && matchesExec && matchesContractor && matchesSector && matchesStatus) {
                 const tr = document.createElement('tr');
-                
-                // إضافة تظليل أحمر فوري إذا كانت الدار متأخرة في التنظيف أو التسليم
                 if (logic.isCleaningOverdue || logic.isHandoverOverdue) {
                     tr.classList.add('row-overdue-alert');
                 }
@@ -900,7 +940,6 @@
 
         const details = document.getElementById('status-modal-details');
         const actions = document.getElementById('status-interactive-questions');
-
         const finalHandover = rec.handoverDate || (rec.executionType === 'تنفيذ مقاولين' ? rec.houseReadyDate : 'غير محدد');
 
         details.innerHTML = `
@@ -1028,7 +1067,6 @@
         const ownerName = document.getElementById('ownerName').value;
         const arrivalDate = document.getElementById('arrivalDate').value;
         const executionType = document.getElementById('executionType').value;
-        
         const contractorName = document.getElementById('contractorName').value;
         const sectorNo = document.getElementById('sectorNo').value;
 
@@ -1081,6 +1119,14 @@
 
     function saveAndRefresh() {
         localStorage.setItem('houseRecords', JSON.stringify(houseRecords));
+        localStorage.setItem('contractorsList', JSON.stringify(contractorsList));
+
+        // حفظ وتحديث سحابي فوري بين كافة المستخدمين
+        dbRef.set({
+            records: houseRecords,
+            contractors: contractorsList
+        });
+
         renderTable();
     }
 
