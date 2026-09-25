@@ -38,7 +38,7 @@
             direction: rtl;
         }
 
-        .app-container { width: 98%; max-width: 1800px; margin: 0 auto; }
+        .app-container { width: 98%; max-width: 1900px; margin: 0 auto; }
 
         header {
             background: linear-gradient(135deg, #0b1120 0%, #171e38 100%);
@@ -205,6 +205,9 @@
 
         .whatsapp-icon { color: #25d366; font-size: 1.2rem; text-decoration: none; margin-left: 8px; display: inline-block; }
         .whatsapp-icon:hover { transform: scale(1.2); }
+        .camera-icon-btn { background: rgba(56, 189, 248, 0.15); border: 1px solid var(--primary-blue); color: var(--primary-blue); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+        .camera-icon-btn:hover { background: var(--primary-blue); color: #fff; }
+
         .checkbox-container { display: inline-flex; gap: 5px; align-items: center; }
         .notif-box { width: 18px; height: 18px; cursor: pointer; }
 
@@ -375,6 +378,8 @@
                     <th>موعد انتهاء التنظيف</th>
                     <th>تاريخ الكشف</th>
                     <th>موعد التسليم الـ 10 أيام</th>
+                    <th>موعد التسليم الثاني والسبب</th>
+                    <th>صورة الملاحظات</th>
                     <th>واتساب والتبليغ (3 مرات)</th>
                     <th>تعديل</th>
                 </tr>
@@ -532,6 +537,18 @@
     </div>
 </div>
 
+<!-- Modal عرض الصورة المرفوعة -->
+<div id="imagePreviewModal" class="modal">
+    <div class="modal-content" style="text-align:center;">
+        <span class="close-btn" onclick="closeImageModal()">&times;</span>
+        <h3 style="margin-bottom: 15px; color: #fff;">صورة الملاحظات والتقرير</h3>
+        <img id="previewImgElement" src="" alt="صورة الملاحظات" style="max-width: 100%; max-height: 70vh; border-radius: 10px; border: 1px solid var(--border-color);">
+    </div>
+</div>
+
+<!-- Input مخفي لرفع الصور والكاميرا مباشرة -->
+<input type="file" id="cameraFileInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImageCapture(event)">
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyBVFREknn-F4IQ5VJj5ZKuHtomvZVteox4",
@@ -562,6 +579,7 @@
 
     let preCleanedHouses = JSON.parse(localStorage.getItem('preCleanedHouses')) || [];
     let houseRecords = JSON.parse(localStorage.getItem('houseRecords')) || [];
+    let activeRecordIdForCamera = null;
 
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('current-date-display').innerText = todayStr;
@@ -696,7 +714,7 @@
                 `;
             }
 
-            const targetDate = rec.handoverDate || rec.houseReadyDate || '';
+            const targetDate = rec.secondHandoverDate || rec.handoverDate || rec.houseReadyDate || '';
             if (!rec.isReady && targetDate === todayStr) {
                 readinessCount++;
                 readinessListDiv.innerHTML += `
@@ -760,6 +778,7 @@
 
         const house = rec.houseNo || '';
         const isPreCleaned = preCleanedHouses.some(item => item.trim() === house.trim());
+        const effectiveHandoverDate = rec.secondHandoverDate || rec.handoverDate || (rec.executionType === 'تنفيذ مقاولين' ? rec.houseReadyDate : '');
 
         if (rec.executionType === "تنفيذ مباشر") {
             if (isPreCleaned || rec.isCleaned) {
@@ -783,8 +802,8 @@
                 statusText = "الدار جاهزة للإنهاء والانجاز";
                 badgeClass = "badge-ready";
             } else {
-                if (rec.houseReadyDate && rec.houseReadyDate < todayStr) {
-                    statusText = "🚨 عبرت موعد التسليم (10 أيام)";
+                if (effectiveHandoverDate && effectiveHandoverDate < todayStr) {
+                    statusText = "🚨 عبرت موعد التسليم";
                     badgeClass = "badge-overdue";
                     isHandoverOverdue = true;
                 } else {
@@ -794,8 +813,8 @@
             }
         }
 
-        if (rec.handoverDate && rec.handoverDate < todayStr && !rec.isReady) {
-            statusText = "🚨 عبرت موعد التسليم النهائي (10 أيام)";
+        if (effectiveHandoverDate && effectiveHandoverDate < todayStr && !rec.isReady) {
+            statusText = "🚨 عبرت موعد التسليم";
             badgeClass = "badge-overdue";
             isHandoverOverdue = true;
         }
@@ -843,23 +862,34 @@
                 }
 
                 tr.onclick = (e) => {
-                    if (e.target.closest('.action-btn') || e.target.closest('input') || e.target.closest('a')) return;
+                    if (e.target.closest('.action-btn') || e.target.closest('input') || e.target.closest('a') || e.target.closest('button')) return;
                     openStatusCheckModal(rec.id);
                 };
 
-                // تعديل خانات العرض حسب نوع التنفيذ (مباشر أو مقاولين)
                 let startWorkDate = '-', endWorkDate = '-', inspectionDisplay = '-', finalHandover = '-';
 
                 if (rec.executionType === 'تنفيذ مباشر') {
                     startWorkDate = isPreCleaned ? '-' : (rec.cleaningStartDate || '-');
-                    endWorkDate = isPreCleaned ? '-' : (rec.cleaningEndDate || '-'); // موعد انتهاء التنظيف يخص المباشر فقط
+                    endWorkDate = isPreCleaned ? '-' : (rec.cleaningEndDate || '-');
                     inspectionDisplay = rec.inspectionDate || 'غير محدد';
                     finalHandover = rec.handoverDate || '-';
                 } else if (rec.executionType === 'تنفيذ مقاولين') {
-                    startWorkDate = rec.contractorStartDate || '-'; // تاريخ عمل المقاول
-                    endWorkDate = '-'; // موعد التنظيف غير مخصص للمقاولين
-                    inspectionDisplay = '-'; // موعد الكشف غير مخصص للمقاولين
-                    finalHandover = rec.houseReadyDate || '-'; // التسليم بعد 10 أيام
+                    startWorkDate = rec.contractorStartDate || '-';
+                    endWorkDate = '-';
+                    inspectionDisplay = '-';
+                    finalHandover = rec.houseReadyDate || '-';
+                }
+
+                // عرض موعد التسليم الثاني والسبب إن وجد
+                let secondHandoverDisplay = finalHandover;
+                if (rec.secondHandoverDate) {
+                    secondHandoverDisplay = `<span style="color:#f59e0b;">${rec.secondHandoverDate}</span><br><small style="color:var(--text-muted);">السبب: ${rec.notReadyReason || '-'}</small>`;
+                }
+
+                // زر الكاميرا
+                let cameraCellHtml = `<button class="camera-icon-btn" onclick="triggerCamera(${rec.id})" title="التقاط أو رفع صورة الملاحظات">📷 تصوير</button>`;
+                if (rec.noteImage) {
+                    cameraCellHtml = `<button class="camera-icon-btn" style="background:rgba(16,185,129,0.15); border-color:#10b981; color:#10b981;" onclick="viewImage('${rec.noteImage}')" title="عرض الصورة">🖼️ عرض</button>`;
                 }
 
                 const phone = rec.phoneNo || '';
@@ -887,7 +917,9 @@
                     <td>${startWorkDate}</td>
                     <td>${endWorkDate}</td>
                     <td>${inspectionDisplay}</td>
-                    <td><strong>${finalHandover}</strong></td>
+                    <td>${finalHandover}</td>
+                    <td>${secondHandoverDisplay}</td>
+                    <td>${cameraCellHtml}</td>
                     <td><div class="checkbox-container">${checkboxesHtml}</div></td>
                     <td>
                         <button class="action-btn" onclick="editRecord(${rec.id})" title="تعديل">✏️</button>
@@ -933,7 +965,7 @@
 
         const house = rec.houseNo || '';
         const isPreCleaned = preCleanedHouses.some(item => item.trim() === house.trim());
-        const finalHandover = rec.handoverDate || (rec.executionType === 'تنفيذ مقاولين' ? rec.houseReadyDate : 'غير محدد');
+        const finalHandover = rec.secondHandoverDate || rec.handoverDate || (rec.executionType === 'تنفيذ مقاولين' ? rec.houseReadyDate : 'غير محدد');
 
         const details = document.getElementById('status-modal-details');
         const actions = document.getElementById('status-interactive-questions');
@@ -947,7 +979,7 @@
         if (rec.executionType === 'تنفيذ مباشر') {
             detailsHtml += `<p><strong>تاريخ الكشف المحدد:</strong> ${rec.inspectionDate || 'لم يحدد بعد (بانتظار مجيء المستفيد)'}</p>`;
         }
-        detailsHtml += `<p><strong>موعد التسليم:</strong> ${finalHandover}</p>`;
+        detailsHtml += `<p><strong>موعد التسليم الحالي:</strong> ${finalHandover}</p>`;
 
         details.innerHTML = detailsHtml;
 
@@ -1011,27 +1043,76 @@
                             `🔍 *تاريخ الكشف المحدد:* ${rec.inspectionDate}\n` +
                             `⏳ *موعد التسليم النهائي (10 أيام):* ${rec.handoverDate}`;
                 
-                showTeamWhatsAppModal(msg, `تم تحديد الكشف وإكمال التنظيف للدار (${rec.houseNo}). اختر الشخص لإرسال التفاصيل مباشرة عبر واتساب:`);
+                showTeamWhatsAppModal(msg, `تم تحديد الكشف وإكمال التنظيف للدار (${rec.houseNo}). اختر الشخص لإرسال التفاصيل إليه عبر واتساب مباشرة:`);
             }
         }
     }
 
+    // هنا تم تفعيل إدخال موعد التسليم الثاني وذكر السبب عند اختيار "غير جاهز"
     function updateReadyFlag(val) {
         const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
-        if (rec) {
-            rec.isReady = val;
+        if (!rec) return;
+
+        if (val === true) {
+            rec.isReady = true;
             saveAndRefresh();
             closeStatusModal();
+        } else {
+            // إذا كان غير جاهز، نطلب موعد التسليم الثاني وسبب عدم التسليم
+            const secondDate = prompt("أدخل موعد التسليم الثاني الجديد (تاريخ):", addDays(todayStr, 5));
+            if (secondDate) {
+                const reason = prompt("اذكر سبب عدم التسليم (الملاحظات):", "وجود نواقص أو أعمال غير مكتملة");
+                if (reason) {
+                    rec.isReady = false;
+                    rec.secondHandoverDate = secondDate;
+                    rec.notReadyReason = reason;
+                    saveAndRefresh();
+                    closeStatusModal();
+                }
+            }
         }
     }
 
     function closeStatusModal() { document.getElementById('statusCheckModal').style.display = "none"; }
 
+    // دوال التعامل مع الكاميرا ورفع الصور مباشرة
+    function triggerCamera(id) {
+        activeRecordIdForCamera = id;
+        document.getElementById('cameraFileInput').click();
+    }
+
+    function handleImageCapture(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64Image = e.target.result;
+            const rec = houseRecords.find(r => r.id === activeRecordIdForCamera);
+            if (rec) {
+                rec.noteImage = base64Image;
+                saveAndRefresh();
+                alert("✅ تم رفع وحفظ صورة الملاحظات بنجاح!");
+            }
+            event.target.value = ""; // إعادة تعيين الحقل
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function viewImage(imgUrl) {
+        document.getElementById('previewImgElement').src = imgUrl;
+        document.getElementById('imagePreviewModal').style.display = 'flex';
+    }
+
+    function closeImageModal() {
+        document.getElementById('imagePreviewModal').style.display = 'none';
+    }
+
     function openAddModal() {
         document.getElementById('modal-title').innerText = "إضافة دار جديد";
         document.getElementById('record-form').reset();
         document.getElementById('edit-id').value = "";
-        document.getElementById('arrivalDate').value = todayStr; // إعادة التعيين التلقائي لتاريخ اليوم
+        document.getElementById('arrivalDate').value = todayStr;
         document.getElementById('preCleanedAlertBox').style.display = 'none';
 
         populateContractorsDropdown();
@@ -1128,6 +1209,8 @@
                 cleaningStartDate, cleaningEndDate,
                 contractorStartDate, houseReadyDate,
                 inspectionDate: "", handoverDate: "",
+                secondHandoverDate: "", notReadyReason: "",
+                noteImage: "",
                 isCleaned: isPreCleaned, isReady: false,
                 notifications: [null, null, null]
             });
