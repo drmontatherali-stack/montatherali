@@ -317,6 +317,29 @@
         .btn-action-danger { background: rgba(244, 63, 94, 0.9); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(251, 113, 133, 0.4); padding: 14px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(244, 63, 94, 0.35); }
         .btn-action-danger:hover { filter: brightness(1.2); box-shadow: 0 0 25px rgba(244, 63, 94, 0.6); }
 
+        .excel-option-btn {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 16px 20px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(12px);
+        }
+        .excel-option-btn:hover {
+            border-color: var(--primary-blue);
+            background: rgba(56, 189, 248, 0.15);
+            transform: translateX(-5px);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+        }
+
         .precleaned-item {
             background: var(--glass-card);
             backdrop-filter: blur(12px);
@@ -445,7 +468,7 @@
                 <button class="btn-contractors-score" onclick="openContractorScorecardModal()">📊 أداء المقاولين</button>
                 <button class="btn-calendar-view" onclick="openCalendarModal()">📅 التقويم الهندسي</button>
                 <button class="btn-whatsapp-daily" onclick="sendDailySummaryWhatsApp()">💬 تقرير اليوم الشامل</button>
-                <button class="btn-excel-export" onclick="exportToExcel()">📊 تصدير Excel مرتب</button>
+                <button class="btn-excel-export" onclick="openExcelOptionsModal()">📊 تصدير Excel مخصص</button>
             </div>
 
             <label>البحث الذكي:</label>
@@ -503,13 +526,43 @@
 </div>
 
 <!-- Modals -->
+<div id="excelOptionsModal" class="modal">
+    <div class="modal-content" style="max-width: 550px;">
+        <span class="close-btn" onclick="closeExcelOptionsModal()">&times;</span>
+        <h3 style="margin-bottom: 12px; color: #10b981; font-weight: 900;">📊 اختر نوع تقرير Excel المخصص</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 22px; line-height: 1.6;">حدد نوع البيانات التي تريد تصديرها، وسيقوم النظام بتوليد ملف محدد يحتوي على التفاصيل الكاملة مع حساب العدد الكلي تلقائياً:</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <button class="excel-option-btn" onclick="exportToExcelFiltered('all')">
+                <span>📁 كل الدور المسجلة في النظام</span>
+                <span style="color: #38bdf8;">📊</span>
+            </button>
+            <button class="excel-option-btn" onclick="exportToExcelFiltered('overdue_handover')">
+                <span>🚨 الدور التي تجاوزت موعد التسليم (وغير جاهزة)</span>
+                <span style="color: #f43f5e;">⚠️</span>
+            </button>
+            <button class="excel-option-btn" onclick="exportToExcelFiltered('overdue_cleaning')">
+                <span>🧹 الدور التي تجاوزت موعد التنظيف (وغير نظيفة)</span>
+                <span style="color: #fbbf24;">⚠️</span>
+            </button>
+            <button class="excel-option-btn" onclick="exportToExcelFiltered('ready_houses')">
+                <span>✅ الدور الجاهزة للإنهاء والتسليم</span>
+                <span style="color: #10b981;">✨</span>
+            </button>
+            <button class="excel-option-btn" onclick="exportToExcelFiltered('cleaned_houses')">
+                <span>🏠 الدور التي تم إكمال تنظيفها بالكامل</span>
+                <span style="color: #06b6d4;">🧼</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <div id="calendarModal" class="modal">
     <div class="modal-content" style="max-width: 950px;">
         <span class="close-btn" onclick="closeCalendarModal()">&times;</span>
         <h3 style="margin-bottom: 15px; color: #fff;">📅 التقويم الهندسي التفاعلي الشامل</h3>
         <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">يمكنك التنقل بين الأنماط والأشهر والسنوات بمرونة متكاملة لمتابعة كافة مواعيد الدور المستمرة والعابرة للأشهر والسنوات.</p>
         
-        <!-- عناصر تحكم للتقويم (التنقل بين الأشهر والسنوات) -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(5, 11, 20, 0.6); padding: 12px 18px; border-radius: 16px; border: 1px solid var(--glass-border); flex-wrap: wrap; gap: 10px;">
             <button class="calendar-nav-btn" onclick="changeCalendarMonth(-1)">◀ الشهر السابق</button>
             <div style="display: flex; gap: 10px; align-items: center;">
@@ -520,7 +573,6 @@
             <button class="calendar-nav-btn" onclick="changeCalendarMonth(1)">الشهر التالي ▶</button>
         </div>
 
-        <!-- أسماء أيام الأسبوع -->
         <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-weight: 800; color: var(--primary-blue); margin-bottom: 8px;">
             <div>الأحد</div><div>الإثنين</div><div>الثلاثاء</div><div>الأربعاء</div><div>الخميس</div><div>الجمعة</div><div>السبت</div>
         </div>
@@ -722,16 +774,14 @@
     let sectorsChartObj = null;
     let contractorsChartObj = null;
 
-    // متغيرات التقويم الهندسي المرن
     let calendarCurrentYear = new Date().getFullYear();
-    let calendarCurrentMonth = new Date().getMonth(); // 0-11
+    let calendarCurrentMonth = new Date().getMonth();
     const arabicMonths = [
         "يناير (كانون الثاني)", "فبراير (شباط)", "مارس (آذار)", "أبريل (نيسان)", 
         "مايو (أيار)", "يونيو (حزيران)", "يوليو (تموز)", "أغسطس (آب)", 
         "سبتمبر (أيلول)", "أكتوبر (تشرين الأول)", "نوفمبر (تشرين الثاني)", "ديسمبر (كانون الأول)"
     ];
 
-    // دالة تنظيف رقم الهاتف وإعادة تشكيله لفتح واتساب ميتا المباشر
     function formatPhoneForWhatsApp(phone) {
         if (!phone) return '';
         let cleaned = phone.replace(/[^\d]/g, '');
@@ -743,7 +793,6 @@
         return cleaned;
     }
 
-    // دالة فتح محادثة واتساب ميتا المباشرة دون المرور بالموقع الإلكتروني
     function openWhatsAppDirect(phone, text) {
         const cleanPhone = formatPhoneForWhatsApp(phone);
         const encodedText = encodeURIComponent(text || '');
@@ -813,7 +862,6 @@
         }
     }
 
-    // إعداد القوائم المنسدلة للتقويم (الأشهر والسنوات)
     function setupCalendarControls() {
         const monthSelect = document.getElementById('calendar-month-select');
         const yearInput = document.getElementById('calendar-year-input');
@@ -861,7 +909,6 @@
         renderCalendarGrid();
     }
 
-    // التقويم الهندسي التفاعلي الشامل للعمل مع كل الأشهر والسنوات المتعددة
     function openCalendarModal() {
         setupCalendarControls();
         renderCalendarGrid();
@@ -874,9 +921,8 @@
         container.innerHTML = "";
 
         const daysInMonth = new Date(calendarCurrentYear, calendarCurrentMonth + 1, 0).getDate();
-        const firstDayOfWeek = new Date(calendarCurrentYear, calendarCurrentMonth, 1).getDay(); // 0 = الأحد
+        const firstDayOfWeek = new Date(calendarCurrentYear, calendarCurrentMonth, 1).getDay();
 
-        // إدراج مربعات فارغة لمراعاة اليوم الأول من الأسبوع
         for (let pad = 0; pad < firstDayOfWeek; pad++) {
             const emptyBox = document.createElement('div');
             emptyBox.style.background = 'transparent';
@@ -1120,16 +1166,57 @@
         openWhatsAppDirect('', msgText);
     }
 
-    // تصدير ملف Excel احترافي ومرتب بالكامل
-    function exportToExcel() {
+    // فتح نافذة اختيار خيارات تصدير الـ Excel المخصص
+    function openExcelOptionsModal() {
+        document.getElementById('excelOptionsModal').style.display = 'flex';
+    }
+    function closeExcelOptionsModal() {
+        document.getElementById('excelOptionsModal').style.display = 'none';
+    }
+
+    // دالة تصدير تقرير Excel المخصص مع خيارات التصفية وحساب العدد الكلي تلقائياً
+    function exportToExcelFiltered(filterType) {
         if (houseRecords.length === 0) {
             alert("⚠️ لا توجد بيانات مسجلة لتصديرها إلى Excel!");
             return;
         }
 
-        const dataForExcel = houseRecords.map((rec, idx) => {
+        let filteredRecords = [];
+        let reportTitleName = "كل_الدور";
+
+        if (filterType === 'all') {
+            filteredRecords = [...houseRecords];
+            reportTitleName = "التقرير_الشامل_لكل_الدور";
+        } else if (filterType === 'overdue_handover') {
+            filteredRecords = houseRecords.filter(rec => {
+                const logic = calculateRecordStatus(rec);
+                return logic.isHandoverOverdue;
+            });
+            reportTitleName = "تقرير_الدور_المتأخرة_عن_موعد_التسليم";
+        } else if (filterType === 'overdue_cleaning') {
+            filteredRecords = houseRecords.filter(rec => {
+                const logic = calculateRecordStatus(rec);
+                return logic.isCleaningOverdue;
+            });
+            reportTitleName = "تقرير_الدور_المتأخرة_عن_موعد_التنظيف";
+        } else if (filterType === 'ready_houses') {
+            filteredRecords = houseRecords.filter(rec => rec.isReady);
+            reportTitleName = "تقرير_الدور_الجاهزة_للإنهاء";
+        } else if (filterType === 'cleaned_houses') {
+            filteredRecords = houseRecords.filter(rec => {
+                const isPreCleaned = preCleanedHouses.some(item => item.trim() === (rec.houseNo || '').trim());
+                return rec.isCleaned || isPreCleaned;
+            });
+            reportTitleName = "تقرير_الدور_المنظفة_بالكامل";
+        }
+
+        if (filteredRecords.length === 0) {
+            alert("⚠️ لا توجد دور تندرج تحت هذا الخيار المختار في الوقت الحالي!");
+            return;
+        }
+
+        const dataForExcel = filteredRecords.map((rec, idx) => {
             const logic = calculateRecordStatus(rec);
-            const isPreCleaned = preCleanedHouses.some(item => item.trim() === rec.houseNo.trim());
             
             return {
                 "ت": idx + 1,
@@ -1139,7 +1226,7 @@
                 "القطاع": rec.sectorNo || '-',
                 "نوع التنفيذ": rec.executionType || '-',
                 "المقاول": rec.contractorName || '-',
-                "الحالة": logic.statusText,
+                "الحالة الحالية": logic.statusText,
                 "تاريخ الحضور": rec.arrivalDate || '-',
                 "تاريخ بدء العمل/التنظيف": rec.cleaningStartDate || rec.contractorStartDate || '-',
                 "موعد انتهاء التنظيف": rec.cleaningEndDate || '-',
@@ -1150,19 +1237,38 @@
             };
         });
 
+        // إضافة صف ملخص إجمالي للعدد الكلي في نهاية جدول الـ Excel
+        dataForExcel.push({
+            "ت": "الإجمالي",
+            "رقم الدار والبلوك": `العدد الكلي: ${filteredRecords.length} دار`,
+            "اسم المستفيد": "",
+            "رقم الهاتف": "",
+            "القطاع": "",
+            "نوع التنفيذ": "",
+            "المقاول": "",
+            "الحالة الحالية": "",
+            "تاريخ الحضور": "",
+            "تاريخ بدء العمل/التنظيف": "",
+            "موعد انتهاء التنظيف": "",
+            "تاريخ الكشف": "",
+            "موعد التسليم الـ 10 أيام": "",
+            "موعد التسليم الثاني": "",
+            "سبب تأخير التسليم الثاني": ""
+        });
+
         const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "تقرير الدور الهندسي");
+        XLSX.utils.book_append_sheet(workbook, worksheet, "تقرير الدور المخصص");
 
-        // ضبط عرض الأعمدة بشكل تلقائي ومرتب
         const colWidths = [
-            { wch: 5 }, { wch: 15 }, { wch: 22 }, { wch: 16 }, { wch: 15 },
-            { wch: 15 }, { wch: 18 }, { wch: 22 }, { wch: 14 }, { wch: 22 },
-            { wch: 18 }, { wch: 14 }, { wch: 22 }, { wch: 18 }, { wch: 30 }
+            { wch: 10 }, { wch: 22 }, { wch: 24 }, { wch: 18 }, { wch: 16 },
+            { wch: 16 }, { wch: 20 }, { wch: 26 }, { wch: 15 }, { wch: 22 },
+            { wch: 20 }, { wch: 15 }, { wch: 22 }, { wch: 20 }, { wch: 32 }
         ];
         worksheet['!cols'] = colWidths;
 
-        XLSX.writeFile(workbook, `AlAmirat_Report_${todayStr}.xlsx`);
+        XLSX.writeFile(workbook, `AlAmirat_${reportTitleName}_${todayStr}.xlsx`);
+        closeExcelOptionsModal();
     }
 
     function onExecutionTypeChange() {
@@ -1446,8 +1552,6 @@
                 rec.inspectionDate = inspDate; rec.handoverDate = addDays(inspDate, 10);
                 syncRecordFields(rec.id, { inspectionDate: rec.inspectionDate, handoverDate: rec.handoverDate });
                 closeStatusModal();
-                
-                // إرسال واتساب فور تحديد التنظيف والكشف بالتنفيذ المباشر
                 triggerDirectExecutionWhatsApp(rec);
             }
         }
@@ -1604,7 +1708,6 @@
         if (recordToSync) syncRecord(recordToSync);
         closeAddModal();
 
-        // إرسال واتساب تلقائي عند تسليم بيانات تنفيذ المقاولين
         if (executionType === "تنفيذ مقاولين") {
             const msg = `🏗️ *إحالة دار جديد للمقاول - تنفيذ مقاولين*\n` +
                         `🏠 الدار: ${houseNo} (${sectorNo})\n` +
