@@ -4,27 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مجمع الأميرات 2 - مكتب التسليم الفني</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0f1d;
+            --bg-primary: #070b14;
             --bg-secondary: #0f172a;
             --bg-card: #1e293b;
-            --bg-card-hover: #334155;
-            --navy-dark: #020617;
-            --navy-accent: #1e1b4b;
-            --primary-blue: #3b82f6;
+            --bg-card-hover: #2d3d54;
+            --primary-blue: #38bdf8;
             --primary-indigo: #6366f1;
+            --accent-purple: #8b5cf6;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --border-color: #334155;
+            --border-color: #273549;
             
             --status-waiting: #f59e0b;
             --status-overdue: #ef4444;
             --status-ready: #10b981;
-            --status-not-ready: #f43f5e;
             --status-direct: #06b6d4;
-            --status-contractor: #8b5cf6;
+            --status-contractor: #a855f7;
         }
 
         * {
@@ -42,41 +40,58 @@
             direction: rtl;
         }
 
-        /* توقيع المصمم في الأعلى */
-        .designer-credits {
-            text-align: center;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            color: #38bdf8;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
-        }
-
         .app-container {
             width: 98%;
             max-width: 1800px;
             margin: 0 auto;
         }
 
+        /* توقيع المصمم الفخم والحديث */
+        .designer-header-tag {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .designer-badge {
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.8), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 6px 20px;
+            border-radius: 30px;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .designer-badge strong {
+            color: #38bdf8;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
         /* Header Bar */
         header {
-            background: linear-gradient(135deg, #020617 0%, #1e1b4b 100%);
-            padding: 20px 30px;
-            border-radius: 16px;
+            background: linear-gradient(135deg, #0b1120 0%, #171e38 100%);
+            padding: 22px 30px;
+            border-radius: 20px;
             border: 1px solid var(--border-color);
             margin-bottom: 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         header h1 {
             font-size: 1.8rem;
-            font-weight: 800;
+            font-weight: 900;
             color: #ffffff;
         }
 
@@ -84,29 +99,20 @@
             color: var(--primary-blue);
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .btn-auth {
-            background-color: #ef4444;
-            color: white;
-            border: none;
+        .date-badge {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.2);
             padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.2s;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: var(--primary-blue);
+            font-weight: 700;
         }
-
-        .btn-auth:hover { opacity: 0.85; }
 
         /* المستطيلات والإحصائيات */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
@@ -114,28 +120,36 @@
         .metric-card {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            padding: 18px;
-            border-radius: 14px;
-            transition: all 0.3s ease;
+            padding: 18px 20px;
+            border-radius: 16px;
+            transition: all 0.25s ease-in-out;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
 
         .metric-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px);
             background-color: var(--bg-card-hover);
             border-color: var(--primary-blue);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
         .metric-card .title {
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
             margin-bottom: 8px;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .metric-card .value {
-            font-size: 1.7rem;
-            font-weight: 800;
+            font-size: 1.8rem;
+            font-weight: 900;
+        }
+
+        .metric-card.today-section {
+            border-color: rgba(56, 189, 248, 0.4);
+            background: linear-gradient(135deg, #1e293b 0%, #111c30 100%);
         }
 
         /* شريط التصفية والفرز */
@@ -143,11 +157,11 @@
             background-color: var(--bg-secondary);
             border: 1px solid var(--border-color);
             padding: 20px;
-            border-radius: 16px;
+            border-radius: 18px;
             margin-bottom: 24px;
             display: flex;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 14px;
             align-items: center;
             justify-content: space-between;
         }
@@ -155,14 +169,14 @@
         .filter-group {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
         .filter-group label {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.88rem;
         }
 
         select, input[type="text"], input[type="date"] {
@@ -170,22 +184,25 @@
             border: 1px solid var(--border-color);
             color: var(--text-main);
             padding: 10px 14px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 0.9rem;
             outline: none;
             transition: border-color 0.2s;
         }
 
-        select:focus, input:focus { border-color: var(--primary-blue); }
+        select:focus, input:focus {
+            border-color: var(--primary-blue);
+        }
 
         .btn-add {
             background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo));
             color: #fff;
             border: none;
-            padding: 10px 22px;
-            border-radius: 8px;
-            font-weight: 700;
+            padding: 11px 24px;
+            border-radius: 10px;
+            font-weight: 800;
             cursor: pointer;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
             transition: opacity 0.2s;
         }
 
@@ -195,7 +212,7 @@
         .table-container {
             background-color: var(--bg-secondary);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
+            border-radius: 18px;
             overflow-x: auto;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
@@ -208,14 +225,14 @@
         }
 
         thead {
-            background-color: #020617;
+            background-color: #0b1120;
             border-bottom: 2px solid var(--border-color);
         }
 
         th {
-            padding: 16px 16px;
+            padding: 16px;
             font-size: 0.88rem;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--text-muted);
         }
 
@@ -225,9 +242,14 @@
             cursor: pointer;
         }
 
-        tbody tr:hover { background-color: var(--bg-card); }
+        tbody tr:hover {
+            background-color: var(--bg-card);
+        }
 
-        td { padding: 14px 16px; font-size: 0.88rem; }
+        td {
+            padding: 14px 16px;
+            font-size: 0.88rem;
+        }
 
         /* Badges */
         .badge {
@@ -235,7 +257,7 @@
             padding: 5px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
-            font-weight: 700;
+            font-weight: 800;
         }
 
         .badge-waiting {
@@ -256,12 +278,6 @@
             border: 1px solid var(--status-ready);
         }
 
-        .badge-not-ready {
-            background-color: rgba(244, 63, 94, 0.15);
-            color: var(--status-not-ready);
-            border: 1px solid var(--status-not-ready);
-        }
-
         .badge-direct {
             background-color: rgba(6, 182, 212, 0.15);
             color: var(--status-direct);
@@ -269,20 +285,18 @@
         }
 
         .badge-contractor {
-            background-color: rgba(139, 92, 246, 0.15);
+            background-color: rgba(168, 85, 247, 0.15);
             color: var(--status-contractor);
             border: 1px solid var(--status-contractor);
         }
-
-        .date-highlight { color: #38bdf8; font-weight: 700; }
 
         /* Modals */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(2, 6, 23, 0.85);
-            backdrop-filter: blur(6px);
+            background: rgba(7, 11, 20, 0.88);
+            backdrop-filter: blur(8px);
             z-index: 10000;
             align-items: center;
             justify-content: center;
@@ -291,19 +305,20 @@
         .modal-content {
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
-            padding: 28px;
-            border-radius: 16px;
+            padding: 30px;
+            border-radius: 20px;
             width: 90%;
-            max-width: 600px;
+            max-width: 620px;
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
         }
 
         .close-btn {
             position: absolute;
-            top: 15px; left: 20px;
-            font-size: 1.5rem;
+            top: 18px; left: 22px;
+            font-size: 1.6rem;
             color: var(--text-muted);
             cursor: pointer;
         }
@@ -320,6 +335,7 @@
             margin-bottom: 6px;
             color: var(--text-muted);
             font-size: 0.88rem;
+            font-weight: 700;
         }
 
         .form-control {
@@ -327,11 +343,13 @@
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
             color: #fff;
-            padding: 10px 14px;
-            border-radius: 8px;
+            padding: 11px 14px;
+            border-radius: 10px;
             font-size: 0.9rem;
             outline: none;
         }
+
+        .form-control:focus { border-color: var(--primary-blue); }
 
         .btn-primary {
             width: 100%;
@@ -339,10 +357,14 @@
             color: #fff;
             border: none;
             padding: 12px;
-            border-radius: 8px;
-            font-weight: 700;
+            border-radius: 10px;
+            font-weight: 800;
             font-size: 0.95rem;
             cursor: pointer;
+        }
+
+        .hidden-field {
+            display: none;
         }
 
         .action-btn {
@@ -350,83 +372,95 @@
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
             margin: 0 4px;
         }
 
         .action-btn:hover { color: var(--primary-blue); }
         .action-btn.delete:hover { color: var(--status-overdue); }
 
-        .status-actions-grid {
+        .modal-action-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
-        .btn-status-yes {
-            background-color: var(--status-ready);
+        .btn-action-success {
+            background: #10b981;
             color: #fff;
             border: none;
             padding: 12px;
-            border-radius: 8px;
-            font-weight: 700;
+            border-radius: 10px;
+            font-weight: 800;
             cursor: pointer;
         }
 
-        .btn-status-no {
-            background-color: var(--status-not-ready);
+        .btn-action-danger {
+            background: #ef4444;
             color: #fff;
             border: none;
             padding: 12px;
-            border-radius: 8px;
-            font-weight: 700;
+            border-radius: 10px;
+            font-weight: 800;
             cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-<!-- توقيع المصمم -->
-<div class="designer-credits">Design by: montather ali</div>
+<!-- توقيع المصمم الأنيق في الأعلى -->
+<div class="designer-header-tag">
+    <div class="designer-badge">
+        <span>✨</span> Design by <strong>montather ali</strong>
+    </div>
+</div>
 
 <div class="app-container">
     <!-- Header -->
     <header>
         <div>
             <h1><span>مجمع الأميرات 2</span> - مكتب التسليم الفني</h1>
-            <small style="color: var(--text-muted);">نظام متابعة واستلام الدور الفني</small>
+            <small style="color: var(--text-muted); font-size: 0.88rem;">سجل متابعة وإدارة التسليم الفني والدور</small>
         </div>
-        <div class="user-info">
-            <span style="color: var(--text-muted); font-size: 0.9rem;">تاريخ اليوم: <strong id="current-date-display" style="color: #fff;"></strong></span>
+        <div class="date-badge">
+            تاريخ اليوم: <span id="current-date-display"></span>
         </div>
     </header>
 
     <!-- المستطيلات الإحصائية المحدثة -->
     <div class="metrics-grid">
-        <div class="metric-card" onclick="setFilterStatus('all')">
-            <div class="title">إجمالي الدور</div>
-            <div class="value" id="total-count">0</div>
+        <div class="metric-card today-section" onclick="setFilterStatus('today_cleaning')">
+            <div class="title" style="color: #38bdf8;">أعمال اليوم: مراجعة موقف التنظيف</div>
+            <div class="value" style="color: #38bdf8;" id="today-cleaning-count">0</div>
         </div>
-        <div class="metric-card" onclick="setFilterStatus('تم اكمال التنظيف')">
-            <div class="title" style="color: var(--status-ready);">تم اكمال التنظيف</div>
-            <div class="value" style="color: var(--status-ready);" id="clean-completed-count">0</div>
+        <div class="metric-card today-section" onclick="setFilterStatus('today_readiness')">
+            <div class="title" style="color: #a855f7;">أعمال اليوم: مراجعة موقف الجهوزية</div>
+            <div class="value" style="color: #a855f7;" id="today-readiness-count">0</div>
         </div>
-        <div class="metric-card" onclick="setFilterStatus('الدور الجاهزة')">
-            <div class="title" style="color: #38bdf8;">الدور الجاهزة للكشف</div>
-            <div class="value" style="color: #38bdf8;" id="ready-houses-count">0</div>
+        <div class="metric-card" onclick="setFilterStatus('completed_cleaning')">
+            <div class="title" style="color: #10b981;">دور تم إكمال تنظيفها</div>
+            <div class="value" style="color: #10b981;" id="clean-completed-count">0</div>
         </div>
-        <div class="metric-card" onclick="setFilterStatus('الدور الغير جاهزة')">
-            <div class="title" style="color: var(--status-not-ready);">الدور الغير جاهزة</div>
-            <div class="value" style="color: var(--status-not-ready);" id="not-ready-houses-count">0</div>
+        <div class="metric-card" onclick="setFilterStatus('uncompleted_cleaning')">
+            <div class="title" style="color: #ef4444;">دور لم يكتمل تنظيفها (تجاوزت يومين)</div>
+            <div class="value" style="color: #ef4444;" id="clean-uncompleted-count">0</div>
         </div>
-        <div class="metric-card" onclick="setFilterStatus('عبر موعد التنظيف ولم يتم اعطاء موقف')">
-            <div class="title" style="color: var(--status-overdue);">عبر موعد التنظيف</div>
-            <div class="value" style="color: var(--status-overdue);" id="overdue-count">0</div>
+        <div class="metric-card" onclick="setFilterStatus('ready_inspection')">
+            <div class="title" style="color: #06b6d4;">دور جاهزة للكشف (تنفيذ مباشر)</div>
+            <div class="value" style="color: #06b6d4;" id="ready-inspection-count">0</div>
+        </div>
+        <div class="metric-card" onclick="setFilterStatus('ready_all')">
+            <div class="title" style="color: #10b981;">دور جاهزة (مقاولين / مباشر)</div>
+            <div class="value" style="color: #10b981;" id="ready-all-count">0</div>
+        </div>
+        <div class="metric-card" onclick="setFilterStatus('not_ready_overdue')">
+            <div class="title" style="color: #f43f5e;">دور غير جاهزة (عبرت موعد 10 أيام)</div>
+            <div class="value" style="color: #f43f5e;" id="not-ready-overdue-count">0</div>
         </div>
     </div>
 
-    <!-- شريط الفرز والبحث -->
+    <!-- شريط التصفية والفرز -->
     <div class="filter-section">
         <div class="filter-group">
             <label>بحث:</label>
@@ -458,18 +492,20 @@
             <label>الحالة:</label>
             <select id="status-filter" onchange="renderTable()">
                 <option value="all">جميع الحالات</option>
-                <option value="بانتظار اكمال التنظيف">بانتظار اكمال التنظيف</option>
-                <option value="عبر موعد التنظيف ولم يتم اعطاء موقف">عبر موعد التنظيف</option>
-                <option value="تم اكمال التنظيف">تم اكمال التنظيف</option>
-                <option value="الدور الجاهزة">الدور الجاهزة</option>
-                <option value="الدور الغير جاهزة">الدور الغير جاهزة</option>
+                <option value="today_cleaning">أعمال اليوم: موقف التنظيف</option>
+                <option value="today_readiness">أعمال اليوم: موقف الجهوزية</option>
+                <option value="completed_cleaning">تم إكمال التنظيف</option>
+                <option value="uncompleted_cleaning">لم يكتمل التنظيف (تجاوزت يومين)</option>
+                <option value="ready_inspection">جاهزة للكشف (مباشر)</option>
+                <option value="ready_all">دور جاهزة (الكل)</option>
+                <option value="not_ready_overdue">غير جاهزة (تجاوزت 10 أيام)</option>
             </select>
         </div>
 
         <button class="btn-add" onclick="openAddModal()">+ إضافة دار جديد</button>
     </div>
 
-    <!-- جدول السجل -->
+    <!-- جدول السجل الرئيسي -->
     <div class="table-container">
         <table>
             <thead>
@@ -479,16 +515,17 @@
                     <th>اسم المستفيد</th>
                     <th>القطاع</th>
                     <th>نوع التنفيذ والمقاول</th>
-                    <th>الحالة</th>
-                    <th>بداية العمل / التنظيف</th>
-                    <th>انتهاء العمل / التنظيف</th>
-                    <th>موعد الكشف</th>
-                    <th>موعد التسليم (+10 أيام)</th>
+                    <th>الحالة الحالية</th>
+                    <th>تاريخ الحضور/المباشرة</th>
+                    <th>تاريخ التنظيف/عمل المقاول</th>
+                    <th>تاريخ انتهاء العمل/التنظيف</th>
+                    <th>تاريخ الكشف</th>
+                    <th>تاريخ التسليم (+10 أيام)</th>
                     <th>إجراءات والتعديل</th>
                 </tr>
             </thead>
             <tbody id="table-body">
-                <!-- تعبئة البيانات تلقائياً -->
+                <!-- يتم التحميل عبر JS -->
             </tbody>
         </table>
     </div>
@@ -513,23 +550,27 @@
             </div>
 
             <div class="form-group">
+                <label>تاريخ حضور / مجيء المستفيد</label>
+                <input type="date" id="arrivalDate" class="form-control" required onchange="handleArrivalDateChange()">
+            </div>
+
+            <div class="form-group">
                 <label>نوع التنفيذ</label>
-                <select id="executionType" class="form-control" onchange="handleExecutionTypeChange()">
+                <select id="executionType" class="form-control" onchange="onExecutionTypeChange()">
+                    <option value="">-- اختر نوع التنفيذ --</option>
                     <option value="تنفيذ مباشر">تنفيذ مباشر</option>
                     <option value="تنفيذ مقاولين">تنفيذ مقاولين</option>
                 </select>
             </div>
 
-            <!-- اسم المقاول + إضافة مقاول جديد -->
-            <div class="form-group">
+            <!-- حقول مخفية تظهر فقط بعد اختيار نوع التنفيذ -->
+            <div id="contractor-group" class="form-group hidden-field">
                 <label>اسم المقاول</label>
                 <select id="contractorName" class="form-control" onchange="checkNewContractorOption(this)">
-                    <!-- يتم التحميل تلقائياً -->
                 </select>
             </div>
 
-            <!-- القطاع -->
-            <div class="form-group">
+            <div id="sector-group" class="form-group hidden-field">
                 <label>رقم القطاع</label>
                 <select id="sectorNo" class="form-control">
                     <option value="القطاع الأول">القطاع الأول</option>
@@ -541,27 +582,28 @@
                 </select>
             </div>
 
-            <!-- تاريخ بداية ونهاية العمل/التنظيف -->
-            <div class="form-group">
-                <label id="lbl-start-date">تاريخ بداية التنظيف</label>
-                <input type="date" id="startDate" class="form-control" required onchange="autoCalculateEndDate()">
+            <!-- تواريخ التنفيذ المباشر (تظهر عند اختيار تنفيذ مباشر) -->
+            <div id="direct-dates-group" class="hidden-field">
+                <div class="form-group">
+                    <label>تاريخ التنظيف (بعد يوم تلقائياً)</label>
+                    <input type="date" id="cleaningStartDate" class="form-control" onchange="autoCalcDirectEndDate()">
+                </div>
+                <div class="form-group">
+                    <label>تاريخ انتهاء التنظيف (بعد يومين تلقائياً)</label>
+                    <input type="date" id="cleaningEndDate" class="form-control">
+                </div>
             </div>
 
-            <div class="form-group">
-                <label id="lbl-end-date">تاريخ انتهاء التنظيف (بعد يومين)</label>
-                <input type="date" id="endDate" class="form-control" required>
-            </div>
-
-            <!-- موعد الكشف اليدوي -->
-            <div class="form-group">
-                <label>موعد الكشف (تاريخ مجيء المستفيد)</label>
-                <input type="date" id="inspectionDate" class="form-control" onchange="autoCalculateHandoverDate()">
-            </div>
-
-            <!-- موعد التسليم التلقائي (+10 أيام من الكشف) -->
-            <div class="form-group">
-                <label>موعد التسليم (تلقائياً بعد 10 أيام من الكشف)</label>
-                <input type="date" id="handoverDate" class="form-control" readonly style="opacity: 0.8; background: #020617;">
+            <!-- تواريخ التنفيذ مقاولين (تظهر عند اختيار تنفيذ مقاولين) -->
+            <div id="contractor-dates-group" class="hidden-field">
+                <div class="form-group">
+                    <label>تاريخ عمل المقاول (بعد يوم تلقائياً)</label>
+                    <input type="date" id="contractorStartDate" class="form-control" onchange="autoCalcContractorReadyDate()">
+                </div>
+                <div class="form-group">
+                    <label>تاريخ جهوزية الدار (بعد 10 أيام تلقائياً وحسب الاتفاق)</label>
+                    <input type="date" id="houseReadyDate" class="form-control">
+                </div>
             </div>
 
             <button type="submit" class="btn-primary" style="margin-top: 10px;">حفظ الدار بالسجل</button>
@@ -569,23 +611,21 @@
     </div>
 </div>
 
-<!-- Modal تفاصيل وتحديث موقف الدار عند الضغط -->
+<!-- Modal تفاصيل وتحديث موقف الدار والتنظيف والكشف -->
 <div id="statusCheckModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeStatusModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #fff;">موقف الدار وتحديث الحالة</h3>
+        <h3 style="margin-bottom: 15px; color: #fff;">موقف الدار وإعطاء الإيعاز</h3>
         <div id="status-modal-details" style="line-height: 1.8; margin-bottom: 20px; color: var(--text-muted);">
-            <!-- يتم التعبئة ديناميكياً -->
         </div>
         
         <div id="status-interactive-questions">
-            <!-- أزرار تحديث الموقف -->
         </div>
     </div>
 </div>
 
 <script>
-    // قائمة المقاولين المعتمدة
+    // قائمة المقاولين
     let contractorsList = JSON.parse(localStorage.getItem('contractorsList')) || [
         "أحمد عواد", "عادل عرار", "محمد عرار", "جاسم زراك", "دياري كريم", 
         "علي الكوفي", "علي هويدي", "علي محمد حسين", "طه عبد الله", "اكام بهاء", 
@@ -593,22 +633,7 @@
     ];
 
     // السجلات الأولية
-    let houseRecords = JSON.parse(localStorage.getItem('houseRecords')) || [
-        {
-            id: 1,
-            houseNo: "A-10",
-            ownerName: "علي حسين",
-            executionType: "تنفيذ مباشر",
-            contractorName: "أحمد عواد",
-            sectorNo: "القطاع الأول",
-            startDate: new Date().toISOString().split('T')[0],
-            endDate: addDays(new Date().toISOString().split('T')[0], 2),
-            inspectionDate: addDays(new Date().toISOString().split('T')[0], 3),
-            handoverDate: addDays(new Date().toISOString().split('T')[0], 13),
-            isCleaned: false,
-            isReady: false
-        }
-    ];
+    let houseRecords = JSON.parse(localStorage.getItem('houseRecords')) || [];
 
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('current-date-display').innerText = todayStr;
@@ -620,7 +645,6 @@
         return d.toISOString().split('T')[0];
     }
 
-    // إعداد واجهة خيارات المقاولين
     function populateContractorsDropdown() {
         const select = document.getElementById('contractorName');
         const filterSelect = document.getElementById('contractor-filter');
@@ -653,83 +677,101 @@
         }
     }
 
-    // منطق تغيير نوع التنفيذ بالاستمارة
-    function handleExecutionTypeChange() {
+    // إخفاء وإظهار الحقول بناءً على اختيار نوع التنفيذ
+    function onExecutionTypeChange() {
         const type = document.getElementById('executionType').value;
-        const lblStart = document.getElementById('lbl-start-date');
-        const lblEnd = document.getElementById('lbl-end-date');
-        const startDateInput = document.getElementById('startDate');
+        const contractorGroup = document.getElementById('contractor-group');
+        const sectorGroup = document.getElementById('sector-group');
+        const directDates = document.getElementById('direct-dates-group');
+        const contractorDates = document.getElementById('contractor-dates-group');
+
+        if (!type) {
+            contractorGroup.classList.add('hidden-field');
+            sectorGroup.classList.add('hidden-field');
+            directDates.classList.add('hidden-field');
+            contractorDates.classList.add('hidden-field');
+            return;
+        }
+
+        // إظهار اسم المقاول والقطاع دائماً بعد اختيار نوع التنفيذ
+        contractorGroup.classList.remove('hidden-field');
+        sectorGroup.classList.remove('hidden-field');
+
+        const arrival = document.getElementById('arrivalDate').value || todayStr;
 
         if (type === "تنفيذ مباشر") {
-            lblStart.innerText = "تاريخ بداية التنظيف";
-            lblEnd.innerText = "تاريخ انتهاء التنظيف (بعد يومين)";
-            startDateInput.value = todayStr;
-        } else {
-            lblStart.innerText = "تاريخ بداية عمل المقاول (بعد يوم تلقائياً)";
-            lblEnd.innerText = "تاريخ انتهاء العمل بالدار (بعد 10 أيام)";
-            startDateInput.value = addDays(todayStr, 1);
-        }
-        autoCalculateEndDate();
-    }
+            directDates.classList.remove('hidden-field');
+            contractorDates.classList.add('hidden-field');
 
-    function autoCalculateEndDate() {
-        const type = document.getElementById('executionType').value;
-        const startVal = document.getElementById('startDate').value;
-        if (!startVal) return;
+            document.getElementById('cleaningStartDate').value = addDays(arrival, 1);
+            document.getElementById('cleaningEndDate').value = addDays(arrival, 3);
+        } else if (type === "تنفيذ مقاولين") {
+            contractorDates.classList.remove('hidden-field');
+            directDates.classList.add('hidden-field');
 
-        if (type === "تنفيذ مباشر") {
-            document.getElementById('endDate').value = addDays(startVal, 2);
-        } else {
-            document.getElementById('endDate').value = addDays(startVal, 10);
+            document.getElementById('contractorStartDate').value = addDays(arrival, 1);
+            document.getElementById('houseReadyDate').value = addDays(arrival, 11);
         }
     }
 
-    function autoCalculateHandoverDate() {
-        const insp = document.getElementById('inspectionDate').value;
-        if (insp) {
-            document.getElementById('handoverDate').value = addDays(insp, 10);
-        } else {
-            document.getElementById('handoverDate').value = "";
+    function handleArrivalDateChange() {
+        onExecutionTypeChange();
+    }
+
+    function autoCalcDirectEndDate() {
+        const start = document.getElementById('cleaningStartDate').value;
+        if (start) {
+            document.getElementById('cleaningEndDate').value = addDays(start, 2);
         }
     }
 
-    // حساب الحالة التقدمية للدار
-    function calculateRecordStatus(record) {
+    function autoCalcContractorReadyDate() {
+        const start = document.getElementById('contractorStartDate').value;
+        if (start) {
+            document.getElementById('houseReadyDate').value = addDays(start, 10);
+        }
+    }
+
+    // حساب حالة السجل
+    function calculateRecordStatus(rec) {
         let statusText = "";
         let badgeClass = "";
 
-        if (record.executionType === "تنفيذ مباشر") {
-            if (record.isCleaned) {
-                statusText = record.isReady ? "تم تنظيف والدار جاهز للكشف" : "تم التنظيف وبانتظار المستفيد للكشف";
+        if (rec.executionType === "تنفيذ مباشر") {
+            if (rec.isCleaned) {
+                statusText = "تم التنظيف وبانتظار الكشف";
+                if (rec.inspectionDate) {
+                    statusText = rec.isReady ? "الدار جاهز للكشف والتسليم" : "تم التنظيف والموعد حدد للكشف";
+                }
                 badgeClass = "badge-ready";
             } else {
                 const now = new Date();
-                const start = new Date(record.startDate);
-                const hoursPassed = (now - start) / (1000 * 60 * 60);
-
-                if (hoursPassed <= 48) {
-                    statusText = "بانتظار اكمال التنظيف";
-                    badgeClass = "badge-waiting";
-                } else {
+                const endClean = new Date(rec.cleaningEndDate || rec.arrivalDate);
+                if (now > endClean) {
                     statusText = "عبر موعد التنظيف ولم يتم اعطاء موقف";
                     badgeClass = "badge-overdue";
+                } else {
+                    statusText = "بانتظار اكمال التنظيف";
+                    badgeClass = "badge-waiting";
                 }
             }
-        } else {
-            // تنفيذ مقاولين
-            if (record.isReady) {
-                statusText = "الدار جاهزة للكشف والتسليم";
+        } else if (rec.executionType === "تنفيذ مقاولين") {
+            if (rec.isReady) {
+                statusText = "الدار جاهزة للكشف والإنهاء";
                 badgeClass = "badge-ready";
             } else {
-                statusText = "قيد تنفيذ المقاول";
+                statusText = "قيد تنفيذ عمل المقاول";
                 badgeClass = "badge-contractor";
             }
+        } else {
+            statusText = "بانتظار تحديد نوع التنفيذ";
+            badgeClass = "badge-waiting";
         }
 
         return { statusText, badgeClass };
     }
 
-    // عرض الجدول والفرز
+    // عرض السجل بالجدول وتحديث مستطيلات الإحصائيات
     function renderTable() {
         const tbody = document.getElementById('table-body');
         const searchVal = document.getElementById('search-input').value.toLowerCase();
@@ -740,37 +782,58 @@
 
         tbody.innerHTML = "";
 
-        let total = 0, cleanCompleted = 0, readyHouses = 0, notReadyHouses = 0, overdue = 0;
+        let cTodayCleaning = 0, cTodayReadiness = 0, cCleanCompleted = 0, cCleanUncompleted = 0;
+        let cReadyInspection = 0, cReadyAll = 0, cNotReadyOverdue = 0;
 
         houseRecords.forEach((rec, idx) => {
             const logic = calculateRecordStatus(rec);
 
-            // الإحصائيات
-            total++;
-            if (rec.isCleaned) cleanCompleted++;
-            if (rec.isReady) readyHouses++;
-            if (!rec.isReady) notReadyHouses++;
-            if (logic.statusText === "عبر موعد التنظيف ولم يتم اعطاء موقف") overdue++;
+            // فحص التواريخ والشروط للمستطيلات الإحصائية
+            const isTodayCleaning = (rec.executionType === "تنفيذ مباشر" && rec.cleaningEndDate === todayStr && !rec.isCleaned);
+            const isTodayReadiness = (rec.houseReadyDate === todayStr || rec.inspectionDate === todayStr);
 
-            // الفلترة
+            if (isTodayCleaning) cTodayCleaning++;
+            if (isTodayReadiness) cTodayReadiness++;
+            if (rec.isCleaned) cCleanCompleted++;
+
+            // دور لم يكتمل تنظيفها (عبرت يومين بدون إيعاز)
+            const isOverdueCleaning = (rec.executionType === "تنفيذ مباشر" && !rec.isCleaned && rec.cleaningEndDate < todayStr);
+            if (isOverdueCleaning) cCleanUncompleted++;
+
+            // دور جاهزة للكشف (فقط تنفيذ مباشر تم تنظيفها)
+            if (rec.executionType === "تنفيذ مباشر" && rec.isCleaned) cReadyInspection++;
+
+            // دور جاهزة (سواء مقاولين أو مباشر)
+            if (rec.isReady) cReadyAll++;
+
+            // دور غير جاهزة (عبرت موعد تسليمها 10 أيام)
+            const isOverdueHandover = (rec.handoverDate && rec.handoverDate < todayStr && !rec.isReady);
+            if (isOverdueHandover) cNotReadyOverdue++;
+
+            // التصفية والفرز
             const matchesSearch = rec.houseNo.toLowerCase().includes(searchVal) || rec.ownerName.toLowerCase().includes(searchVal);
             const matchesExec = execFilter === "all" || rec.executionType === execFilter;
             const matchesContractor = contractorFilter === "all" || rec.contractorName === contractorFilter;
             const matchesSector = sectorFilter === "all" || rec.sectorNo === sectorFilter;
-            
+
             let matchesStatus = true;
-            if (statusFilter === "تم اكمال التنظيف") matchesStatus = rec.isCleaned;
-            else if (statusFilter === "الدور الجاهزة") matchesStatus = rec.isReady;
-            else if (statusFilter === "الدور الغير جاهزة") matchesStatus = !rec.isReady;
-            else if (statusFilter !== "all") matchesStatus = (logic.statusText === statusFilter);
+            if (statusFilter === "today_cleaning") matchesStatus = isTodayCleaning;
+            else if (statusFilter === "today_readiness") matchesStatus = isTodayReadiness;
+            else if (statusFilter === "completed_cleaning") matchesStatus = rec.isCleaned;
+            else if (statusFilter === "uncompleted_cleaning") matchesStatus = isOverdueCleaning;
+            else if (statusFilter === "ready_inspection") matchesStatus = (rec.executionType === "تنفيذ مباشر" && rec.isCleaned);
+            else if (statusFilter === "ready_all") matchesStatus = rec.isReady;
+            else if (statusFilter === "not_ready_overdue") matchesStatus = isOverdueHandover;
 
             if (matchesSearch && matchesExec && matchesContractor && matchesSector && matchesStatus) {
                 const tr = document.createElement('tr');
                 tr.onclick = (e) => {
-                    // منع فتح نافذة الموقف إذا تم الضغط على أزرار التعديل والحذف
                     if (e.target.closest('.action-btn')) return;
                     openStatusCheckModal(rec.id);
                 };
+
+                const startWorkDate = rec.executionType === 'تنفيذ مباشر' ? rec.cleaningStartDate : rec.contractorStartDate;
+                const endWorkDate = rec.executionType === 'تنفيذ مباشر' ? rec.cleaningEndDate : rec.houseReadyDate;
 
                 tr.innerHTML = `
                     <td>${idx + 1}</td>
@@ -778,13 +841,14 @@
                     <td>${rec.ownerName}</td>
                     <td>${rec.sectorNo || '-'}</td>
                     <td>
-                        <span class="badge ${rec.executionType === 'تنفيذ مباشر' ? 'badge-direct' : 'badge-contractor'}">${rec.executionType}</span>
+                        <span class="badge ${rec.executionType === 'تنفيذ مباشر' ? 'badge-direct' : 'badge-contractor'}">${rec.executionType || 'غير محدد'}</span>
                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top:2px;">${rec.contractorName || '-'}</div>
                     </td>
                     <td><span class="badge ${logic.badgeClass}">${logic.statusText}</span></td>
-                    <td>${rec.startDate || '-'}</td>
-                    <td>${rec.endDate || '-'}</td>
-                    <td class="${rec.inspectionDate === todayStr ? 'date-highlight' : ''}">${rec.inspectionDate || 'لم يحدد'}</td>
+                    <td>${rec.arrivalDate || '-'}</td>
+                    <td>${startWorkDate || '-'}</td>
+                    <td>${endWorkDate || '-'}</td>
+                    <td>${rec.inspectionDate || 'غير محدد'}</td>
                     <td><strong>${rec.handoverDate || '-'}</strong></td>
                     <td>
                         <button class="action-btn" onclick="editRecord(${rec.id})" title="تعديل">✏️</button>
@@ -795,12 +859,14 @@
             }
         });
 
-        // تحديث أرقام البطاقات
-        document.getElementById('total-count').innerText = total;
-        document.getElementById('clean-completed-count').innerText = cleanCompleted;
-        document.getElementById('ready-houses-count').innerText = readyHouses;
-        document.getElementById('not-ready-houses-count').innerText = notReadyHouses;
-        document.getElementById('overdue-count').innerText = overdue;
+        // تحديث أرقام البطاقات الإحصائية
+        document.getElementById('today-cleaning-count').innerText = cTodayCleaning;
+        document.getElementById('today-readiness-count').innerText = cTodayReadiness;
+        document.getElementById('clean-completed-count').innerText = cCleanCompleted;
+        document.getElementById('clean-uncompleted-count').innerText = cCleanUncompleted;
+        document.getElementById('ready-inspection-count').innerText = cReadyInspection;
+        document.getElementById('ready-all-count').innerText = cReadyAll;
+        document.getElementById('not-ready-overdue-count').innerText = cNotReadyOverdue;
     }
 
     function setFilterStatus(statusVal) {
@@ -808,7 +874,7 @@
         renderTable();
     }
 
-    // Modal تحديث وقراءة موقف الدار عند الضغط عليه
+    // Modal تحديث الموقف
     let selectedRecordIdForStatus = null;
 
     function openStatusCheckModal(id) {
@@ -820,52 +886,71 @@
         const actions = document.getElementById('status-interactive-questions');
 
         details.innerHTML = `
-            <p><strong>رقم الدار:</strong> ${rec.houseNo} (${rec.sectorNo})</p>
+            <p><strong>رقم الدار:</strong> ${rec.houseNo} (${rec.sectorNo || 'غير محدد'})</p>
             <p><strong>اسم المستفيد:</strong> ${rec.ownerName}</p>
-            <p><strong>نوع التنفيذ:</strong> ${rec.executionType} - المقاول: ${rec.contractorName}</p>
-            <p><strong>تاريخ بداية العمل/التنظيف:</strong> ${rec.startDate}</p>
-            <p><strong>تاريخ نهاية العمل/التنظيف:</strong> ${rec.endDate}</p>
-            <p><strong>موعد الكشف:</strong> ${rec.inspectionDate || 'غير محدد'}</p>
+            <p><strong>نوع التنفيذ:</strong> ${rec.executionType || 'غير محدد'} | المقاول: ${rec.contractorName || '-'}</p>
+            <p><strong>تاريخ الحضور:</strong> ${rec.arrivalDate || '-'}</p>
+            <p><strong>تاريخ الكشف المحدد:</strong> ${rec.inspectionDate || 'لم يحدد بعد'}</p>
+            <p><strong>تاريخ التسليم (+10 أيام من الكشف):</strong> ${rec.handoverDate || 'لم يحدد بعد'}</p>
         `;
 
-        let questionsHtml = "";
+        let html = "";
 
         if (rec.executionType === "تنفيذ مباشر") {
-            questionsHtml += `
-                <p style="margin-bottom:10px; font-weight:700; color:#fff;">موقف التنظيف (بعد فترة اليومين):</p>
-                <div class="status-actions-grid">
-                    <button class="btn-status-yes" onclick="updateCleaningStatus(true)">تم إكمال التنظيف</button>
-                    <button class="btn-status-no" onclick="updateCleaningStatus(false)">لم يتم التنظيف بعد</button>
+            html += `
+                <div style="background: rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-bottom:15px;">
+                    <p style="font-weight:800; color:#fff; margin-bottom:10px;">1. موقف التنظيف:</p>
+                    <div class="modal-action-grid">
+                        <button class="btn-action-success" onclick="markCleaningCompleted()">تم إكمال التنظيف</button>
+                        <button class="btn-action-danger" onclick="updateCleaningFlag(false)">لم يكتمل التنظيف</button>
+                    </div>
                 </div>
-                <hr style="border-color: var(--border-color); margin: 15px 0;">
             `;
         }
 
-        questionsHtml += `
-            <p style="margin-bottom:10px; font-weight:700; color:#fff;">موقف الجاهزية الفنية للدار للكشف والتسليم:</p>
-            <div class="status-actions-grid">
-                <button class="btn-status-yes" onclick="updateReadyStatus(true)">الدار جاهز للكشف</button>
-                <button class="btn-status-no" onclick="updateReadyStatus(false)">الدار غير جاهز</button>
+        html += `
+            <div style="background: rgba(255,255,255,0.03); padding:15px; border-radius:12px;">
+                <p style="font-weight:800; color:#fff; margin-bottom:10px;">2. موقف جهوزية الدار الكلية:</p>
+                <div class="modal-action-grid">
+                    <button class="btn-action-success" onclick="updateReadyFlag(true)">الدار جاهز</button>
+                    <button class="btn-action-danger" onclick="updateReadyFlag(false)">الدار غير جاهز</button>
+                </div>
             </div>
         `;
 
-        actions.innerHTML = questionsHtml;
+        actions.innerHTML = html;
         document.getElementById('statusCheckModal').style.display = "flex";
     }
 
-    function updateCleaningStatus(status) {
+    // عند كتابة أو اختيار "تم إكمال التنظيف"
+    function markCleaningCompleted() {
         const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
         if (rec) {
-            rec.isCleaned = status;
+            rec.isCleaned = true;
+            
+            const inspDate = prompt("أدخل تاريخ الكشف (مجيء المستفيد للكشف):", todayStr);
+            if (inspDate) {
+                rec.inspectionDate = inspDate;
+                rec.handoverDate = addDays(inspDate, 10); // يحدد بعد 10 أيام تلقائياً
+            }
             saveAndRefresh();
             closeStatusModal();
         }
     }
 
-    function updateReadyStatus(status) {
+    function updateCleaningFlag(val) {
         const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
         if (rec) {
-            rec.isReady = status;
+            rec.isCleaned = val;
+            saveAndRefresh();
+            closeStatusModal();
+        }
+    }
+
+    function updateReadyFlag(val) {
+        const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
+        if (rec) {
+            rec.isReady = val;
             saveAndRefresh();
             closeStatusModal();
         }
@@ -880,10 +965,11 @@
         document.getElementById('modal-title').innerText = "إضافة دار جديد";
         document.getElementById('record-form').reset();
         document.getElementById('edit-id').value = "";
-        
+        document.getElementById('arrivalDate').value = todayStr;
+
         populateContractorsDropdown();
-        handleExecutionTypeChange();
-        
+        onExecutionTypeChange();
+
         document.getElementById('addRecordModal').style.display = "flex";
     }
 
@@ -901,13 +987,21 @@
         document.getElementById('edit-id').value = rec.id;
         document.getElementById('houseNo').value = rec.houseNo;
         document.getElementById('ownerName').value = rec.ownerName;
-        document.getElementById('executionType').value = rec.executionType;
-        document.getElementById('contractorName').value = rec.contractorName;
-        document.getElementById('sectorNo').value = rec.sectorNo;
-        document.getElementById('startDate').value = rec.startDate;
-        document.getElementById('endDate').value = rec.endDate;
-        document.getElementById('inspectionDate').value = rec.inspectionDate || "";
-        document.getElementById('handoverDate').value = rec.handoverDate || "";
+        document.getElementById('arrivalDate').value = rec.arrivalDate || todayStr;
+        document.getElementById('executionType').value = rec.executionType || "";
+
+        onExecutionTypeChange();
+
+        if (rec.contractorName) document.getElementById('contractorName').value = rec.contractorName;
+        if (rec.sectorNo) document.getElementById('sectorNo').value = rec.sectorNo;
+
+        if (rec.executionType === "تنفيذ مباشر") {
+            document.getElementById('cleaningStartDate').value = rec.cleaningStartDate || "";
+            document.getElementById('cleaningEndDate').value = rec.cleaningEndDate || "";
+        } else if (rec.executionType === "تنفيذ مقاولين") {
+            document.getElementById('contractorStartDate').value = rec.contractorStartDate || "";
+            document.getElementById('houseReadyDate').value = rec.houseReadyDate || "";
+        }
 
         document.getElementById('addRecordModal').style.display = "flex";
     }
@@ -917,32 +1011,44 @@
         const editId = document.getElementById('edit-id').value;
         const houseNo = document.getElementById('houseNo').value;
         const ownerName = document.getElementById('ownerName').value;
+        const arrivalDate = document.getElementById('arrivalDate').value;
         const executionType = document.getElementById('executionType').value;
+        
         const contractorName = document.getElementById('contractorName').value;
         const sectorNo = document.getElementById('sectorNo').value;
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        const inspectionDate = document.getElementById('inspectionDate').value;
-        const handoverDate = document.getElementById('handoverDate').value;
+
+        let cleaningStartDate = "", cleaningEndDate = "", contractorStartDate = "", houseReadyDate = "";
+
+        if (executionType === "تنفيذ مباشر") {
+            cleaningStartDate = document.getElementById('cleaningStartDate').value;
+            cleaningEndDate = document.getElementById('cleaningEndDate').value;
+        } else if (executionType === "تنفيذ مقاولين") {
+            contractorStartDate = document.getElementById('contractorStartDate').value;
+            houseReadyDate = document.getElementById('houseReadyDate').value;
+        }
 
         if (editId) {
             const item = houseRecords.find(r => r.id == editId);
             if (item) {
                 item.houseNo = houseNo;
                 item.ownerName = ownerName;
+                item.arrivalDate = arrivalDate;
                 item.executionType = executionType;
                 item.contractorName = contractorName;
                 item.sectorNo = sectorNo;
-                item.startDate = startDate;
-                item.endDate = endDate;
-                item.inspectionDate = inspectionDate;
-                item.handoverDate = handoverDate;
+                item.cleaningStartDate = cleaningStartDate;
+                item.cleaningEndDate = cleaningEndDate;
+                item.contractorStartDate = contractorStartDate;
+                item.houseReadyDate = houseReadyDate;
             }
         } else {
             houseRecords.push({
                 id: Date.now(),
-                houseNo, ownerName, executionType, contractorName, sectorNo,
-                startDate, endDate, inspectionDate, handoverDate,
+                houseNo, ownerName, arrivalDate, executionType,
+                contractorName, sectorNo,
+                cleaningStartDate, cleaningEndDate,
+                contractorStartDate, houseReadyDate,
+                inspectionDate: "", handoverDate: "",
                 isCleaned: false, isReady: false
             });
         }
@@ -963,7 +1069,7 @@
         renderTable();
     }
 
-    // التهيئة الأولية عند التحميل
+    // التشغيل الأول
     populateContractorsDropdown();
     renderTable();
 </script>
