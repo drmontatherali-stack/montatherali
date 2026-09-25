@@ -372,7 +372,7 @@
                     <th>الحالة الحالية</th>
                     <th>تاريخ الحضور</th>
                     <th>تاريخ العمل/التنظيف</th>
-                    <th>موعد الموقف</th>
+                    <th>موعد انتهاء التنظيف</th>
                     <th>تاريخ الكشف</th>
                     <th>موعد التسليم الـ 10 أيام</th>
                     <th>واتساب والتبليغ (3 مرات)</th>
@@ -477,7 +477,7 @@
             </div>
 
             <div class="form-group">
-                <label>تاريخ حضور / مجيء المستفيد</label>
+                <label>تاريخ حضور / مجيء المستفيد (تلقائي)</label>
                 <input type="date" id="arrivalDate" class="form-control" required onchange="handleArrivalDateChange()">
             </div>
 
@@ -547,7 +547,6 @@
     firebase.initializeApp(firebaseConfig);
     const dbRef = firebase.database().ref('amirat_houses_db');
 
-    // الأرقام الأربعة المعتمدة للإرسال المباشر
     const targetTeam = [
         { name: "مهندس محمد عبد الأمير", phone: "9647825962173" },
         { name: "منتظر علي", phone: "9647862568787" },
@@ -692,7 +691,7 @@
                 cleaningCount++;
                 cleaningListDiv.innerHTML += `
                     <div style="padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem;">
-                        📍 القطاع: <strong>${rec.sectorNo}</strong> | الدار: <strong>${rec.houseNo}</strong> | المستفيد: ${rec.ownerName} | موعد التنظيف: <span style="color:#f59e0b;">${rec.cleaningEndDate}</span>
+                        📍 القطاع: <strong>${rec.sectorNo}</strong> | الدار: <strong>${rec.houseNo}</strong> | المستفيد: ${rec.ownerName} | موعد انتهاء التنظيف: <span style="color:#f59e0b;">${rec.cleaningEndDate}</span>
                     </div>
                 `;
             }
@@ -708,7 +707,7 @@
             }
         });
 
-        if (cleaningCount === 0) cleaningListDiv.innerHTML = "<p style='color:var(--text-muted);'>لا توجد دور موعد تنظيفها يصادف اليوم.</p>";
+        if (cleaningCount === 0) cleaningListDiv.innerHTML = "<p style='color:var(--text-muted);'>لا توجد دور موعد انتهاء تنظيفها يصادف اليوم.</p>";
         if (readinessCount === 0) readinessListDiv.innerHTML = "<p style='color:var(--text-muted);'>لا توجد دور موعد جاهزيتها أو تسليمها يصادف اليوم.</p>";
 
         document.getElementById('dailyChecklistModal').style.display = 'flex';
@@ -729,6 +728,8 @@
         }
 
         contractorGroup.classList.remove('hidden-field');
+        const arrivalInput = document.getElementById('arrivalDate');
+        const arrival = arrivalInput ? arrivalInput.value || todayStr : todayStr;
         const houseInput = document.getElementById('houseNo').value.trim();
         const isPreCleaned = preCleanedHouses.some(item => item.trim() === houseInput);
 
@@ -737,15 +738,15 @@
                 directDates.classList.add('hidden-field');
             } else {
                 directDates.classList.remove('hidden-field');
-                document.getElementById('cleaningStartDate').value = addDays(todayStr, 1);
-                document.getElementById('cleaningEndDate').value = addDays(todayStr, 3);
+                document.getElementById('cleaningStartDate').value = addDays(arrival, 1);
+                document.getElementById('cleaningEndDate').value = addDays(arrival, 3);
             }
             contractorDates.classList.add('hidden-field');
         } else if (type === "تنفيذ مقاولين") {
             contractorDates.classList.remove('hidden-field');
             directDates.classList.add('hidden-field');
-            document.getElementById('contractorStartDate').value = addDays(todayStr, 1);
-            document.getElementById('houseReadyDate').value = addDays(todayStr, 11);
+            document.getElementById('contractorStartDate').value = addDays(arrival, 1);
+            document.getElementById('houseReadyDate').value = addDays(arrival, 11);
         }
     }
 
@@ -769,7 +770,7 @@
                 }
             } else {
                 if (rec.cleaningEndDate && rec.cleaningEndDate < todayStr) {
-                    statusText = "🚨 عبر موعد التنظيف ولم يعط موقف";
+                    statusText = "🚨 عبر موعد انتهاء التنظيف ولم يعط موقف";
                     badgeClass = "badge-overdue";
                     isCleaningOverdue = true;
                 } else {
@@ -846,9 +847,20 @@
                     openStatusCheckModal(rec.id);
                 };
 
-                const startWorkDate = isPreCleaned ? '-' : (rec.executionType === 'تنفيذ مباشر' ? rec.cleaningStartDate : rec.contractorStartDate);
-                const endWorkDate = isPreCleaned ? '-' : (rec.executionType === 'تنفيذ مباشر' ? rec.cleaningEndDate : rec.houseReadyDate);
-                const finalHandover = rec.handoverDate || (rec.executionType === 'تنفيذ مقاولين' ? rec.houseReadyDate : '-');
+                // تعديل خانات العرض حسب نوع التنفيذ (مباشر أو مقاولين)
+                let startWorkDate = '-', endWorkDate = '-', inspectionDisplay = '-', finalHandover = '-';
+
+                if (rec.executionType === 'تنفيذ مباشر') {
+                    startWorkDate = isPreCleaned ? '-' : (rec.cleaningStartDate || '-');
+                    endWorkDate = isPreCleaned ? '-' : (rec.cleaningEndDate || '-'); // موعد انتهاء التنظيف يخص المباشر فقط
+                    inspectionDisplay = rec.inspectionDate || 'غير محدد';
+                    finalHandover = rec.handoverDate || '-';
+                } else if (rec.executionType === 'تنفيذ مقاولين') {
+                    startWorkDate = rec.contractorStartDate || '-'; // تاريخ عمل المقاول
+                    endWorkDate = '-'; // موعد التنظيف غير مخصص للمقاولين
+                    inspectionDisplay = '-'; // موعد الكشف غير مخصص للمقاولين
+                    finalHandover = rec.houseReadyDate || '-'; // التسليم بعد 10 أيام
+                }
 
                 const phone = rec.phoneNo || '';
                 const waText = encodeURIComponent(`مرحباً بالمستفيد المحترم ${rec.ownerName}، نبلغكم بجهوزية الدار رقم ${rec.houseNo} في مجمع الأميرات 2.`);
@@ -872,9 +884,9 @@
                     </td>
                     <td><span class="badge ${logic.badgeClass}">${logic.statusText}</span></td>
                     <td>${rec.arrivalDate || '-'}</td>
-                    <td>${startWorkDate || '-'}</td>
-                    <td>${endWorkDate || '-'}</td>
-                    <td>${rec.inspectionDate || 'غير محدد'}</td>
+                    <td>${startWorkDate}</td>
+                    <td>${endWorkDate}</td>
+                    <td>${inspectionDisplay}</td>
                     <td><strong>${finalHandover}</strong></td>
                     <td><div class="checkbox-container">${checkboxesHtml}</div></td>
                     <td>
@@ -926,13 +938,18 @@
         const details = document.getElementById('status-modal-details');
         const actions = document.getElementById('status-interactive-questions');
 
-        details.innerHTML = `
+        let detailsHtml = `
             <p><strong>رقم الدار:</strong> ${rec.houseNo} (${rec.sectorNo || 'غير محدد'})</p>
             <p><strong>اسم المستفيد:</strong> ${rec.ownerName} | هاتف: ${rec.phoneNo || '-'}</p>
             <p><strong>نوع التنفيذ:</strong> ${rec.executionType || 'غير محدد'} | المقاول: ${rec.contractorName || '-'}</p>
-            <p><strong>تاريخ الكشف المحدد:</strong> ${rec.inspectionDate || 'لم يحدد بعد (بانتظار مجيء المستفيد)'}</p>
-            <p><strong>موعد التسليم الـ 10 أيام:</strong> ${finalHandover}</p>
         `;
+
+        if (rec.executionType === 'تنفيذ مباشر') {
+            detailsHtml += `<p><strong>تاريخ الكشف المحدد:</strong> ${rec.inspectionDate || 'لم يحدد بعد (بانتظار مجيء المستفيد)'}</p>`;
+        }
+        detailsHtml += `<p><strong>موعد التسليم:</strong> ${finalHandover}</p>`;
+
+        details.innerHTML = detailsHtml;
 
         let html = "";
         if (rec.executionType === "تنفيذ مباشر" && !isPreCleaned && !rec.isCleaned) {
@@ -976,7 +993,6 @@
         }
     }
 
-    // التنفيذ المباشر: إرسال تفاصيل الدار والتواريخ كاملة عبر واتساب بعد إدخال تاريخ الكشف حصراً
     function setInspectionAndHandoverDate() {
         const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
         if (rec) {
@@ -995,7 +1011,7 @@
                             `🔍 *تاريخ الكشف المحدد:* ${rec.inspectionDate}\n` +
                             `⏳ *موعد التسليم النهائي (10 أيام):* ${rec.handoverDate}`;
                 
-                showTeamWhatsAppModal(msg, `تم تحديد الكشف وإكمال التنظيف للدار (${rec.houseNo}). اختر الشخص لإرسال التفاصيل مباشرة عبر واتساب بيتا:`);
+                showTeamWhatsAppModal(msg, `تم تحديد الكشف وإكمال التنظيف للدار (${rec.houseNo}). اختر الشخص لإرسال التفاصيل مباشرة عبر واتساب:`);
             }
         }
     }
@@ -1015,6 +1031,7 @@
         document.getElementById('modal-title').innerText = "إضافة دار جديد";
         document.getElementById('record-form').reset();
         document.getElementById('edit-id').value = "";
+        document.getElementById('arrivalDate').value = todayStr; // إعادة التعيين التلقائي لتاريخ اليوم
         document.getElementById('preCleanedAlertBox').style.display = 'none';
 
         populateContractorsDropdown();
@@ -1025,7 +1042,6 @@
     function closeAddModal() { document.getElementById('addRecordModal').style.display = 'none'; }
     function closeWhatsappNotifyModal() { document.getElementById('whatsappNotifyModal').style.display = 'none'; }
 
-    // دالة إنشاء أزرار الإرسال الفوري للأشخاص الأربعة عبر واتساب المباشر
     function showTeamWhatsAppModal(msgText, subtitleText) {
         const encodedMsg = encodeURIComponent(msgText);
         document.getElementById('whatsapp-notify-subtitle').innerText = subtitleText;
@@ -1034,7 +1050,6 @@
         container.innerHTML = "";
 
         targetTeam.forEach(member => {
-            // استخدام رابط whatsapp مباشر لفتح التطبيق دون متصفح
             const waUrl = `https://wa.me/${member.phone}?text=${encodedMsg}`;
             container.innerHTML += `
                 <a href="${waUrl}" target="_blank" class="wa-target-btn">
@@ -1059,6 +1074,7 @@
         document.getElementById('executionType').value = rec.executionType || "";
         document.getElementById('sectorNo').value = rec.sectorNo || "القطاع الأول";
         document.getElementById('ownerName').value = rec.ownerName;
+        document.getElementById('arrivalDate').value = rec.arrivalDate || todayStr;
 
         onExecutionTypeChange();
         if (rec.contractorName) document.getElementById('contractorName').value = rec.contractorName;
@@ -1076,6 +1092,7 @@
         const contractorName = document.getElementById('contractorName').value;
         const sectorNo = document.getElementById('sectorNo').value;
         const ownerName = document.getElementById('ownerName').value;
+        const arrivalDate = document.getElementById('arrivalDate').value;
 
         const isPreCleaned = preCleanedHouses.some(item => item.trim() === houseNo.trim());
 
@@ -1097,6 +1114,7 @@
                 item.contractorName = contractorName;
                 item.sectorNo = sectorNo;
                 item.ownerName = ownerName;
+                item.arrivalDate = arrivalDate;
                 item.cleaningStartDate = cleaningStartDate;
                 item.cleaningEndDate = cleaningEndDate;
                 item.contractorStartDate = contractorStartDate;
@@ -1106,7 +1124,7 @@
             houseRecords.push({
                 id: Date.now(),
                 houseNo, phoneNo, executionType, contractorName,
-                sectorNo, ownerName, arrivalDate: todayStr,
+                sectorNo, ownerName, arrivalDate,
                 cleaningStartDate, cleaningEndDate,
                 contractorStartDate, houseReadyDate,
                 inspectionDate: "", handoverDate: "",
@@ -1114,7 +1132,6 @@
                 notifications: [null, null, null]
             });
 
-            // دور المقاولين: إرسال كافة التفاصيل والتواريخ تلقائياً بمجرد إدخال الدار
             if (executionType === "تنفيذ مقاولين") {
                 const msg = `📋 *تفاصيل دار مقاولين جديدة - مجمع الأميرات 2*\n\n` +
                             `🏠 *رقم البلوك والدار:* ${houseNo}\n` +
@@ -1122,8 +1139,9 @@
                             `👤 *اسم المستفيد:* ${ownerName}\n` +
                             `📞 *رقم الهاتف:* ${phoneNo || 'غير محدد'}\n` +
                             `👷‍♂️ *المقاول المسؤول:* ${contractorName}\n` +
+                            `📅 *تاريخ الحضور:* ${arrivalDate}\n` +
                             `📅 *تاريخ عمل المقاول:* ${contractorStartDate}\n` +
-                            `⏳ *تاريخ الجهوزية والتسليم:* ${houseReadyDate}`;
+                            `⏳ *تاريخ الجهوزية والتسليم (10 أيام):* ${houseReadyDate}`;
                 
                 showTeamWhatsAppModal(msg, `تم حفظ دار المقاولين (${houseNo}) بنجاح. اختر الشخص لإرسال التفاصيل إليه عبر واتساب مباشرة:`);
             }
