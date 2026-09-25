@@ -367,7 +367,7 @@
     </div>
 </div>
 
-<!-- Modal لائحة المتابعة اليومية (تاريخ اليوم فقط) -->
+<!-- Modal لائحة المتابعة اليومية -->
 <div id="dailyChecklistModal" class="modal">
     <div class="modal-content" style="max-width: 800px;">
         <span class="close-btn" onclick="closeDailyChecklistModal()">&times;</span>
@@ -490,6 +490,20 @@
     </div>
 </div>
 
+<!-- Modal إشعار وإرسال واتساب لدور المقاولين فور الحفظ -->
+<div id="whatsappNotifyModal" class="modal">
+    <div class="modal-content" style="text-align: center;">
+        <span class="close-btn" onclick="closeWhatsappNotifyModal()">&times;</span>
+        <h3 style="margin-bottom: 15px; color: #10b981;">✅ تم حفظ دار المقاولين بنجاح!</h3>
+        <p style="color: var(--text-muted); margin-bottom: 20px; line-height: 1.6;" id="whatsapp-notify-text">
+            هل تريد إرسال تفاصيل الدار والتواريخ مباشرة عبر الواتساب؟
+        </p>
+        <a id="whatsapp-direct-link" href="#" target="_blank" class="btn-primary" style="background: #25d366; display: inline-block; text-decoration: none; padding: 14px 20px; font-size: 1.1rem; font-weight: 800;">
+            💬 إرسال التفاصيل عبر الواتساب الآن
+        </a>
+    </div>
+</div>
+
 <!-- Modal تحديث الموقف والإيعاز -->
 <div id="statusCheckModal" class="modal">
     <div class="modal-content">
@@ -585,9 +599,8 @@
         renderPreCleanedList();
         document.getElementById('preCleanedModal').style.display = 'flex';
     }
-    function closePreCleanedModal() {
-        document.getElementById('preCleanedModal').style.display = 'none';
-    }
+    function closePreCleanedModal() { document.getElementById('preCleanedModal').style.display = 'none'; }
+    
     function addBulkPreCleanedHouses() {
         const text = document.getElementById('bulkPreCleanedInput').value;
         if (!text.trim()) return;
@@ -623,7 +636,6 @@
         });
     }
 
-    // مطابقة تامة (حرفياً ورقمياً بدون تشابه جزئي)
     function checkPreCleanedMatch() {
         const houseInput = document.getElementById('houseNo').value.trim();
         const alertBox = document.getElementById('preCleanedAlertBox');
@@ -637,7 +649,6 @@
         onExecutionTypeChange();
     }
 
-    // لائحة المتابعة اليومية (مواعيد وتواريخ اليوم حصراً)
     function openDailyChecklistModal() {
         document.getElementById('modal-today-date').innerText = todayStr;
         const cleaningListDiv = document.getElementById('cleaning-checklist-list');
@@ -653,7 +664,6 @@
             const house = rec.houseNo || '';
             const isPreCleaned = preCleanedHouses.some(item => item.trim() === house.trim());
 
-            // تنظيف اليوم فقط
             if (rec.executionType === "تنفيذ مباشر" && !isPreCleaned && !rec.isCleaned && rec.cleaningEndDate === todayStr) {
                 cleaningCount++;
                 cleaningListDiv.innerHTML += `
@@ -663,7 +673,6 @@
                 `;
             }
 
-            // جاهزية أو تسليم اليوم فقط
             const targetDate = rec.handoverDate || rec.houseReadyDate || '';
             if (!rec.isReady && targetDate === todayStr) {
                 readinessCount++;
@@ -696,7 +705,6 @@
         }
 
         contractorGroup.classList.remove('hidden-field');
-        const arrival = document.getElementById('arrivalDate').value || todayStr;
         const houseInput = document.getElementById('houseNo').value.trim();
         const isPreCleaned = preCleanedHouses.some(item => item.trim() === houseInput);
 
@@ -705,15 +713,15 @@
                 directDates.classList.add('hidden-field');
             } else {
                 directDates.classList.remove('hidden-field');
-                document.getElementById('cleaningStartDate').value = addDays(arrival, 1);
-                document.getElementById('cleaningEndDate').value = addDays(arrival, 3);
+                document.getElementById('cleaningStartDate').value = addDays(todayStr, 1);
+                document.getElementById('cleaningEndDate').value = addDays(todayStr, 3);
             }
             contractorDates.classList.add('hidden-field');
         } else if (type === "تنفيذ مقاولين") {
             contractorDates.classList.remove('hidden-field');
             directDates.classList.add('hidden-field');
-            document.getElementById('contractorStartDate').value = addDays(arrival, 1);
-            document.getElementById('houseReadyDate').value = addDays(arrival, 11);
+            document.getElementById('contractorStartDate').value = addDays(todayStr, 1);
+            document.getElementById('houseReadyDate').value = addDays(todayStr, 11);
         }
     }
 
@@ -944,6 +952,7 @@
         }
     }
 
+    // هنا يتم إرسال رسالة الواتساب لتنفيذ المباشر حصراً بعد إدخال تاريخ الكشف والتأكد من إكمال النظافة
     function setInspectionAndHandoverDate() {
         const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
         if (rec) {
@@ -953,6 +962,22 @@
                 rec.handoverDate = addDays(inspDate, 10);
                 saveAndRefresh();
                 closeStatusModal();
+
+                // إشعار واتساب فوري لتنفيذ مباشر بعد تحديد الكشف
+                const msg = `📋 *تفاصيل كشف وتجهيز دار (تنفيذ مباشر) - مجمع الأميرات 2*\n\n` +
+                            `🏠 *رقم البلوك والدار:* ${rec.houseNo}\n` +
+                            `📍 *القطاع:* ${rec.sectorNo}\n` +
+                            `👤 *اسم المستفيد:* ${rec.ownerName}\n` +
+                            `📞 *رقم الهاتف:* ${rec.phoneNo || 'غير محدد'}\n` +
+                            `🔍 *تاريخ الكشف المحدد:* ${rec.inspectionDate}\n` +
+                            `⏳ *موعد التسليم النهائي (10 أيام):* ${rec.handoverDate}`;
+                
+                const encodedMsg = encodeURIComponent(msg);
+                const waUrl = rec.phoneNo ? `https://wa.me/${rec.phoneNo}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
+                
+                document.getElementById('whatsapp-direct-link').href = waUrl;
+                document.getElementById('whatsapp-notify-text').innerText = `تم تحديد الكشف وإكمال نظافة الدار (${rec.houseNo}). هل تريد إرسال تفاصيل الكشف والتسليم عبر الواتساب؟`;
+                document.getElementById('whatsappNotifyModal').style.display = 'flex';
             }
         }
     }
@@ -972,7 +997,6 @@
         document.getElementById('modal-title').innerText = "إضافة دار جديد";
         document.getElementById('record-form').reset();
         document.getElementById('edit-id').value = "";
-        document.getElementById('arrivalDate').value = todayStr;
         document.getElementById('preCleanedAlertBox').style.display = 'none';
 
         populateContractorsDropdown();
@@ -980,7 +1004,8 @@
         document.getElementById('addRecordModal').style.display = "flex";
     }
 
-    function closeAddModal() { document.getElementById('addRecordModal').style.display = "none"; }
+    function closeAddModal() { document.getElementById('addRecordModal').style.display = 'none'; }
+    function closeWhatsappNotifyModal() { document.getElementById('whatsappNotifyModal').style.display = 'none'; }
 
     function editRecord(id) {
         const rec = houseRecords.find(r => r.id === id);
@@ -994,7 +1019,6 @@
         document.getElementById('executionType').value = rec.executionType || "";
         document.getElementById('sectorNo').value = rec.sectorNo || "القطاع الأول";
         document.getElementById('ownerName').value = rec.ownerName;
-        document.getElementById('arrivalDate').value = rec.arrivalDate || todayStr;
 
         onExecutionTypeChange();
         if (rec.contractorName) document.getElementById('contractorName').value = rec.contractorName;
@@ -1012,7 +1036,6 @@
         const contractorName = document.getElementById('contractorName').value;
         const sectorNo = document.getElementById('sectorNo').value;
         const ownerName = document.getElementById('ownerName').value;
-        const arrivalDate = document.getElementById('arrivalDate').value;
 
         const isPreCleaned = preCleanedHouses.some(item => item.trim() === houseNo.trim());
 
@@ -1034,7 +1057,6 @@
                 item.contractorName = contractorName;
                 item.sectorNo = sectorNo;
                 item.ownerName = ownerName;
-                item.arrivalDate = arrivalDate;
                 item.cleaningStartDate = cleaningStartDate;
                 item.cleaningEndDate = cleaningEndDate;
                 item.contractorStartDate = contractorStartDate;
@@ -1044,13 +1066,32 @@
             houseRecords.push({
                 id: Date.now(),
                 houseNo, phoneNo, executionType, contractorName,
-                sectorNo, ownerName, arrivalDate,
+                sectorNo, ownerName, arrivalDate: todayStr,
                 cleaningStartDate, cleaningEndDate,
                 contractorStartDate, houseReadyDate,
                 inspectionDate: "", handoverDate: "",
                 isCleaned: isPreCleaned, isReady: false,
                 notifications: [null, null, null]
             });
+
+            // إذا كان نوع التنفيذ "تنفيذ مقاولين"، ترسل تفاصيل الدار والتواريخ فورا عند الحفظ
+            if (executionType === "تنفيذ مقاولين") {
+                const msg = `📋 *تفاصيل دار مقاولين جديدة - مجمع الأميرات 2*\n\n` +
+                            `🏠 *رقم البلوك والدار:* ${houseNo}\n` +
+                            `📍 *القطاع:* ${sectorNo}\n` +
+                            `👤 *اسم المستفيد:* ${ownerName}\n` +
+                            `📞 *رقم الهاتف:* ${phoneNo || 'غير محدد'}\n` +
+                            `👷‍♂️ *المقاول المسؤول:* ${contractorName}\n` +
+                            `📅 *تاريخ العمل:* ${contractorStartDate}\n` +
+                            `⏳ *تاريخ الجهوزية والتسليم:* ${houseReadyDate}`;
+                
+                const encodedMsg = encodeURIComponent(msg);
+                const waUrl = phoneNo ? `https://wa.me/${phoneNo}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
+                
+                document.getElementById('whatsapp-direct-link').href = waUrl;
+                document.getElementById('whatsapp-notify-text').innerText = `تم حفظ دار المقاولين (${houseNo}) بنجاح. هل تريد إرسال التفاصيل عبر الواتساب؟`;
+                document.getElementById('whatsappNotifyModal').style.display = 'flex';
+            }
         }
 
         saveAndRefresh();
