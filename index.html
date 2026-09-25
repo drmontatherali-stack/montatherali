@@ -28,12 +28,7 @@
             --status-contractor: #a855f7;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Cairo', sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
 
         body {
             background-color: var(--bg-primary);
@@ -43,11 +38,7 @@
             direction: rtl;
         }
 
-        .app-container {
-            width: 98%;
-            max-width: 1800px;
-            margin: 0 auto;
-        }
+        .app-container { width: 98%; max-width: 1800px; margin: 0 auto; }
 
         header {
             background: linear-gradient(135deg, #0b1120 0%, #171e38 100%);
@@ -63,22 +54,10 @@
             gap: 15px;
         }
 
-        header h1 {
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: #ffffff;
-        }
+        header h1 { font-size: 1.8rem; font-weight: 900; color: #ffffff; }
+        header h1 span { color: var(--primary-blue); }
 
-        header h1 span {
-            color: var(--primary-blue);
-        }
-
-        .header-info-box {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
+        .header-info-box { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 
         .designer-title-large {
             font-family: 'Outfit', 'Cairo', sans-serif;
@@ -93,13 +72,9 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            direction: ltr; /* لضمان ضبط اتجاه الحروف الإنجليزية تماماً */
+            direction: ltr;
         }
-
-        .designer-title-large strong {
-            color: #ffffff;
-            font-weight: 900;
-        }
+        .designer-title-large strong { color: #ffffff; font-weight: 900; }
 
         .date-badge {
             background: rgba(255, 255, 255, 0.05);
@@ -110,11 +85,7 @@
             color: var(--text-main);
             font-weight: 700;
         }
-
-        .date-badge span {
-            color: #38bdf8;
-            font-weight: 800;
-        }
+        .date-badge span { color: #38bdf8; font-weight: 800; }
 
         .sync-indicator {
             font-size: 0.85rem;
@@ -144,30 +115,15 @@
             transition: all 0.25s ease-in-out;
             cursor: pointer;
         }
-
         .metric-card:hover {
             transform: translateY(-4px);
             background-color: var(--bg-card-hover);
             border-color: var(--primary-blue);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
-
-        .metric-card .title {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        .metric-card .value {
-            font-size: 1.8rem;
-            font-weight: 900;
-        }
-
-        .metric-card.alert-card {
-            border-color: rgba(239, 68, 68, 0.5);
-            background: linear-gradient(135deg, #1e293b 0%, #2a1215 100%);
-        }
+        .metric-card .title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; }
+        .metric-card .value { font-size: 1.8rem; font-weight: 900; }
+        .metric-card.alert-card { border-color: rgba(239, 68, 68, 0.5); background: linear-gradient(135deg, #1e293b 0%, #2a1215 100%); }
 
         .filter-section {
             background-color: var(--bg-secondary);
@@ -182,18 +138,8 @@
             justify-content: space-between;
         }
 
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .filter-group label {
-            font-weight: 700;
-            color: var(--text-muted);
-            font-size: 0.88rem;
-        }
+        .filter-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .filter-group label { font-weight: 700; color: var(--text-muted); font-size: 0.88rem; }
 
         select, input[type="text"], input[type="date"] {
             background-color: var(--bg-primary);
@@ -204,7 +150,6 @@
             font-size: 0.9rem;
             outline: none;
         }
-
         select:focus, input:focus { border-color: var(--primary-blue); }
 
         .btn-daily-checklist {
@@ -216,7 +161,6 @@
             font-weight: 800;
             cursor: pointer;
         }
-
         .btn-precleaned-manage {
             background: linear-gradient(135deg, #8b5cf6, #6d28d9);
             color: #fff;
@@ -226,7 +170,6 @@
             font-weight: 800;
             cursor: pointer;
         }
-
         .btn-add {
             background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo));
             color: #fff;
@@ -245,63 +188,23 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: right;
-            white-space: nowrap;
-        }
-
-        thead {
-            background-color: #0b1120;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        th {
-            padding: 16px;
-            font-size: 0.88rem;
-            font-weight: 800;
-            color: var(--text-muted);
-        }
-
-        tbody tr {
-            border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s;
-            cursor: pointer;
-        }
-
+        table { width: 100%; border-collapse: collapse; text-align: right; white-space: nowrap; }
+        thead { background-color: #0b1120; border-bottom: 2px solid var(--border-color); }
+        th { padding: 16px; font-size: 0.88rem; font-weight: 800; color: var(--text-muted); }
+        tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; cursor: pointer; }
         tbody tr:hover { background-color: var(--bg-card); }
-
-        tbody tr.row-overdue-alert {
-            background-color: rgba(239, 68, 68, 0.12) !important;
-            border-right: 4px solid #ef4444 !important;
-        }
-
+        tbody tr.row-overdue-alert { background-color: rgba(239, 68, 68, 0.12) !important; border-right: 4px solid #ef4444 !important; }
         td { padding: 14px 16px; font-size: 0.88rem; }
 
-        .badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 800;
-        }
-
+        .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; }
         .badge-waiting { background-color: rgba(245, 158, 11, 0.15); color: var(--status-waiting); border: 1px solid var(--status-waiting); }
         .badge-overdue { background-color: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
         .badge-ready { background-color: rgba(16, 185, 129, 0.15); color: var(--status-ready); border: 1px solid var(--status-ready); }
         .badge-direct { background-color: rgba(6, 182, 212, 0.15); color: var(--status-direct); border: 1px solid var(--status-direct); }
         .badge-contractor { background-color: rgba(168, 85, 247, 0.15); color: var(--status-contractor); border: 1px solid var(--status-contractor); }
 
-        .whatsapp-icon {
-            color: #25d366;
-            font-size: 1.2rem;
-            text-decoration: none;
-            margin-left: 8px;
-            display: inline-block;
-        }
+        .whatsapp-icon { color: #25d366; font-size: 1.2rem; text-decoration: none; margin-left: 8px; display: inline-block; }
         .whatsapp-icon:hover { transform: scale(1.2); }
-
         .checkbox-container { display: inline-flex; gap: 5px; align-items: center; }
         .notif-box { width: 18px; height: 18px; cursor: pointer; }
 
@@ -315,7 +218,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .modal-content {
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
@@ -327,64 +229,33 @@
             overflow-y: auto;
             position: relative;
         }
-
-        .close-btn {
-            position: absolute;
-            top: 18px; left: 22px;
-            font-size: 1.6rem;
-            color: var(--text-muted);
-            cursor: pointer;
-        }
+        .close-btn { position: absolute; top: 18px; left: 22px; font-size: 1.6rem; color: var(--text-muted); cursor: pointer; }
         .close-btn:hover { color: #fff; }
 
-        .form-group {
-            margin-bottom: 16px;
-            text-align: right;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            color: var(--text-muted);
-            font-size: 0.88rem;
-            font-weight: 700;
-        }
-
-        .form-control {
-            width: 100%;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            color: #fff;
-            padding: 11px 14px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .btn-primary {
-            width: 100%;
-            background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo));
-            color: #fff;
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: 800;
-            cursor: pointer;
-        }
+        .form-group { margin-bottom: 16px; text-align: right; }
+        .form-group label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 0.88rem; font-weight: 700; }
+        .form-control { width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color); color: #fff; padding: 11px 14px; border-radius: 10px; font-size: 0.9rem; outline: none; }
+        .btn-primary { width: 100%; background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; }
 
         .hidden-field { display: none; }
         .action-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; margin: 0 4px; }
         .action-btn:hover { color: var(--primary-blue); }
         .action-btn.delete:hover { color: var(--status-overdue); }
 
-        .modal-action-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 15px;
-        }
+        .modal-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .btn-action-success { background: #10b981; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; }
         .btn-action-danger { background: #ef4444; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; }
+
+        .precleaned-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -397,7 +268,6 @@
         </div>
 
         <div class="header-info-box">
-            <!-- التوقيع الصحيح وغير المقلوب -->
             <div class="designer-title-large">
                 <span>✨</span> Design by: <strong>Montather Ali</strong>
             </div>
@@ -412,7 +282,7 @@
         </div>
     </header>
 
-    <!-- المستطيلات الإحصائية -->
+    <!-- البطاقات الإحصائية -->
     <div class="metrics-grid">
         <div class="metric-card" onclick="setFilterStatus('all')">
             <div class="title" style="color: #38bdf8;">كل الدور المسجلة</div>
@@ -443,7 +313,7 @@
     <!-- شريط الفرز والتحكم -->
     <div class="filter-section">
         <div class="filter-group">
-            <button class="btn-daily-checklist" onclick="setFilterStatus('daily_checklist')">
+            <button class="btn-daily-checklist" onclick="openDailyChecklistModal()">
                 📋 لائحة المتابعة اليومية
             </button>
             <button class="btn-precleaned-manage" onclick="openPreCleanedModal()">
@@ -501,20 +371,43 @@
     </div>
 </div>
 
-<!-- Modal إدارة الدور المنظفة مسبقاً -->
-<div id="preCleanedModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closePreCleanedModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #fff;">إدارة الدور المنظفة مسبقاً</h3>
-        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">
-            أدخل الدور (كل دار بسطر)، مثال:<br>القطاع الأول, بلوك A, دار 5
-        </p>
-        <textarea id="preCleanedInput" class="form-control" rows="6" placeholder="القطاع الأول, بلوك 3, دار 12&#10;القطاع الثاني, بلوك 1, دار 8"></textarea>
-        <button class="btn-primary" style="margin-top: 15px;" onclick="savePreCleanedHouses()">حفظ الدور المنظفة مسبقاً</button>
+<!-- Modal لائحة المتابعة اليومية (القائمتان المطلوبتان) -->
+<div id="dailyChecklistModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <span class="close-btn" onclick="closeDailyChecklistModal()">&times;</span>
+        <h3 style="margin-bottom: 20px; color: #fff; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">📋 لائحة المتابعة اليومية</h3>
+        
+        <div style="margin-bottom: 25px;">
+            <h4 style="color: #38bdf8; margin-bottom: 10px;">🧹 دور تحتاج متابعة تنظيفها (سجل البيوت والتواريخ):</h4>
+            <div id="cleaning-checklist-list" style="max-height: 200px; overflow-y: auto; background: var(--bg-primary); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);">
+            </div>
+        </div>
+
+        <div>
+            <h4 style="color: #a855f7; margin-bottom: 10px;">🏠 دور تحتاج متابعة جاهزيتها (سجل البيوت والتواريخ):</h4>
+            <div id="readiness-checklist-list" style="max-height: 200px; overflow-y: auto; background: var(--bg-primary); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);">
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Modal إضافة / تعديل دار جديد (بالترتيب الصحيح للحقول) -->
+<!-- Modal إدارة الدور المنظفة مسبقاً (سجل متكامل) -->
+<div id="preCleanedModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closePreCleanedModal()">&times;</span>
+        <h3 style="margin-bottom: 15px; color: #fff;">إدارة الدور المنظفة مسبقاً (سجل)</h3>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="text" id="newPreCleanedInput" class="form-control" placeholder="أدخل اسم/رقم الدار (مثل: القطاع الأول - دار 12)">
+            <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="addSinglePreCleanedHouse()">إضافة للسجل</button>
+        </div>
+
+        <div id="preCleanedListContainer" style="max-height: 300px; overflow-y: auto; background: var(--bg-primary); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);">
+        </div>
+    </div>
+</div>
+
+<!-- Modal إضافة / تعديل دار جديد -->
 <div id="addRecordModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeAddModal()">&times;</span>
@@ -540,7 +433,7 @@
             </div>
 
             <div id="preCleanedAlertBox" style="display:none; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; padding: 12px; border-radius: 10px; margin-bottom: 15px; color: #10b981; font-weight: 700;">
-                ✨ هذا الدار مدرج ضمن "الدور المنظفة مسبقاً"! تم تخطي مواعيد التنظيف.
+                ✨ هذا الدار مدرج ضمن "الدور المنظفة مسبقاً"! تم تخطي مواعيد التنظيف وإعطاؤه صفة نظيف مباشرة.
             </div>
 
             <div class="form-group">
@@ -691,19 +584,93 @@
         }
     }
 
+    // إدارة الدور المنظفة مسبقاً (كسجل مستقل ومتكامل)
     function openPreCleanedModal() {
-        document.getElementById('preCleanedInput').value = preCleanedHouses.join('\n');
+        renderPreCleanedList();
         document.getElementById('preCleanedModal').style.display = 'flex';
     }
     function closePreCleanedModal() {
         document.getElementById('preCleanedModal').style.display = 'none';
     }
-    function savePreCleanedHouses() {
-        const text = document.getElementById('preCleanedInput').value;
-        preCleanedHouses = text.split('\n').map(item => item.trim()).filter(item => item !== '');
+    function addSinglePreCleanedHouse() {
+        const input = document.getElementById('newPreCleanedInput');
+        const val = input.value.trim();
+        if (val) {
+            if (!preCleanedHouses.includes(val)) {
+                preCleanedHouses.push(val);
+                saveAndRefresh();
+                input.value = '';
+                renderPreCleanedList();
+            }
+        }
+    }
+    function removePreCleanedHouse(index) {
+        preCleanedHouses.splice(index, 1);
         saveAndRefresh();
-        closePreCleanedModal();
-        alert("تم حفظ الدور المنظفة مسبقاً بنجاح!");
+        renderPreCleanedList();
+    }
+    function renderPreCleanedList() {
+        const container = document.getElementById('preCleanedListContainer');
+        container.innerHTML = "";
+        if (preCleanedHouses.length === 0) {
+            container.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>لا توجد دور مسجلة ضمن الدور المنظفة مسبقاً حالياً.</p>";
+            return;
+        }
+        preCleanedHouses.forEach((item, idx) => {
+            container.innerHTML += `
+                <div class="precleaned-item">
+                    <span>🏠 ${item}</span>
+                    <button class="action-btn delete" onclick="removePreCleanedHouse(${idx})" title="حذف">🗑️ حذف</button>
+                </div>
+            `;
+        });
+    }
+
+    // إدارة لائحة المتابعة اليومية (المستطيل والقائمتان)
+    function openDailyChecklistModal() {
+        const cleaningListDiv = document.getElementById('cleaning-checklist-list');
+        const readinessListDiv = document.getElementById('readiness-checklist-list');
+        
+        cleaningListDiv.innerHTML = "";
+        readinessListDiv.innerHTML = "";
+
+        let cleaningCount = 0;
+        let readinessCount = 0;
+
+        houseRecords.forEach(rec => {
+            const sector = rec.sectorNo || '';
+            const house = rec.houseNo || '';
+            const isPreCleaned = preCleanedHouses.some(item => item.includes(sector) && item.includes(house));
+
+            // دور تحتاج متابعة تنظيفها (تنفيذ مباشر وغير مكتملة أو تجاوزت)
+            if (rec.executionType === "تنفيذ مباشر" && !isPreCleaned && !rec.isCleaned) {
+                cleaningCount++;
+                cleaningListDiv.innerHTML += `
+                    <div style="padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem;">
+                        📍 القطاع: <strong>${rec.sectorNo}</strong> | الدار: <strong>${rec.houseNo}</strong> | المستفيد: ${rec.ownerName} | موعد التنظيف: <span style="color:#f59e0b;">${rec.cleaningEndDate || 'غير محدد'}</span>
+                    </div>
+                `;
+            }
+
+            // دور تحتاج متابعة جاهزيتها (تسليم أو 10 أيام أو مقاولين)
+            if (!rec.isReady) {
+                readinessCount++;
+                const targetDate = rec.handoverDate || rec.houseReadyDate || 'غير محدد';
+                readinessListDiv.innerHTML += `
+                    <div style="padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem;">
+                        📍 القطاع: <strong>${rec.sectorNo}</strong> | الدار: <strong>${rec.houseNo}</strong> | المستفيد: ${rec.ownerName} | موعد الجاهزية/التسليم: <span style="color:#38bdf8;">${targetDate}</span>
+                    </div>
+                `;
+            }
+        });
+
+        if (cleaningCount === 0) cleaningListDiv.innerHTML = "<p style='color:var(--text-muted);'>لا توجد دور تحتاج متابعة تنظيف حالياً.</p>";
+        if (readinessCount === 0) readinessListDiv.innerHTML = "<p style='color:var(--text-muted);'>لا توجد دور تحتاج متابعة جاهزية حالياً.</p>";
+
+        document.getElementById('dailyChecklistModal').style.display = 'flex';
+    }
+    function closeDailyChecklistModal() {
+        document.getElementById('dailyChecklistModal').style.display = 'none';
     }
 
     function checkPreCleanedMatch() {
@@ -815,7 +782,7 @@
         const searchVal = document.getElementById('search-input').value.toLowerCase();
         const execFilter = document.getElementById('execution-filter').value;
         const sectorFilter = document.getElementById('sector-filter').value;
-        const statusFilter = document.getElementById('status-filter').value;
+        const statusFilter = document.getElementById('status-filter').value || 'all';
 
         if (!tbody) return;
         tbody.innerHTML = "";
@@ -841,9 +808,7 @@
             const matchesSector = sectorFilter === "all" || rec.sectorNo === sectorFilter;
 
             let matchesStatus = true;
-            if (statusFilter === "daily_checklist") {
-                matchesStatus = (isTodayCleaning || logic.isCleaningOverdue || logic.isHandoverOverdue);
-            } else if (statusFilter === "today_cleaning") matchesStatus = isTodayCleaning;
+            if (statusFilter === "today_cleaning") matchesStatus = isTodayCleaning;
             else if (statusFilter === "completed_cleaning") matchesStatus = (rec.isCleaned || isPreCleaned);
             else if (statusFilter === "uncompleted_cleaning") matchesStatus = logic.isCleaningOverdue;
             else if (statusFilter === "ready_all") matchesStatus = rec.isReady;
@@ -909,7 +874,7 @@
     }
 
     function setFilterStatus(statusVal) {
-        document.getElementById('status-filter').value = statusVal;
+        window.currentStatusFilter = statusVal;
         renderTable();
     }
 
@@ -964,7 +929,7 @@
             html += `
                 <div style="background: rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-bottom:15px;">
                     <p style="font-weight:800; color:#fff; margin-bottom:10px;">حضور المستفيد وإعطاء موعد الكشف:</p>
-                    <button class="btn-primary" onclick="setInspectionAndHandoverDate()">حدد موعد الكشف الآن (لتحساب 10 أيام للتسليم)</button>
+                    <button class="btn-primary" onclick="setInspectionAndHandoverDate()">حدد موعد الكشف الآن (لتشمل 10 أيام للتسليم)</button>
                 </div>
             `;
         }
