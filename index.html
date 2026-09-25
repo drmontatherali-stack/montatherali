@@ -93,6 +93,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            direction: ltr; /* لضمان ضبط اتجاه الحروف الإنجليزية تماماً */
         }
 
         .designer-title-large strong {
@@ -214,7 +215,6 @@
             border-radius: 10px;
             font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         }
 
         .btn-precleaned-manage {
@@ -235,7 +235,6 @@
             border-radius: 10px;
             font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
         }
 
         .table-container {
@@ -299,21 +298,12 @@
             font-size: 1.2rem;
             text-decoration: none;
             margin-left: 8px;
-            transition: transform 0.2s;
             display: inline-block;
         }
         .whatsapp-icon:hover { transform: scale(1.2); }
 
-        .checkbox-container {
-            display: inline-flex;
-            gap: 5px;
-            align-items: center;
-        }
-        .notif-box {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
+        .checkbox-container { display: inline-flex; gap: 5px; align-items: center; }
+        .notif-box { width: 18px; height: 18px; cursor: pointer; }
 
         .modal {
             display: none;
@@ -407,8 +397,9 @@
         </div>
 
         <div class="header-info-box">
+            <!-- التوقيع الصحيح وغير المقلوب -->
             <div class="designer-title-large">
-                <span>✨</span> Design by <strong>Montather Ali</strong>
+                <span>✨</span> Design by: <strong>Montather Ali</strong>
             </div>
 
             <div class="date-badge">
@@ -421,7 +412,7 @@
         </div>
     </header>
 
-    <!-- المستطيلات الإحصائية المحدثة -->
+    <!-- المستطيلات الإحصائية -->
     <div class="metrics-grid">
         <div class="metric-card" onclick="setFilterStatus('all')">
             <div class="title" style="color: #38bdf8;">كل الدور المسجلة</div>
@@ -510,20 +501,20 @@
     </div>
 </div>
 
-<!-- Modal إضافة دور منظفة مسبقاً دفعة واحدة -->
+<!-- Modal إدارة الدور المنظفة مسبقاً -->
 <div id="preCleanedModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closePreCleanedModal()">&times;</span>
         <h3 style="margin-bottom: 15px; color: #fff;">إدارة الدور المنظفة مسبقاً</h3>
         <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">
-            أدخل الدور (كل دار بسطر أو مفصولة بفواصل)، مثال:<br>القطاع الأول, بلوك A, دار 5
+            أدخل الدور (كل دار بسطر)، مثال:<br>القطاع الأول, بلوك A, دار 5
         </p>
         <textarea id="preCleanedInput" class="form-control" rows="6" placeholder="القطاع الأول, بلوك 3, دار 12&#10;القطاع الثاني, بلوك 1, دار 8"></textarea>
         <button class="btn-primary" style="margin-top: 15px;" onclick="savePreCleanedHouses()">حفظ الدور المنظفة مسبقاً</button>
     </div>
 </div>
 
-<!-- Modal إضافة / تعديل دار جديد -->
+<!-- Modal إضافة / تعديل دار جديد (بالترتيب الصحيح للحقول) -->
 <div id="addRecordModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeAddModal()">&times;</span>
@@ -544,7 +535,7 @@
             </div>
 
             <div class="form-group">
-                <label>رقم الدار (أو البلوك ورقم الدار)</label>
+                <label>رقم الدار</label>
                 <input type="text" id="houseNo" class="form-control" required placeholder="مثال: بلوك A - دار 12 أو 12" oninput="checkPreCleanedMatch()">
             </div>
 
@@ -671,13 +662,16 @@
 
     function populateContractorsDropdown() {
         const select = document.getElementById('contractorName');
-        const filterSelect = document.getElementById('contractor-filter');
         if (!select) return;
+        const currentVal = select.value;
         select.innerHTML = "";
         contractorsList.forEach(c => {
             select.innerHTML += `<option value="${c}">${c}</option>`;
         });
         select.innerHTML += `<option value="ADD_NEW">+ إضافة مقاول جديد</option>`;
+        if (currentVal && contractorsList.includes(currentVal)) {
+            select.value = currentVal;
+        }
     }
 
     function checkNewContractorOption(selectElement) {
@@ -723,6 +717,7 @@
         } else {
             alertBox.style.display = 'none';
         }
+        onExecutionTypeChange();
     }
 
     function onExecutionTypeChange() {
@@ -869,7 +864,6 @@
                 const endWorkDate = isPreCleaned ? '-' : (rec.executionType === 'تنفيذ مباشر' ? rec.cleaningEndDate : rec.houseReadyDate);
                 const finalHandover = rec.handoverDate || (rec.executionType === 'تنفيذ مقاولين' ? rec.houseReadyDate : '-');
 
-                // روابط وإعدادات الواتساب والمربعات الثلاثة
                 const phone = rec.phoneNo || '';
                 const waText = encodeURIComponent(`مرحباً بالمستفيد المحترم ${rec.ownerName}، نبلغكم بجهوزية الدار رقم ${rec.houseNo} في مجمع الأميرات 2.`);
                 const waLink = phone ? `https://wa.me/${phone}?text=${waText}` : `https://wa.me/?text=${waText}`;
@@ -992,7 +986,7 @@
     function markCleaningCompletedWithoutInspection() {
         const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
         if (rec) {
-            rec.isCleaned = true; // تحولت حالته إلى نظيف وبانتظار المستفيد دون إجبار موعد الكشف
+            rec.isCleaned = true;
             saveAndRefresh();
             closeStatusModal();
         }
