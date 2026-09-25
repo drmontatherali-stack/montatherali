@@ -170,11 +170,12 @@
         select:focus, input:focus { border-color: var(--primary-blue); }
 
         .btn-action-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-        .btn-daily-checklist { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; border: none; padding: 11px 16px; border-radius: 10px; font-weight: 800; cursor: pointer; }
-        .btn-precleaned-manage { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff; border: none; padding: 11px 16px; border-radius: 10px; font-weight: 800; cursor: pointer; }
-        .btn-contractors-score { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #fff; border: none; padding: 11px 16px; border-radius: 10px; font-weight: 800; cursor: pointer; }
-        .btn-whatsapp-daily { background: #25d366; color: #fff; border: none; padding: 11px 16px; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        .btn-pdf-export { background: #f59e0b; color: #fff; border: none; padding: 11px 16px; border-radius: 10px; font-weight: 800; cursor: pointer; }
+        .btn-daily-checklist { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; border: none; padding: 11px 14px; border-radius: 10px; font-weight: 800; cursor: pointer; }
+        .btn-precleaned-manage { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff; border: none; padding: 11px 14px; border-radius: 10px; font-weight: 800; cursor: pointer; }
+        .btn-contractors-score { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #fff; border: none; padding: 11px 14px; border-radius: 10px; font-weight: 800; cursor: pointer; }
+        .btn-calendar-view { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none; padding: 11px 14px; border-radius: 10px; font-weight: 800; cursor: pointer; }
+        .btn-whatsapp-daily { background: #25d366; color: #fff; border: none; padding: 11px 14px; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .btn-pdf-export { background: #64748b; color: #fff; border: none; padding: 11px 14px; border-radius: 10px; font-weight: 800; cursor: pointer; }
         .btn-add { background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: none; padding: 11px 24px; border-radius: 10px; font-weight: 800; cursor: pointer; }
 
         .table-container {
@@ -293,6 +294,9 @@
             .table-container { display: none; }
             .mobile-card-item { display: block; }
         }
+
+        /* لوحة التقويم والتوقيع */
+        .signature-pad { border: 2px dashed var(--border-color); background: var(--bg-primary); width: 100%; height: 150px; border-radius: 10px; cursor: crosshair; }
     </style>
 </head>
 <body>
@@ -301,7 +305,7 @@
     <header>
         <div>
             <h1><span>مجمع الأميرات 2</span> - مكتب التسليم الفني</h1>
-            <small style="color: var(--text-muted); font-size: 0.88rem;">النظام الهندسي المثالي والأتمتة الذكية الشاملة</small>
+            <small style="color: var(--text-muted); font-size: 0.88rem;">المنصة الهندسية المتكاملة والذكية الشاملة</small>
         </div>
 
         <div class="header-info-box">
@@ -359,12 +363,13 @@
                 <button class="btn-daily-checklist" onclick="openDailyChecklistModal()">📋 مواعيد اليوم</button>
                 <button class="btn-precleaned-manage" onclick="openPreCleanedModal()">🏠 المنظفة مسبقاً</button>
                 <button class="btn-contractors-score" onclick="openContractorScorecardModal()">📊 أداء المقاولين</button>
+                <button class="btn-calendar-view" onclick="openCalendarModal()">📅 التقويم الهندسي</button>
                 <button class="btn-whatsapp-daily" onclick="sendDailySummaryWhatsApp()">💬 تقرير اليوم الشامل</button>
                 <button class="btn-pdf-export" onclick="exportToPDF()">📄 تصدير PDF</button>
             </div>
 
-            <label>بحث:</label>
-            <input type="text" id="search-input" placeholder="رقم الدار أو اسم المستفيد..." oninput="renderTable()">
+            <label>البحث الذكي:</label>
+            <input type="text" id="search-input" placeholder="ابحث برقم الدار، الاسم، أو كلمة (متأخر، جاهز)..." oninput="renderTable()">
             
             <label>نوع التنفيذ:</label>
             <select id="execution-filter" onchange="renderTable()">
@@ -418,6 +423,14 @@
 </div>
 
 <!-- Modals -->
+<div id="calendarModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <span class="close-btn" onclick="closeCalendarModal()">&times;</span>
+        <h3 style="margin-bottom: 20px; color: #fff;">📅 التقويم الهندسي التفاعلي (المواعيد والمهام)</h3>
+        <div id="calendar-view-container" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; max-height: 400px; overflow-y: auto;"></div>
+    </div>
+</div>
+
 <div id="contractorScorecardModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeContractorScorecardModal()">&times;</span>
@@ -440,11 +453,11 @@
         <h3 style="margin-bottom: 20px; color: #fff; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">📋 مواعيد وتواريخ اليوم: <span id="modal-today-date" style="color:#38bdf8;"></span></h3>
         <div style="margin-bottom: 25px;">
             <h4 style="color: #38bdf8; margin-bottom: 10px;">🧹 دور موعد تنظيفها يصادف اليوم:</h4>
-            <div id="cleaning-checklist-list" style="max-height: 200px; overflow-y: auto; background: var(--bg-primary); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);"></div>
+            <div id="cleaning-checklist-list" style="max-height: 200px; overflow-y: auto; background: var(--bg-primary); padding: 12px; border-radius: 10px;"></div>
         </div>
         <div>
             <h4 style="color: #a855f7; margin-bottom: 10px;">🏠 دور موعد جاهزيتها أو تسليمها يصادف اليوم:</h4>
-            <div id="readiness-checklist-list" style="max-height: 200px; overflow-y: auto; background: var(--bg-primary); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);"></div>
+            <div id="readiness-checklist-list" style="max-height: 200px; overflow-y: auto; background: var(--bg-primary); padding: 12px; border-radius: 10px;"></div>
         </div>
     </div>
 </div>
@@ -472,7 +485,7 @@
                 <input type="text" id="houseNo" class="form-control" required placeholder="مثال: A1.1" oninput="checkPreCleanedMatch()">
             </div>
             <div id="preCleanedAlertBox" style="display:none; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; padding: 12px; border-radius: 10px; margin-bottom: 15px; color: #10b981; font-weight: 700;">
-                ✨ هذا الدار مطابق تماماً ضمن "الدور المنظفة مسبقاً"! تم تعيين حالته "نظيف" مباشرة وتخطي تواريخ التنظيف.
+                ✨ هذا الدار مطابق تماماً ضمن "الدور المنظفة مسبقاً"! تم تعيين حالته "نظيف" مباشرة.
             </div>
             <div class="form-group">
                 <label>رقم الهاتف</label>
@@ -522,6 +535,20 @@
     </div>
 </div>
 
+<!-- Modal التوقيع الإلكتروني المحترف -->
+<div id="signatureModal" class="modal">
+    <div class="modal-content" style="max-width: 500px; text-align:center;">
+        <span class="close-btn" onclick="closeSignatureModal()">&times;</span>
+        <h3 style="margin-bottom: 15px; color: #fff;">✍️ التوقيع الإلكتروني لمحضر الاستلام</h3>
+        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:12px;">وقّع بالإصبع أو باستخدام الماوس داخل المربع أدناه:</p>
+        <canvas id="sigCanvas" class="signature-pad"></canvas>
+        <div style="margin-top: 15px; display:flex; gap:10px;">
+            <button class="btn-action-danger" style="flex:1;" onclick="clearSignature()">مسح التوقيع</button>
+            <button class="btn-action-success" style="flex:1;" onclick="saveSignature()">اعتماد وحفظ التوقيع</button>
+        </div>
+    </div>
+</div>
+
 <div id="whatsappNotifyModal" class="modal">
     <div class="modal-content" style="text-align: center;">
         <span class="close-btn" onclick="closeWhatsappNotifyModal()">&times;</span>
@@ -543,8 +570,10 @@
 <div id="imagePreviewModal" class="modal">
     <div class="modal-content" style="text-align:center;">
         <span class="close-btn" onclick="closeImageModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #fff;">صورة الملاحظات والتقرير</h3>
-        <img id="previewImgElement" src="" alt="صورة الملاحظات" style="max-width: 100%; max-height: 70vh; border-radius: 10px;">
+        <h3 style="margin-bottom: 15px; color: #fff;">صورة الملاحظات والتوقيع</h3>
+        <img id="previewImgElement" src="" alt="صورة الملاحظات" style="max-width: 100%; max-height: 70vh; border-radius: 10px; margin-bottom:15px;">
+        <br>
+        <button class="btn-primary" onclick="openSignatureModalForCurrent()">✍️ إضافة أو تعديل التوقيع الرقمي</button>
     </div>
 </div>
 
@@ -581,6 +610,7 @@
     let preCleanedHouses = JSON.parse(localStorage.getItem('preCleanedHouses')) || [];
     let houseRecords = JSON.parse(localStorage.getItem('houseRecords')) || [];
     let activeRecordIdForCamera = null;
+    let activeRecordIdForSig = null;
 
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('current-date-display').innerText = todayStr;
@@ -595,8 +625,34 @@
             if (data.contractors) contractorsList = data.contractors;
             if (data.preCleaned) preCleanedHouses = data.preCleaned;
             saveLocalAndRender();
+            checkPushNotifications();
         }
     });
+
+    // ** إشعارات المتصفح المنبثقة الذكية **
+    function checkPushNotifications() {
+        if (!("Notification" in window)) return;
+        if (Notification.permission === "granted") {
+            triggerAlerts();
+        } else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") triggerAlerts();
+            });
+        }
+    }
+    function triggerAlerts() {
+        let overdueCount = 0;
+        houseRecords.forEach(r => {
+            const target = r.secondHandoverDate || r.handoverDate || r.houseReadyDate || '';
+            if (target && target < todayStr && !r.isReady) overdueCount++;
+        });
+        if (overdueCount > 0) {
+            new Notification("مجمع الأميرات 2 - تنبيه فني عاجل 🚨", {
+                body: `توجد عدد (${overdueCount}) دار متجاوزة لموعد التسليم النهائي وتتطلب اتخاذ إجراء فوري!`,
+                icon: "https://cdn-icons-png.flaticon.com/512/564/564619.png"
+            });
+        }
+    }
 
     function addDays(dateStr, days) {
         if (!dateStr) return "";
@@ -625,6 +681,80 @@
                 selectElement.value = trimmed;
             } else { selectElement.selectedIndex = 0; }
         }
+    }
+
+    // ** التقويم الهندسي التفاعلي الجديد **
+    function openCalendarModal() {
+        const container = document.getElementById('calendar-view-container');
+        container.innerHTML = "";
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            let dayHouses = [];
+            houseRecords.forEach(r => {
+                const t = r.secondHandoverDate || r.handoverDate || r.houseReadyDate || r.cleaningEndDate || '';
+                if (t === dStr) dayHouses.push(r.houseNo);
+            });
+
+            const box = document.createElement('div');
+            box.style.background = dayHouses.length > 0 ? 'rgba(56, 189, 248, 0.15)' : 'var(--bg-primary)';
+            box.style.border = '1px solid var(--border-color)';
+            box.style.padding = '8px';
+            box.style.borderRadius = '8px';
+            box.style.minHeight = '70px';
+            box.innerHTML = `
+                <div style="font-weight:800; color:${dStr === todayStr ? '#38bdf8' : '#fff'}; margin-bottom:4px;">${i}</div>
+                <div style="font-size:0.75rem; color:#f59e0b; line-height:1.3;">${dayHouses.join(', ')}</div>
+            `;
+            container.appendChild(box);
+        }
+        document.getElementById('calendarModal').style.display = 'flex';
+    }
+    function closeCalendarModal() { document.getElementById('calendarModal').style.display = 'none'; }
+
+    // ** التوقيع الإلكتروني **
+    let canvas, ctx, drawing = false;
+    function initCanvas() {
+        canvas = document.getElementById('sigCanvas');
+        if (!canvas) return;
+        ctx = canvas.getContext('2d');
+        canvas.width = canvas.parentElement.clientWidth - 40;
+        canvas.height = 150;
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+
+        canvas.onmousedown = (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
+        canvas.onmousemove = (e) => { if (!drawing) return; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); };
+        canvas.onmouseup = () => { drawing = false; };
+        canvas.ontouchstart = (e) => { drawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault(); };
+        canvas.ontouchmove = (e) => { if (!drawing) return; const rect = canvas.getBoundingClientRect(); ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); ctx.stroke(); e.preventDefault(); };
+        canvas.ontouchend = () => { drawing = false; };
+    }
+    function openSignatureModal(id) {
+        activeRecordIdForSig = id;
+        document.getElementById('signatureModal').style.display = 'flex';
+        setTimeout(initCanvas, 100);
+    }
+    function openSignatureModalForCurrent() {
+        closeImageModal();
+        openSignatureModal(activeRecordIdForCamera);
+    }
+    function closeSignatureModal() { document.getElementById('signatureModal').style.display = 'none'; }
+    function clearSignature() { if(ctx) ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    function saveSignature() {
+        if (!canvas) return;
+        const dataUrl = canvas.toDataURL();
+        const rec = houseRecords.find(r => r.id === activeRecordIdForSig);
+        if (rec) {
+            rec.signatureImg = dataUrl;
+            saveAndRefresh();
+            alert("✅ تم اعتماد وحفظ التوقيع الرقمي بنجاح!");
+        }
+        closeSignatureModal();
     }
 
     function openPreCleanedModal() { renderPreCleanedList(); document.getElementById('preCleanedModal').style.display = 'flex'; }
@@ -725,26 +855,22 @@
         if (rec.inspectionDate) html += `<p>🔍 <strong>تاريخ الكشف:</strong> ${rec.inspectionDate}</p>`;
         if (rec.handoverDate) html += `<p>⏱️ <strong>موعد التسليم (10 أيام):</strong> ${rec.handoverDate}</p>`;
         if (rec.secondHandoverDate) html += `<p style="color:#f59e0b;">🔄 <strong>موعد التسليم الثاني:</strong> ${rec.secondHandoverDate} (السبب: ${rec.notReadyReason})</p>`;
+        if (rec.signatureImg) html += `<p style="color:#10b981;">✍️ <strong>يوجد توقيع رقمي معتمد</strong></p>`;
         document.getElementById('timeline-content-box').innerHTML = html;
         document.getElementById('timelineModal').style.display = 'flex';
     }
     function closeTimelineModal() { document.getElementById('timelineModal').style.display = 'none'; }
 
-    // ** التحديث الجذري لتقرير الواتساب الشامل: سرد تفصيلي لأرقام الدور وأسمائها والقطاعات **
     function sendDailySummaryWhatsApp() {
         let totalCount = houseRecords.length;
         let readyCount = 0;
-        
         let uncompletedCleanList = [];
         let overdueHandoverList = [];
 
         houseRecords.forEach(rec => {
             const logic = calculateRecordStatus(rec);
             if (rec.isReady) readyCount++;
-
-            if (logic.isCleaningOverdue) {
-                uncompletedCleanList.push(`• دار (${rec.houseNo}) - ${rec.sectorNo} - المستفيد: ${rec.ownerName}`);
-            }
+            if (logic.isCleaningOverdue) uncompletedCleanList.push(`• دار (${rec.houseNo}) - ${rec.sectorNo} - المستفيد: ${rec.ownerName}`);
             if (logic.isHandoverOverdue) {
                 const target = rec.secondHandoverDate || rec.handoverDate || rec.houseReadyDate || '-';
                 overdueHandoverList.push(`• دار (${rec.houseNo}) - ${rec.sectorNo} - المستفيد: ${rec.ownerName} (موعده: ${target})`);
@@ -756,18 +882,8 @@
                       `🏠 إجمالي الدور المسجلة: ${totalCount}\n` +
                       `✅ الدور الجاهزة والمنجزة: ${readyCount}\n\n`;
 
-        if (uncompletedCleanList.length > 0) {
-            msgText += `⚠️ *دور تجاوزت موعد التنظيف (${uncompletedCleanList.length}):*\n` + uncompletedCleanList.join('\n') + `\n\n`;
-        } else {
-            msgText += `🧹 *دور تجاوزت موعد التنظيف:* لا توجد.\n\n`;
-        }
-
-        if (overdueHandoverList.length > 0) {
-            msgText += `🚨 *دور تجاوزت موعد التسليم الـ 10 أيام (${overdueHandoverList.length}):*\n` + overdueHandoverList.join('\n') + `\n\n`;
-        } else {
-            msgText += `🚨 *دور تجاوزت موعد التسليم:* لا توجد.\n\n`;
-        }
-
+        if (uncompletedCleanList.length > 0) msgText += `⚠️ *دور تجاوزت موعد التنظيف (${uncompletedCleanList.length}):*\n` + uncompletedCleanList.join('\n') + `\n\n`;
+        if (overdueHandoverList.length > 0) msgText += `🚨 *دور تجاوزت موعد التسليم الـ 10 أيام (${overdueHandoverList.length}):*\n` + overdueHandoverList.join('\n') + `\n\n`;
         msgText += `_صادر عن مكتب التسليم الفني_`;
 
         window.open(`https://wa.me/?text=${encodeURIComponent(msgText)}`, '_blank');
@@ -874,7 +990,7 @@
     function renderTable() {
         const tbody = document.getElementById('table-body');
         const cardsContainer = document.getElementById('mobile-cards-container');
-        const searchVal = document.getElementById('search-input').value.toLowerCase();
+        const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
         const execFilter = document.getElementById('execution-filter').value;
         const sectorFilter = document.getElementById('sector-filter').value;
         const statusFilter = window.currentStatusFilter || 'all';
@@ -900,7 +1016,25 @@
             if (rec.isReady) cReadyAll++;
             if (logic.isHandoverOverdue) cNotReadyOverdue++;
 
-            const matchesSearch = rec.houseNo.toLowerCase().includes(searchVal) || rec.ownerName.toLowerCase().includes(searchVal);
+            // ** محرك البحث الذكي بالكلمات الحرة **
+            let matchesSearch = true;
+            if (searchVal !== "") {
+                if (searchVal === "متأخر" || searchVal === "عبرت") {
+                    matchesSearch = (logic.isCleaningOverdue || logic.isHandoverOverdue);
+                } else if (searchVal === "جاهز") {
+                    matchesSearch = rec.isReady;
+                } else if (searchVal === "مباشر") {
+                    matchesSearch = rec.executionType === "تنفيذ مباشر";
+                } else if (searchVal === "مقاولين") {
+                    matchesSearch = rec.executionType === "تنفيذ مقاولين";
+                } else {
+                    matchesSearch = rec.houseNo.toLowerCase().includes(searchVal) || 
+                                    rec.ownerName.toLowerCase().includes(searchVal) || 
+                                    (rec.contractorName && rec.contractorName.toLowerCase().includes(searchVal)) ||
+                                    (rec.sectorNo && rec.sectorNo.toLowerCase().includes(searchVal));
+                }
+            }
+
             const matchesExec = execFilter === "all" || rec.executionType === execFilter;
             const matchesSector = sectorFilter === "all" || rec.sectorNo === sectorFilter;
 
@@ -1050,6 +1184,8 @@
         if (val === true) {
             rec.isReady = true; rec.secondHandoverDate = ""; rec.notReadyReason = "";
             saveAndRefresh(); closeStatusModal();
+            // طلب التوقيع الرقمي عند الجاهزية والاستلام
+            openSignatureModal(rec.id);
         } else {
             const secondDate = prompt("أدخل موعد التسليم الثاني الجديد:", addDays(todayStr, 5));
             if (secondDate) {
@@ -1143,7 +1279,7 @@
                 id: Date.now(), houseNo, phoneNo, executionType, contractorName,
                 sectorNo, ownerName, arrivalDate, cleaningStartDate, cleaningEndDate,
                 contractorStartDate, houseReadyDate, inspectionDate: "", handoverDate: "",
-                secondHandoverDate: "", notReadyReason: "", noteImage: "",
+                secondHandoverDate: "", notReadyReason: "", noteImage: "", signatureImg: "",
                 isCleaned: isPreCleaned, isReady: false, notifications: [null, null, null]
             });
         }
