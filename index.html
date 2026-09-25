@@ -1138,30 +1138,52 @@
     }
     function closeTimelineModal() { document.getElementById('timelineModal').style.display = 'none'; }
 
+    // تعديل الدالة لتكوين التقرير اليومي المعتمد على التواريخ والأعداد والأرقام بدقة
     function sendDailySummaryWhatsApp() {
-        let totalCount = houseRecords.length;
-        let readyCount = 0;
-        let uncompletedCleanList = [];
-        let overdueHandoverList = [];
+        let allHouses = [];
+        let cleanedHouses = [];
+        let uncleanedHouses = [];
+        let readyHouses = [];
+        let notReadyHouses = [];
 
         houseRecords.forEach(rec => {
-            const logic = calculateRecordStatus(rec);
-            if (rec.isReady) readyCount++;
-            if (logic.isCleaningOverdue) uncompletedCleanList.push(`• دار (${rec.houseNo}) - ${rec.sectorNo} - المستفيد: ${rec.ownerName}`);
-            if (logic.isHandoverOverdue) {
-                const target = rec.secondHandoverDate || rec.handoverDate || rec.houseReadyDate || '-';
-                overdueHandoverList.push(`• دار (${rec.houseNo}) - ${rec.sectorNo} - المستفيد: ${rec.ownerName} (موعده: ${target})`);
+            const houseNum = rec.houseNo || '-';
+            allHouses.push(houseNum);
+
+            const isPreCleaned = preCleanedHouses.some(item => item.trim() === houseNum.trim());
+            const isClean = rec.isCleaned || isPreCleaned;
+
+            if (isClean) {
+                cleanedHouses.push(houseNum);
+            } else {
+                uncleanedHouses.push(houseNum);
+            }
+
+            if (rec.isReady) {
+                readyHouses.push(houseNum);
+            } else {
+                notReadyHouses.push(houseNum);
             }
         });
 
-        let msgText = `📊 *التقرير اليومي الشامل (مفرغ للأخطاء الصفرية) - مجمع الأميرات 2*\n` +
+        let msgText = `📊 *التقرير اليومي الشامل - مجمع الأميرات 2*\n` +
                       `📅 التاريخ: ${todayStr}\n\n` +
-                      `🏠 إجمالي الدور المسجلة: ${totalCount}\n` +
-                      `✅ الدور الجاهزة والمنجزة: ${readyCount}\n\n`;
+                      `🏠 *إجمالي الدور المسجلة:* (${allHouses.length})\n` +
+                      `📌 أرقام الدور: ${allHouses.length > 0 ? allHouses.join('، ') : 'لا يوجد'}\n\n` +
 
-        if (uncompletedCleanList.length > 0) msgText += `⚠️ *دور تجاوزت موعد التنظيف (${uncompletedCleanList.length}):*\n` + uncompletedCleanList.join('\n') + `\n\n`;
-        if (overdueHandoverList.length > 0) msgText += `🚨 *دور تجاوزت موعد التسليم الـ 10 أيام (${overdueHandoverList.length}):*\n` + overdueHandoverList.join('\n') + `\n\n`;
-        msgText += `_صادر عن مكتب التسليم الفني_`;
+                      `🧹 *الدور المنظفة:* (${cleanedHouses.length})\n` +
+                      `📌 أرقام الدور: ${cleanedHouses.length > 0 ? cleanedHouses.join('، ') : 'لا يوجد'}\n\n` +
+
+                      `🧼 *الدور الغير نظيفة:* (${uncleanedHouses.length})\n` +
+                      `📌 أرقام الدور: ${uncleanedHouses.length > 0 ? uncleanedHouses.join('، ') : 'لا يوجد'}\n\n` +
+
+                      `✅ *الدور الجاهزة:* (${readyHouses.length})\n` +
+                      `📌 أرقام الدور: ${readyHouses.length > 0 ? readyHouses.join('، ') : 'لا يوجد'}\n\n` +
+
+                      `⚠️ *الدور الغير جاهزة:* (${notReadyHouses.length})\n` +
+                      `📌 أرقام الدور: ${notReadyHouses.length > 0 ? notReadyHouses.join('، ') : 'لا يوجد'}\n\n` +
+
+                      `_صادر عن مكتب التسليم الفني_`;
 
         openWhatsAppDirect('', msgText);
     }
