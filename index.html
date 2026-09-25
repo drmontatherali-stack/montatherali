@@ -258,7 +258,7 @@
         .badge-direct { background-color: rgba(6, 182, 212, 0.15); color: var(--status-direct); border: 1px solid rgba(6, 182, 212, 0.35); }
         .badge-contractor { background-color: rgba(168, 85, 247, 0.15); color: var(--status-contractor); border: 1px solid rgba(168, 85, 247, 0.35); }
 
-        .whatsapp-icon { color: #34d399; font-size: 1.3rem; text-decoration: none; margin-left: 10px; display: inline-block; transition: transform 0.2s, text-shadow 0.2s; }
+        .whatsapp-icon { color: #34d399; font-size: 1.3rem; text-decoration: none; margin-left: 10px; display: inline-block; cursor: pointer; transition: transform 0.2s, text-shadow 0.2s; }
         .whatsapp-icon:hover { transform: scale(1.3); text-shadow: 0 0 12px #34d399; }
         
         .camera-icon-btn { background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); color: var(--primary-blue); padding: 7px 14px; border-radius: 14px; cursor: pointer; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(6px); transition: all 0.2s; }
@@ -731,6 +731,31 @@
         "سبتمبر (أيلول)", "أكتوبر (تشرين الأول)", "نوفمبر (تشرين الثاني)", "ديسمبر (كانون الأول)"
     ];
 
+    // دالة تنظيف رقم الهاتف وإعادة تشكيله لفتح واتساب ميتا المباشر
+    function formatPhoneForWhatsApp(phone) {
+        if (!phone) return '';
+        let cleaned = phone.replace(/[^\d]/g, '');
+        if (cleaned.startsWith('0')) {
+            cleaned = '964' + cleaned.substring(1);
+        } else if (!cleaned.startsWith('964') && cleaned.length === 10) {
+            cleaned = '964' + cleaned;
+        }
+        return cleaned;
+    }
+
+    // دالة فتح محادثة واتساب ميتا المباشرة دون المرور بالموقع الإلكتروني
+    function openWhatsAppDirect(phone, text) {
+        const cleanPhone = formatPhoneForWhatsApp(phone);
+        const encodedText = encodeURIComponent(text || '');
+        let waUrl = '';
+        if (cleanPhone) {
+            waUrl = `whatsapp://send?phone=${cleanPhone}&text=${encodedText}`;
+        } else {
+            waUrl = `whatsapp://send?text=${encodedText}`;
+        }
+        window.location.href = waUrl;
+    }
+
     dbRef.on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -1092,7 +1117,7 @@
         if (overdueHandoverList.length > 0) msgText += `🚨 *دور تجاوزت موعد التسليم الـ 10 أيام (${overdueHandoverList.length}):*\n` + overdueHandoverList.join('\n') + `\n\n`;
         msgText += `_صادر عن مكتب التسليم الفني_`;
 
-        window.open(`https://wa.me/?text=${encodeURIComponent(msgText)}`, '_blank');
+        openWhatsAppDirect('', msgText);
     }
 
     // تصدير ملف Excel احترافي ومرتب بالكامل
@@ -1226,6 +1251,11 @@
         });
     }
 
+    function triggerWhatsAppNotify(phone, name, houseNo, sectorNo) {
+        let msg = `السلام عليكم ورحمة الله وبركاته\nالأخ المستفيد: ${name}\nنود إعلامكم بأن الدار رقم (${houseNo}) في ${sectorNo} أصبح جاهزاً للإنهاء والتسليم.\nيرجى المراجعة لإكمال الإجراءات.`;
+        openWhatsAppDirect(phone, msg);
+    }
+
     function renderTable() {
         const tbody = document.getElementById('table-body');
         const cardsContainer = document.getElementById('mobile-cards-container');
@@ -1307,8 +1337,11 @@
                 }
 
                 const phone = rec.phoneNo || '';
-                const waLink = phone ? `https://wa.me/${phone}?text=` : `https://wa.me/?text=`;
-                let checkboxesHtml = `<a href="${waLink}" target="_blank" class="whatsapp-icon">💬</a>`;
+                const escapedOwner = rec.ownerName ? rec.ownerName.replace(/'/g, "\\'") : '';
+                const escapedHouse = rec.houseNo ? rec.houseNo.replace(/'/g, "\\'") : '';
+                const escapedSector = rec.sectorNo ? rec.sectorNo.replace(/'/g, "\\'") : '';
+                
+                let checkboxesHtml = `<span class="whatsapp-icon" onclick="triggerWhatsAppNotify('${phone}', '${escapedOwner}', '${escapedHouse}', '${escapedSector}')" title="إرسال تبليغ عبر واتساب ميتا المباشر">💬</span>`;
                 for (let i = 0; i < 3; i++) {
                     const checked = rec.notifications && rec.notifications[i] ? 'checked' : '';
                     checkboxesHtml += `<input type="checkbox" class="notif-box" ${checked} onclick="toggleNotification(${rec.id}, ${i}, event)">`;
@@ -1316,7 +1349,7 @@
 
                 const tr = document.createElement('tr');
                 if (logic.isCleaningOverdue || logic.isHandoverOverdue) tr.classList.add('row-overdue-alert');
-                tr.onclick = (e) => { if (e.target.closest('.action-btn') || e.target.closest('input') || e.target.closest('a') || e.target.closest('button')) return; openStatusCheckModal(rec.id); };
+                tr.onclick = (e) => { if (e.target.closest('.action-btn') || e.target.closest('input') || e.target.closest('a') || e.target.closest('button') || e.target.closest('.whatsapp-icon')) return; openStatusCheckModal(rec.id); };
 
                 tr.innerHTML = `
                     <td>${idx + 1}</td>
@@ -1488,11 +1521,13 @@
         container.innerHTML = "";
 
         if (ownerPhone) {
-            container.innerHTML += `<button class="btn-primary" style="background:#10b981;" onclick="window.open('https://wa.me/${ownerPhone}?text=${encodeURIComponent(msgText)}', '_blank')">📲 إرسال إلى المستفيد (${ownerPhone})</button>`;
+            const escapedText = msgText.replace(/'/g, "\\'");
+            container.innerHTML += `<button class="btn-primary" style="background:#10b981;" onclick="openWhatsAppDirect('${ownerPhone}', '${escapedText}')">📲 إرسال إلى المستفيد (${ownerPhone})</button>`;
         }
 
         targetTeam.forEach(member => {
-            container.innerHTML += `<button class="btn-primary" style="background:rgba(56,189,248,0.2); border:1px solid var(--primary-blue);" onclick="window.open('https://wa.me/${member.phone}?text=${encodeURIComponent(msgText)}', '_blank')">💬 إرسال إلى: ${member.name}</button>`;
+            const escapedText = msgText.replace(/'/g, "\\'");
+            container.innerHTML += `<button class="btn-primary" style="background:rgba(56,189,248,0.2); border:1px solid var(--primary-blue);" onclick="openWhatsAppDirect('${member.phone}', '${escapedText}')">💬 إرسال إلى: ${member.name}</button>`;
         });
 
         document.getElementById('whatsappNotifyModal').style.display = 'flex';
