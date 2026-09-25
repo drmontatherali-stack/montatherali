@@ -13,22 +13,23 @@
 
     <style>
         :root {
-            --bg-primary: #050811;
-            --bg-secondary: #0b1329;
-            --bg-card: #131e38;
-            --bg-card-hover: #1c2b4e;
-            --primary-blue: #38bdf8;
-            --primary-indigo: #6366f1;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border-color: #1e293b;
-            --border-glow: rgba(56, 189, 248, 0.25);
+            --bg-primary: #030712;
+            --glass-bg: rgba(13, 20, 38, 0.55);
+            --glass-bg-hover: rgba(22, 33, 62, 0.75);
+            --glass-card: rgba(17, 24, 39, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-glow: rgba(56, 189, 248, 0.4);
             
-            --status-waiting: #f59e0b;
-            --status-overdue: #f43f5e;
-            --status-ready: #10b981;
-            --status-direct: #06b6d4;
-            --status-contractor: #a855f7;
+            --primary-blue: #38bdf8;
+            --primary-indigo: #818cf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            
+            --status-waiting: #fbbf24;
+            --status-overdue: #fb7185;
+            --status-ready: #34d399;
+            --status-direct: #22d3ee;
+            --status-contractor: #c084fc;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
@@ -39,22 +40,27 @@
             min-height: 100vh;
             padding: 24px;
             direction: rtl;
-            background-image: radial-gradient(circle at 10% 10%, rgba(15, 23, 42, 0.6) 0%, transparent 40%),
-                              radial-gradient(circle at 90% 90%, rgba(11, 19, 41, 0.6) 0%, transparent 40%);
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(129, 140, 248, 0.1) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.06) 0%, transparent 60%);
+            background-attachment: fixed;
         }
 
         .app-container { width: 100%; max-width: 1920px; margin: 0 auto; }
 
         header {
-            background: linear-gradient(135deg, #090e1a 0%, #111b36 100%);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 24px 32px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
             margin-bottom: 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
             flex-wrap: wrap;
             gap: 20px;
             position: relative;
@@ -63,12 +69,13 @@
         header::before {
             content: '';
             position: absolute;
-            top: 0; right: 0; width: 4px; height: 100%;
+            top: 0; right: 0; width: 6px; height: 100%;
             background: linear-gradient(to bottom, var(--primary-blue), var(--primary-indigo));
+            box-shadow: 0 0 15px var(--primary-blue);
         }
 
         header h1 { font-size: 1.75rem; font-weight: 900; color: #ffffff; letter-spacing: -0.5px; }
-        header h1 span { color: var(--primary-blue); text-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
+        header h1 span { color: var(--primary-blue); text-shadow: 0 0 25px rgba(56, 189, 248, 0.6); }
         header small { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; margin-top: 4px; display: block; }
 
         .header-info-box { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -78,24 +85,25 @@
             font-size: 1.15rem;
             font-weight: 900;
             color: #38bdf8;
-            background: rgba(56, 189, 248, 0.08);
-            border: 1px solid rgba(56, 189, 248, 0.25);
+            background: rgba(56, 189, 248, 0.06);
+            border: 1px solid rgba(56, 189, 248, 0.3);
             padding: 8px 18px;
-            border-radius: 12px;
+            border-radius: 14px;
             letter-spacing: 0.5px;
             display: flex;
             align-items: center;
             gap: 8px;
             direction: ltr;
-            box-shadow: inset 0 1px 2px rgba(56, 189, 248, 0.1);
+            box-shadow: inset 0 1px 3px rgba(56, 189, 248, 0.2), 0 0 15px rgba(56, 189, 248, 0.1);
         }
         .designer-title-large strong { color: #ffffff; font-weight: 900; }
 
         .date-badge {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
+            background: var(--glass-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
             padding: 9px 16px;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 0.9rem;
             color: var(--text-main);
             font-weight: 700;
@@ -106,13 +114,14 @@
             font-size: 0.85rem;
             padding: 8px 16px;
             border-radius: 14px;
-            background: rgba(16, 185, 129, 0.1);
+            background: rgba(16, 185, 129, 0.08);
             color: #34d399;
             border: 1px solid rgba(16, 185, 129, 0.3);
             display: flex;
             align-items: center;
             gap: 8px;
             font-weight: 700;
+            backdrop-filter: blur(10px);
         }
 
         .analytics-grid {
@@ -122,14 +131,16 @@
             margin-bottom: 24px;
         }
         .chart-box {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
             padding: 22px;
-            border-radius: 18px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transition: border-color 0.3s ease;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
         }
-        .chart-box:hover { border-color: rgba(56, 189, 248, 0.2); }
+        .chart-box:hover { border-color: var(--glass-border-glow); box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 20px rgba(56, 189, 248, 0.15); }
         .chart-box h3 { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
 
         .metrics-grid {
@@ -140,108 +151,116 @@
         }
 
         .metric-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
+            background: var(--glass-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
             padding: 20px;
-            border-radius: 16px;
+            border-radius: 18px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255, 255, 255, 0.05);
         }
         .metric-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; width: 100%; height: 3px;
             background: transparent;
-            transition: background 0.3s;
+            transition: background 0.3s, box-shadow 0.3s;
         }
         .metric-card:hover {
             transform: translateY(-5px);
-            background-color: var(--bg-card-hover);
+            background: var(--glass-bg-hover);
             border-color: var(--primary-blue);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.2);
         }
-        .metric-card:hover::before { background: var(--primary-blue); }
+        .metric-card:hover::before { background: var(--primary-blue); box-shadow: 0 0 10px var(--primary-blue); }
         .metric-card .title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; font-weight: 700; }
-        .metric-card .value { font-size: 1.9rem; font-weight: 900; letter-spacing: -0.5px; }
-        .metric-card.alert-card { border-color: rgba(244, 63, 94, 0.3); background: linear-gradient(135deg, #131e38 0%, #2a121d 100%); }
-        .metric-card.alert-card:hover { border-color: var(--status-overdue); }
-        .metric-card.alert-card:hover::before { background: var(--status-overdue); }
+        .metric-card .value { font-size: 1.9rem; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .metric-card.alert-card { border-color: rgba(251, 113, 133, 0.25); background: linear-gradient(135deg, rgba(17, 24, 39, 0.5) 0%, rgba(159, 18, 57, 0.15) 100%); }
+        .metric-card.alert-card:hover { border-color: var(--status-overdue); box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 20px rgba(251, 113, 133, 0.25); }
+        .metric-card.alert-card:hover::before { background: var(--status-overdue); box-shadow: 0 0 10px var(--status-overdue); }
 
         .filter-section {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
             padding: 20px 24px;
-            border-radius: 18px;
+            border-radius: 20px;
             margin-bottom: 24px;
             display: flex;
             flex-wrap: wrap;
             gap: 16px;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         .filter-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1; }
         .filter-group label { font-weight: 700; color: var(--text-muted); font-size: 0.88rem; }
 
         select, input[type="text"], input[type="date"] {
-            background-color: var(--bg-primary);
-            border: 1px solid var(--border-color);
+            background: rgba(3, 7, 18, 0.6);
+            border: 1px solid var(--glass-border);
             color: var(--text-main);
             padding: 10px 16px;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 0.9rem;
             outline: none;
+            backdrop-filter: blur(10px);
             transition: all 0.2s;
         }
-        select:focus, input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); }
+        select:focus, input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2), 0 0 15px rgba(56, 189, 248, 0.2); }
 
         .btn-action-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         
-        /* أزرار العمليات بتصميم عصري ومتناسق */
-        .btn-daily-checklist { background: linear-gradient(135deg, #f43f5e, #e11d48); color: #fff; border: none; padding: 11px 16px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3); }
-        .btn-precleaned-manage { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; border: none; padding: 11px 16px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
-        .btn-contractors-score { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #fff; border: none; padding: 11px 16px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3); }
-        .btn-calendar-view { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none; padding: 11px 16px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
-        .btn-whatsapp-daily { background: #10b981; color: #fff; border: none; padding: 11px 16px; border-radius: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
-        .btn-pdf-export { background: #475569; color: #fff; border: none; padding: 11px 16px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-        .btn-add { background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: none; padding: 12px 26px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 6px 20px rgba(56, 189, 248, 0.3); }
+        .btn-daily-checklist { background: linear-gradient(135deg, rgba(244, 63, 94, 0.85), rgba(225, 29, 72, 0.85)); backdrop-filter: blur(10px); color: #fff; border: 1px solid rgba(251, 113, 133, 0.3); padding: 11px 16px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3); }
+        .btn-precleaned-manage { background: linear-gradient(135deg, rgba(139, 92, 246, 0.85), rgba(124, 58, 237, 0.85)); backdrop-filter: blur(10px); color: #fff; border: 1px solid rgba(168, 85, 247, 0.3); padding: 11px 16px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
+        .btn-contractors-score { background: linear-gradient(135deg, rgba(6, 182, 212, 0.85), rgba(8, 145, 178, 0.85)); backdrop-filter: blur(10px); color: #fff; border: 1px solid rgba(34, 211, 238, 0.3); padding: 11px 16px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3); }
+        .btn-calendar-view { background: linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(217, 119, 6, 0.85)); backdrop-filter: blur(10px); color: #fff; border: 1px solid rgba(251, 191, 36, 0.3); padding: 11px 16px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
+        .btn-whatsapp-daily { background: rgba(16, 185, 129, 0.85); backdrop-filter: blur(10px); color: #fff; border: 1px solid rgba(52, 211, 153, 0.3); padding: 11px 16px; border-radius: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+        .btn-pdf-export { background: rgba(71, 85, 105, 0.85); backdrop-filter: blur(10px); color: #fff; border: 1px solid rgba(148, 163, 184, 0.3); padding: 11px 16px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+        .btn-add { background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 26px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3); }
 
         .btn-daily-checklist:hover, .btn-precleaned-manage:hover, .btn-contractors-score:hover, .btn-calendar-view:hover, .btn-whatsapp-daily:hover, .btn-pdf-export:hover, .btn-add:hover {
             transform: translateY(-2px);
-            filter: brightness(1.1);
+            filter: brightness(1.15);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5), 0 0 15px rgba(255,255,255,0.2);
         }
 
         .table-container {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 18px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
             overflow-x: auto;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.05);
         }
 
         table { width: 100%; border-collapse: collapse; text-align: right; white-space: nowrap; }
-        thead { background-color: #070d1d; border-bottom: 2px solid var(--border-color); }
+        thead { background: rgba(3, 7, 18, 0.75); border-bottom: 2px solid var(--glass-border); }
         th { padding: 18px 16px; font-size: 0.85rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.3px; }
-        tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.2s ease; cursor: pointer; }
-        tbody tr:hover { background-color: var(--bg-card); }
-        tbody tr.row-overdue-alert { background-color: rgba(244, 63, 94, 0.08) !important; border-right: 4px solid var(--status-overdue) !important; }
+        tbody tr { border-bottom: 1px solid var(--glass-border); transition: all 0.2s ease; cursor: pointer; }
+        tbody tr:hover { background: rgba(56, 189, 248, 0.06); }
+        tbody tr.row-overdue-alert { background: rgba(251, 113, 133, 0.1) !important; border-right: 4px solid var(--status-overdue) !important; }
         td { padding: 15px 16px; font-size: 0.88rem; vertical-align: middle; }
 
-        .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.3px; }
-        .badge-waiting { background-color: rgba(245, 158, 11, 0.12); color: var(--status-waiting); border: 1px solid rgba(245, 158, 11, 0.3); }
-        .badge-overdue { background-color: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
-        .badge-ready { background-color: rgba(16, 185, 129, 0.12); color: var(--status-ready); border: 1px solid rgba(16, 185, 129, 0.3); }
-        .badge-direct { background-color: rgba(6, 182, 212, 0.12); color: var(--status-direct); border: 1px solid rgba(6, 182, 212, 0.3); }
-        .badge-contractor { background-color: rgba(168, 85, 247, 0.12); color: var(--status-contractor); border: 1px solid rgba(168, 85, 247, 0.3); }
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.3px; backdrop-filter: blur(5px); }
+        .badge-waiting { background-color: rgba(251, 191, 36, 0.12); color: var(--status-waiting); border: 1px solid rgba(251, 191, 36, 0.3); }
+        .badge-overdue { background-color: rgba(251, 113, 133, 0.15); color: var(--status-overdue); border: 1px solid rgba(251, 113, 133, 0.3); box-shadow: 0 0 10px rgba(251, 113, 133, 0.2); }
+        .badge-ready { background-color: rgba(52, 211, 153, 0.12); color: var(--status-ready); border: 1px solid rgba(52, 211, 153, 0.3); box-shadow: 0 0 10px rgba(52, 211, 153, 0.2); }
+        .badge-direct { background-color: rgba(34, 211, 238, 0.12); color: var(--status-direct); border: 1px solid rgba(34, 211, 238, 0.3); }
+        .badge-contractor { background-color: rgba(192, 132, 252, 0.12); color: var(--status-contractor); border: 1px solid rgba(192, 132, 252, 0.3); }
 
-        .whatsapp-icon { color: #25d366; font-size: 1.25rem; text-decoration: none; margin-left: 10px; display: inline-block; transition: transform 0.2s; }
-        .whatsapp-icon:hover { transform: scale(1.25); }
+        .whatsapp-icon { color: #34d399; font-size: 1.25rem; text-decoration: none; margin-left: 10px; display: inline-block; transition: transform 0.2s, text-shadow 0.2s; }
+        .whatsapp-icon:hover { transform: scale(1.25); text-shadow: 0 0 10px #34d399; }
         
-        .camera-icon-btn { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); color: var(--primary-blue); padding: 6px 12px; border-radius: 10px; cursor: pointer; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
-        .camera-icon-btn:hover { background: var(--primary-blue); color: #fff; box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+        .camera-icon-btn { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); color: var(--primary-blue); padding: 6px 12px; border-radius: 12px; cursor: pointer; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(5px); transition: all 0.2s; }
+        .camera-icon-btn:hover { background: var(--primary-blue); color: #fff; box-shadow: 0 0 15px rgba(56, 189, 248, 0.6); }
 
         .checkbox-container { display: inline-flex; gap: 8px; align-items: center; }
         .notif-box { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary-blue); border-radius: 4px; }
@@ -250,8 +269,9 @@
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(3, 6, 15, 0.85);
-            backdrop-filter: blur(10px);
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             z-index: 10000;
             align-items: center;
             justify-content: center;
@@ -260,44 +280,47 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .modal-content {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
+            background: rgba(13, 20, 38, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border-glow);
             padding: 32px;
-            border-radius: 22px;
+            border-radius: 24px;
             width: 90%;
             max-width: 720px;
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+            box-shadow: 0 30px 70px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255, 255, 255, 0.15);
         }
         .close-btn { position: absolute; top: 20px; left: 24px; font-size: 1.6rem; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
-        .close-btn:hover { color: #fff; }
+        .close-btn:hover { color: #fff; text-shadow: 0 0 10px #fff; }
 
         .form-group { margin-bottom: 18px; text-align: right; }
         .form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.88rem; font-weight: 700; }
-        .form-control { width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color); color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
-        .form-control:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); }
+        .form-control { width: 100%; background: rgba(3, 7, 18, 0.6); border: 1px solid var(--glass-border); color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 0.9rem; outline: none; backdrop-filter: blur(10px); transition: all 0.2s; }
+        .form-control:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2), 0 0 15px rgba(56, 189, 248, 0.2); }
         
-        .btn-primary { width: 100%; background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: none; padding: 13px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: filter 0.2s, transform 0.2s; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3); }
-        .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-primary { width: 100%; background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 13px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 20px rgba(56, 189, 248, 0.4); }
+        .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); box-shadow: 0 6px 25px rgba(56, 189, 248, 0.6); }
 
         .hidden-field { display: none; }
         .action-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; margin: 0 4px; transition: color 0.2s; }
-        .action-btn:hover { color: var(--primary-blue); }
-        .action-btn.delete:hover { color: var(--status-overdue); }
+        .action-btn:hover { color: var(--primary-blue); text-shadow: 0 0 10px var(--primary-blue); }
+        .action-btn.delete:hover { color: var(--status-overdue); text-shadow: 0 0 10px var(--status-overdue); }
 
         .modal-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
-        .btn-action-success { background: #10b981; color: #fff; border: none; padding: 13px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: filter 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
-        .btn-action-success:hover { filter: brightness(1.1); }
-        .btn-action-danger { background: #f43f5e; color: #fff; border: none; padding: 13px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: filter 0.2s; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3); }
-        .btn-action-danger:hover { filter: brightness(1.1); }
+        .btn-action-success { background: rgba(16, 185, 129, 0.85); backdrop-filter: blur(10px); color: #fff; border: 1px solid rgba(52, 211, 153, 0.3); padding: 13px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+        .btn-action-success:hover { filter: brightness(1.15); box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); }
+        .btn-action-danger { background: rgba(244, 63, 94, 0.85); backdrop-filter: blur(10px); color: #fff; border: 1px solid rgba(251, 113, 133, 0.3); padding: 13px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3); }
+        .btn-action-danger:hover { filter: brightness(1.15); box-shadow: 0 0 20px rgba(244, 63, 94, 0.5); }
 
         .precleaned-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
+            background: var(--glass-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
             padding: 12px 16px;
-            border-radius: 12px;
+            border-radius: 14px;
             margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
@@ -306,19 +329,20 @@
 
         .mobile-card-item {
             display: none;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
+            background: var(--glass-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
             padding: 18px;
-            border-radius: 16px;
+            border-radius: 18px;
             margin-bottom: 14px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
         @media (max-width: 900px) {
             .table-container { display: none; }
             .mobile-card-item { display: block; }
         }
 
-        .signature-pad { border: 2px dashed var(--border-color); background: var(--bg-primary); width: 100%; height: 160px; border-radius: 12px; cursor: crosshair; }
+        .signature-pad { border: 2px dashed var(--glass-border-glow); background: rgba(3, 7, 18, 0.6); width: 100%; height: 160px; border-radius: 14px; cursor: crosshair; backdrop-filter: blur(10px); }
     </style>
 </head>
 <body>
@@ -472,14 +496,14 @@
 <div id="dailyChecklistModal" class="modal">
     <div class="modal-content" style="max-width: 800px;">
         <span class="close-btn" onclick="closeDailyChecklistModal()">&times;</span>
-        <h3 style="margin-bottom: 20px; color: #fff; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">📋 مواعيد اليوم: <span id="modal-today-date" style="color:#38bdf8;"></span></h3>
+        <h3 style="margin-bottom: 20px; color: #fff; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">📋 مواعيد اليوم: <span id="modal-today-date" style="color:#38bdf8;"></span></h3>
         <div style="margin-bottom: 25px;">
             <h4 style="color: #38bdf8; margin-bottom: 10px;">🧹 دور موعد تنظيفها اليوم:</h4>
-            <div id="cleaning-checklist-list" style="max-height: 200px; overflow-y: auto; background: var(--bg-primary); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color);"></div>
+            <div id="cleaning-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(3, 7, 18, 0.6); backdrop-filter: blur(10px); padding: 14px; border-radius: 14px; border: 1px solid var(--glass-border);"></div>
         </div>
         <div>
-            <h4 style="color: #a855f7; margin-bottom: 10px;">🏠 دور موعد تسليمها اليوم:</h4>
-            <div id="readiness-checklist-list" style="max-height: 200px; overflow-y: auto; background: var(--bg-primary); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color);"></div>
+            <h4 style="color: #c084fc; margin-bottom: 10px;">🏠 دور موعد تسليمها اليوم:</h4>
+            <div id="readiness-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(3, 7, 18, 0.6); backdrop-filter: blur(10px); padding: 14px; border-radius: 14px; border: 1px solid var(--glass-border);"></div>
         </div>
     </div>
 </div>
@@ -492,7 +516,7 @@
             <textarea id="bulkPreCleanedInput" class="form-control" rows="4" placeholder="أدخل الدور (كل دار بسطر)..."></textarea>
         </div>
         <button class="btn-primary" style="margin-bottom: 20px;" onclick="addBulkPreCleanedHouses()">إضافة للسجل</button>
-        <div id="preCleanedListContainer" style="max-height: 250px; overflow-y: auto; background: var(--bg-primary); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color);"></div>
+        <div id="preCleanedListContainer" style="max-height: 250px; overflow-y: auto; background: rgba(3, 7, 18, 0.6); backdrop-filter: blur(10px); padding: 14px; border-radius: 14px; border: 1px solid var(--glass-border);"></div>
     </div>
 </div>
 
@@ -506,7 +530,7 @@
                 <label>رقم البلوك والدار (يُمنع التكرار)</label>
                 <input type="text" id="houseNo" class="form-control" required placeholder="مثال: A1.1" oninput="checkPreCleanedMatch()">
             </div>
-            <div id="preCleanedAlertBox" style="display:none; background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; padding: 12px; border-radius: 12px; margin-bottom: 15px; color: #34d399; font-weight: 700;">
+            <div id="preCleanedAlertBox" style="display:none; background: rgba(16, 185, 129, 0.15); border: 1px solid #34d399; padding: 12px; border-radius: 14px; margin-bottom: 15px; color: #34d399; font-weight: 700; backdrop-filter: blur(10px);">
                 ✨ هذا الدار مطابق ضمن "الدور المنظفة مسبقاً"! تم تعيين حالته "نظيف" مباشرة وتخطي تواريخ التنظيف لمنع الأخطاء.
             </div>
             <div class="form-group">
@@ -560,7 +584,7 @@
 <div id="signatureModal" class="modal">
     <div class="modal-content" style="max-width: 500px; text-align:center;">
         <span class="close-btn" onclick="closeSignatureModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #fff;">✍️ التوقيع الإلكتروني الإلزامي للاستلام</h3>
+        <h3 style="margin-bottom: 15px; color: #fff;">✍️ التوقيع الإلكتروني الإلزامي للاستلاستلام</h3>
         <canvas id="sigCanvas" class="signature-pad"></canvas>
         <div style="margin-top: 18px; display:flex; gap:12px;">
             <button class="btn-action-danger" style="flex:1;" onclick="clearSignature()">مسح التوقيع</button>
@@ -572,7 +596,7 @@
 <div id="whatsappNotifyModal" class="modal">
     <div class="modal-content" style="text-align: center;">
         <span class="close-btn" onclick="closeWhatsappNotifyModal()">&times;</span>
-        <h3 style="margin-bottom: 10px; color: #10b981;">✅ تم التدقيق والحفظ بنجاح!</h3>
+        <h3 style="margin-bottom: 10px; color: #34d399;">✅ تم التدقيق والحفظ بنجاح!</h3>
         <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;" id="whatsapp-notify-subtitle">اختر الشخص لإرسال التفاصيل إليه:</p>
         <div id="whatsapp-buttons-container"></div>
     </div>
@@ -591,7 +615,7 @@
     <div class="modal-content" style="text-align:center;">
         <span class="close-btn" onclick="closeImageModal()">&times;</span>
         <h3 style="margin-bottom: 15px; color: #fff;">المرفقات المعتمدة (صور وتوقيع)</h3>
-        <img id="previewImgElement" src="" alt="صورة الملاحظات" style="max-width: 100%; max-height: 70vh; border-radius: 12px; margin-bottom:15px; border:1px solid var(--border-color);">
+        <img id="previewImgElement" src="" alt="صورة الملاحظات" style="max-width: 100%; max-height: 70vh; border-radius: 14px; margin-bottom:15px; border:1px solid var(--glass-border);">
         <br>
         <button class="btn-primary" onclick="openSignatureModalForCurrent()">✍️ تعديل التوقيع الرقمي</button>
     </div>
@@ -694,14 +718,15 @@
             });
 
             const box = document.createElement('div');
-            box.style.background = dayHouses.length > 0 ? 'rgba(56, 189, 248, 0.12)' : 'var(--bg-primary)';
-            box.style.border = '1px solid var(--border-color)';
+            box.style.background = dayHouses.length > 0 ? 'rgba(56, 189, 248, 0.15)' : 'rgba(3, 7, 18, 0.4)';
+            box.style.border = '1px solid var(--glass-border)';
             box.style.padding = '10px';
-            box.style.borderRadius = '10px';
+            box.style.borderRadius = '12px';
             box.style.minHeight = '75px';
+            box.style.backdropFilter = 'blur(10px)';
             box.innerHTML = `
                 <div style="font-weight:800; color:${dStr === todayStr ? '#38bdf8' : '#fff'}; margin-bottom:4px;">${i}</div>
-                <div style="font-size:0.75rem; color:#f59e0b; line-height:1.4;">${dayHouses.join(', ')}</div>
+                <div style="font-size:0.75rem; color:#fbbf24; line-height:1.4;">${dayHouses.join(', ')}</div>
             `;
             container.appendChild(box);
         }
@@ -788,12 +813,12 @@
             const isPreCleaned = preCleanedHouses.some(item => item.trim() === (rec.houseNo||'').trim());
             if (rec.executionType === "تنفيذ مباشر" && !isPreCleaned && !rec.isCleaned && rec.cleaningEndDate === todayStr) {
                 cCount++;
-                cleaningListDiv.innerHTML += `<div style="padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem;">📍 القطاع: <strong>${rec.sectorNo}</strong> | الدار: <strong>${rec.houseNo}</strong> | المستفيد: ${rec.ownerName}</div>`;
+                cleaningListDiv.innerHTML += `<div style="padding: 8px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.9rem;">📍 القطاع: <strong>${rec.sectorNo}</strong> | الدار: <strong>${rec.houseNo}</strong> | المستفيد: ${rec.ownerName}</div>`;
             }
             const targetDate = rec.secondHandoverDate || rec.handoverDate || rec.houseReadyDate || '';
             if (!rec.isReady && targetDate === todayStr) {
                 rCount++;
-                readinessListDiv.innerHTML += `<div style="padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem;">📍 القطاع: <strong>${rec.sectorNo}</strong> | الدار: <strong>${rec.houseNo}</strong> | المستفيد: ${rec.ownerName}</div>`;
+                readinessListDiv.innerHTML += `<div style="padding: 8px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.9rem;">📍 القطاع: <strong>${rec.sectorNo}</strong> | الدار: <strong>${rec.houseNo}</strong> | المستفيد: ${rec.ownerName}</div>`;
             }
         });
         if (cCount === 0) cleaningListDiv.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>لا توجد دور موعد تنظيفها اليوم.</p>";
@@ -816,7 +841,7 @@
                 }
             });
             container.innerHTML += `
-                <div style="background:var(--bg-primary); border:1px solid var(--border-color); padding:16px; border-radius:14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="background:rgba(3, 7, 18, 0.4); backdrop-filter:blur(10px); border:1px solid var(--glass-border); padding:16px; border-radius:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
                     <div>
                         <strong style="color:#38bdf8; font-size:1.05rem;">👷‍♂️ ${contractor}</strong>
                         <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">إجمالي الدور المسجلة: ${total}</div>
@@ -839,7 +864,7 @@
         let html = `
             <p>👤 <strong>اسم المستفيد:</strong> ${rec.ownerName} | الهاتف: ${rec.phoneNo || '-'}</p>
             <p>📍 <strong>القطاع:</strong> ${rec.sectorNo} | نوع التنفيذ: ${rec.executionType || '-'}</p>
-            <hr style="border-color:var(--border-color); margin:12px 0;">
+            <hr style="border-color:var(--glass-border); margin:12px 0;">
             <p>📅 <strong>تاريخ الحضور:</strong> ${rec.arrivalDate || '-'}</p>
             <p>🛡️ <strong>حالة التدقيق:</strong> بيانات موثقة وصفرية الأخطاء</p>
         `;
@@ -847,7 +872,7 @@
         if (rec.cleaningEndDate) html += `<p>⏳ <strong>تاريخ انتهاء التنظيف:</strong> ${rec.cleaningEndDate}</p>`;
         if (rec.inspectionDate) html += `<p>🔍 <strong>تاريخ الكشف:</strong> ${rec.inspectionDate}</p>`;
         if (rec.handoverDate) html += `<p>⏱️ <strong>موعد التسليم (10 أيام):</strong> ${rec.handoverDate}</p>`;
-        if (rec.secondHandoverDate) html += `<p style="color:#f59e0b;">🔄 <strong>موعد التسليم الثاني:</strong> ${rec.secondHandoverDate} (السبب: ${rec.notReadyReason})</p>`;
+        if (rec.secondHandoverDate) html += `<p style="color:#fbbf24;">🔄 <strong>موعد التسليم الثاني:</strong> ${rec.secondHandoverDate} (السبب: ${rec.notReadyReason})</p>`;
         if (rec.signatureImg) html += `<p style="color:#34d399;">✍️ <strong>يوجد توقيع رقمي معتمد</strong></p>`;
         document.getElementById('timeline-content-box').innerHTML = html;
         document.getElementById('timelineModal').style.display = 'flex';
@@ -961,7 +986,7 @@
             type: 'doughnut',
             data: {
                 labels: Object.keys(sectorsCount),
-                datasets: [{ data: Object.values(sectorsCount), backgroundColor: ['#38bdf8', '#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#a855f7'], borderWidth: 0 }]
+                datasets: [{ data: Object.values(sectorsCount), backgroundColor: ['#38bdf8', '#818cf8', '#34d399', '#fbbf24', '#fb7185', '#c084fc'], borderWidth: 0 }]
             },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'left', labels: { color: '#94a3b8', font: { family: 'Cairo', weight: '600' } } } } }
         });
@@ -974,9 +999,9 @@
             type: 'bar',
             data: {
                 labels: cNames.length > 0 ? cNames : ['لا توجد بيانات'],
-                datasets: [{ label: 'دور منجزة', data: cReadys.length > 0 ? cReadys : [0], backgroundColor: '#10b981', borderRadius: 6 }]
+                datasets: [{ label: 'دور منجزة', data: cReadys.length > 0 ? cReadys : [0], backgroundColor: '#34d399', borderRadius: 6 }]
             },
-            options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: '#94a3b8' }, grid: { display: false } }, y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } } }, plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Cairo' } } } } }
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: '#94a3b8' }, grid: { display: false } }, y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } } }, plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Cairo' } } } } }
         });
     }
 
@@ -1051,8 +1076,8 @@
                 let secondHandoverTd = '', cameraTd = '';
                 if (hasAnyNotReadyRecord) {
                     if (rec.secondHandoverDate) {
-                        secondHandoverTd = `<td><span style="color:#f59e0b; font-weight:800;">${rec.secondHandoverDate}</span><br><small style="color:var(--text-muted);">السبب: ${rec.notReadyReason || '-'}</small></td>`;
-                        let cameraBtn = rec.noteImage ? `<button class="camera-icon-btn" style="background:rgba(16,185,129,0.12); border-color:rgba(16,185,129,0.3); color:#34d399;" onclick="viewImage('${rec.noteImage}')">🖼️ عرض</button>` : `<button class="camera-icon-btn" onclick="triggerCamera(${rec.id})">📷 تصوير</button>`;
+                        secondHandoverTd = `<td><span style="color:#fbbf24; font-weight:800;">${rec.secondHandoverDate}</span><br><small style="color:var(--text-muted);">السبب: ${rec.notReadyReason || '-'}</small></td>`;
+                        let cameraBtn = rec.noteImage ? `<button class="camera-icon-btn" style="background:rgba(52,211,153,0.15); border-color:rgba(52,211,153,0.3); color:#34d399;" onclick="viewImage('${rec.noteImage}')">🖼️ عرض</button>` : `<button class="camera-icon-btn" onclick="triggerCamera(${rec.id})">📷 تصوير</button>`;
                         cameraTd = `<td>${cameraBtn}</td>`;
                     } else {
                         secondHandoverTd = `<td style="color:var(--text-muted); text-align:center;">-</td>`;
