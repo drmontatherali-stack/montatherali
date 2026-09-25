@@ -102,7 +102,6 @@
             font-weight: 700;
         }
 
-        /* لوحة الرسوم البيانية الإحصائية */
         .analytics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -282,7 +281,6 @@
         }
         .wa-target-btn:hover { background: #1ebe57; }
 
-        /* دعم الموبايل الميداني (Cards View) */
         .mobile-card-item {
             display: none;
             background: var(--bg-card);
@@ -321,7 +319,6 @@
         </div>
     </header>
 
-    <!-- لوحة الرسوم البيانية الإحصائية (Charts) -->
     <div class="analytics-grid">
         <div class="chart-box">
             <h3>📊 توزيع الإنجاز حسب القطاعات</h3>
@@ -333,7 +330,6 @@
         </div>
     </div>
 
-    <!-- البطاقات الإحصائية -->
     <div class="metrics-grid">
         <div class="metric-card" onclick="setFilterStatus('all')">
             <div class="title" style="color: #38bdf8;">كل الدور المسجلة</div>
@@ -357,7 +353,6 @@
         </div>
     </div>
 
-    <!-- شريط الأزرار والفلترة المتقدمة -->
     <div class="filter-section">
         <div class="filter-group">
             <div class="btn-action-group">
@@ -393,7 +388,6 @@
         <button class="btn-add" onclick="openAddModal()">+ إضافة دار جديد</button>
     </div>
 
-    <!-- جدول السجل الرئيسي للكمبيوتر -->
     <div class="table-container">
         <table>
             <thead>
@@ -420,11 +414,10 @@
         </table>
     </div>
 
-    <!-- بطاقات الموبايل الميدانية المتجاوبة -->
     <div id="mobile-cards-container"></div>
 </div>
 
-<!-- Modal تقييم أداء المقاولين -->
+<!-- Modals -->
 <div id="contractorScorecardModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeContractorScorecardModal()">&times;</span>
@@ -433,7 +426,6 @@
     </div>
 </div>
 
-<!-- Modal سجل التاريخ (Timeline) لكل دار -->
 <div id="timelineModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeTimelineModal()">&times;</span>
@@ -442,7 +434,6 @@
     </div>
 </div>
 
-<!-- Modal لائحة المتابعة اليومية -->
 <div id="dailyChecklistModal" class="modal">
     <div class="modal-content" style="max-width: 800px;">
         <span class="close-btn" onclick="closeDailyChecklistModal()">&times;</span>
@@ -458,7 +449,6 @@
     </div>
 </div>
 
-<!-- Modal إدارة الدور المنظفة مسبقاً -->
 <div id="preCleanedModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closePreCleanedModal()">&times;</span>
@@ -471,7 +461,6 @@
     </div>
 </div>
 
-<!-- Modal إضافة / تعديل دار جديد -->
 <div id="addRecordModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeAddModal()">&times;</span>
@@ -533,7 +522,6 @@
     </div>
 </div>
 
-<!-- Modal إرسال تفاصيل الدار عبر واتساب -->
 <div id="whatsappNotifyModal" class="modal">
     <div class="modal-content" style="text-align: center;">
         <span class="close-btn" onclick="closeWhatsappNotifyModal()">&times;</span>
@@ -543,7 +531,6 @@
     </div>
 </div>
 
-<!-- Modal تحديث الموقف والإيعاز -->
 <div id="statusCheckModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeStatusModal()">&times;</span>
@@ -553,7 +540,6 @@
     </div>
 </div>
 
-<!-- Modal عرض الصورة -->
 <div id="imagePreviewModal" class="modal">
     <div class="modal-content" style="text-align:center;">
         <span class="close-btn" onclick="closeImageModal()">&times;</span>
@@ -744,25 +730,47 @@
     }
     function closeTimelineModal() { document.getElementById('timelineModal').style.display = 'none'; }
 
+    // ** التحديث الجذري لتقرير الواتساب الشامل: سرد تفصيلي لأرقام الدور وأسمائها والقطاعات **
     function sendDailySummaryWhatsApp() {
-        let readyCount = 0, uncompletedClean = 0, overdueHandover = 0;
+        let totalCount = houseRecords.length;
+        let readyCount = 0;
+        
+        let uncompletedCleanList = [];
+        let overdueHandoverList = [];
+
         houseRecords.forEach(rec => {
             const logic = calculateRecordStatus(rec);
             if (rec.isReady) readyCount++;
-            if (logic.isCleaningOverdue) uncompletedClean++;
-            if (logic.isHandoverOverdue) overdueHandover++;
+
+            if (logic.isCleaningOverdue) {
+                uncompletedCleanList.push(`• دار (${rec.houseNo}) - ${rec.sectorNo} - المستفيد: ${rec.ownerName}`);
+            }
+            if (logic.isHandoverOverdue) {
+                const target = rec.secondHandoverDate || rec.handoverDate || rec.houseReadyDate || '-';
+                overdueHandoverList.push(`• دار (${rec.houseNo}) - ${rec.sectorNo} - المستفيد: ${rec.ownerName} (موعده: ${target})`);
+            }
         });
 
-        const msg = encodeURIComponent(
-            `📊 *التقرير اليومي الشامل - مجمع الأميرات 2*\n` +
-            `📅 التاريخ: ${todayStr}\n\n` +
-            `🏠 إجمالي الدور المسجلة: ${houseRecords.length}\n` +
-            `✅ الدور الجاهزة والمنجزة: ${readyCount}\n` +
-            `⚠️ تجاوزت موعد التنظيف: ${uncompletedClean}\n` +
-            `🚨 تجاوزت موعد التسليم (10 أيام): ${overdueHandover}\n\n` +
-            `_صادر عن مكتب التسليم الفني_`
-        );
-        window.open(`https://wa.me/?text=${msg}`, '_blank');
+        let msgText = `📊 *التقرير اليومي الشامل - مجمع الأميرات 2*\n` +
+                      `📅 التاريخ: ${todayStr}\n\n` +
+                      `🏠 إجمالي الدور المسجلة: ${totalCount}\n` +
+                      `✅ الدور الجاهزة والمنجزة: ${readyCount}\n\n`;
+
+        if (uncompletedCleanList.length > 0) {
+            msgText += `⚠️ *دور تجاوزت موعد التنظيف (${uncompletedCleanList.length}):*\n` + uncompletedCleanList.join('\n') + `\n\n`;
+        } else {
+            msgText += `🧹 *دور تجاوزت موعد التنظيف:* لا توجد.\n\n`;
+        }
+
+        if (overdueHandoverList.length > 0) {
+            msgText += `🚨 *دور تجاوزت موعد التسليم الـ 10 أيام (${overdueHandoverList.length}):*\n` + overdueHandoverList.join('\n') + `\n\n`;
+        } else {
+            msgText += `🚨 *دور تجاوزت موعد التسليم:* لا توجد.\n\n`;
+        }
+
+        msgText += `_صادر عن مكتب التسليم الفني_`;
+
+        window.open(`https://wa.me/?text=${encodeURIComponent(msgText)}`, '_blank');
     }
 
     function exportToPDF() {
@@ -934,7 +942,6 @@
                     checkboxesHtml += `<input type="checkbox" class="notif-box" ${checked} onclick="toggleNotification(${rec.id}, ${i}, event)">`;
                 }
 
-                // عرض جدول الكمبيوتر
                 const tr = document.createElement('tr');
                 if (logic.isCleaningOverdue || logic.isHandoverOverdue) tr.classList.add('row-overdue-alert');
                 tr.onclick = (e) => { if (e.target.closest('.action-btn') || e.target.closest('input') || e.target.closest('a') || e.target.closest('button')) return; openStatusCheckModal(rec.id); };
@@ -953,7 +960,6 @@
                 `;
                 tbody.appendChild(tr);
 
-                // عرض بطاقات الموبايل الميدانية المتجاوبة
                 const cardDiv = document.createElement('div');
                 cardDiv.className = 'mobile-card-item';
                 cardDiv.innerHTML = `
