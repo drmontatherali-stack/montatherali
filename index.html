@@ -256,6 +256,24 @@
             justify-content: space-between;
             align-items: center;
         }
+
+        .wa-target-btn {
+            background: #25d366;
+            color: #fff;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        .wa-target-btn:hover { background: #1ebe57; }
     </style>
 </head>
 <body>
@@ -422,7 +440,7 @@
             </div>
 
             <div class="form-group">
-                <label>رقم الهاتف (لإرسال رسائل واتساب)</label>
+                <label>رقم الهاتف (لإرسال رسائل واتساب للمستفيد)</label>
                 <input type="text" id="phoneNo" class="form-control" placeholder="مثال: 9647800000000">
             </div>
 
@@ -490,17 +508,15 @@
     </div>
 </div>
 
-<!-- Modal إشعار وإرسال واتساب لدور المقاولين فور الحفظ -->
+<!-- Modal إرسال تفاصيل الدار للأشخاص الأربعة عبر تطبيق واتساب مباشرة -->
 <div id="whatsappNotifyModal" class="modal">
     <div class="modal-content" style="text-align: center;">
         <span class="close-btn" onclick="closeWhatsappNotifyModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #10b981;">✅ تم حفظ دار المقاولين بنجاح!</h3>
-        <p style="color: var(--text-muted); margin-bottom: 20px; line-height: 1.6;" id="whatsapp-notify-text">
-            هل تريد إرسال تفاصيل الدار والتواريخ مباشرة عبر الواتساب؟
+        <h3 style="margin-bottom: 10px; color: #10b981;">✅ تم حفظ تفاصيل الدار بنجاح!</h3>
+        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;" id="whatsapp-notify-subtitle">
+            اضغط على اسم الشخص أدناه لفتح تطبيق واتساب (واتساب بيتا) وإرسال التفاصيل إليه مباشرة:
         </p>
-        <a id="whatsapp-direct-link" href="#" target="_blank" class="btn-primary" style="background: #25d366; display: inline-block; text-decoration: none; padding: 14px 20px; font-size: 1.1rem; font-weight: 800;">
-            💬 إرسال التفاصيل عبر الواتساب الآن
-        </a>
+        <div id="whatsapp-buttons-container"></div>
     </div>
 </div>
 
@@ -530,6 +546,14 @@
 
     firebase.initializeApp(firebaseConfig);
     const dbRef = firebase.database().ref('amirat_houses_db');
+
+    // الأرقام الأربعة المعتمدة للإرسال المباشر
+    const targetTeam = [
+        { name: "مهندس محمد عبد الأمير", phone: "9647825962173" },
+        { name: "منتظر علي", phone: "9647862568787" },
+        { name: "مهندس بشير أحمد", phone: "9647826821986" },
+        { name: "علي نعمان هادي", phone: "9647819743895" }
+    ];
 
     let contractorsList = JSON.parse(localStorage.getItem('contractorsList')) || [
         "أحمد عواد", "عادل عرار", "محمد عرار", "جاسم زراك", "دياري كريم", 
@@ -830,7 +854,7 @@
                 const waText = encodeURIComponent(`مرحباً بالمستفيد المحترم ${rec.ownerName}، نبلغكم بجهوزية الدار رقم ${rec.houseNo} في مجمع الأميرات 2.`);
                 const waLink = phone ? `https://wa.me/${phone}?text=${waText}` : `https://wa.me/?text=${waText}`;
 
-                let checkboxesHtml = `<a href="${waLink}" target="_blank" class="whatsapp-icon" title="إرسال رسالة واتساب">💬</a>`;
+                let checkboxesHtml = `<a href="${waLink}" target="_blank" class="whatsapp-icon" title="إرسال رسالة واتساب للمستفيد">💬</a>`;
                 for (let i = 0; i < 3; i++) {
                     const checked = rec.notifications && rec.notifications[i] ? 'checked' : '';
                     const title = rec.notifications && rec.notifications[i] ? `تاريخ التبليغ: ${rec.notifications[i]}` : 'انقر لتسجيل التبليغ';
@@ -952,7 +976,7 @@
         }
     }
 
-    // هنا يتم إرسال رسالة الواتساب لتنفيذ المباشر حصراً بعد إدخال تاريخ الكشف والتأكد من إكمال النظافة
+    // التنفيذ المباشر: إرسال تفاصيل الدار والتواريخ كاملة عبر واتساب بعد إدخال تاريخ الكشف حصراً
     function setInspectionAndHandoverDate() {
         const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
         if (rec) {
@@ -963,7 +987,6 @@
                 saveAndRefresh();
                 closeStatusModal();
 
-                // إشعار واتساب فوري لتنفيذ مباشر بعد تحديد الكشف
                 const msg = `📋 *تفاصيل كشف وتجهيز دار (تنفيذ مباشر) - مجمع الأميرات 2*\n\n` +
                             `🏠 *رقم البلوك والدار:* ${rec.houseNo}\n` +
                             `📍 *القطاع:* ${rec.sectorNo}\n` +
@@ -972,12 +995,7 @@
                             `🔍 *تاريخ الكشف المحدد:* ${rec.inspectionDate}\n` +
                             `⏳ *موعد التسليم النهائي (10 أيام):* ${rec.handoverDate}`;
                 
-                const encodedMsg = encodeURIComponent(msg);
-                const waUrl = rec.phoneNo ? `https://wa.me/${rec.phoneNo}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
-                
-                document.getElementById('whatsapp-direct-link').href = waUrl;
-                document.getElementById('whatsapp-notify-text').innerText = `تم تحديد الكشف وإكمال نظافة الدار (${rec.houseNo}). هل تريد إرسال تفاصيل الكشف والتسليم عبر الواتساب؟`;
-                document.getElementById('whatsappNotifyModal').style.display = 'flex';
+                showTeamWhatsAppModal(msg, `تم تحديد الكشف وإكمال التنظيف للدار (${rec.houseNo}). اختر الشخص لإرسال التفاصيل مباشرة عبر واتساب بيتا:`);
             }
         }
     }
@@ -1006,6 +1024,28 @@
 
     function closeAddModal() { document.getElementById('addRecordModal').style.display = 'none'; }
     function closeWhatsappNotifyModal() { document.getElementById('whatsappNotifyModal').style.display = 'none'; }
+
+    // دالة إنشاء أزرار الإرسال الفوري للأشخاص الأربعة عبر واتساب المباشر
+    function showTeamWhatsAppModal(msgText, subtitleText) {
+        const encodedMsg = encodeURIComponent(msgText);
+        document.getElementById('whatsapp-notify-subtitle').innerText = subtitleText;
+        
+        const container = document.getElementById('whatsapp-buttons-container');
+        container.innerHTML = "";
+
+        targetTeam.forEach(member => {
+            // استخدام رابط whatsapp مباشر لفتح التطبيق دون متصفح
+            const waUrl = `https://wa.me/${member.phone}?text=${encodedMsg}`;
+            container.innerHTML += `
+                <a href="${waUrl}" target="_blank" class="wa-target-btn">
+                    <span>💬 إرسال إلى: <strong>${member.name}</strong></span>
+                    <span>➔</span>
+                </a>
+            `;
+        });
+
+        document.getElementById('whatsappNotifyModal').style.display = 'flex';
+    }
 
     function editRecord(id) {
         const rec = houseRecords.find(r => r.id === id);
@@ -1074,7 +1114,7 @@
                 notifications: [null, null, null]
             });
 
-            // إذا كان نوع التنفيذ "تنفيذ مقاولين"، ترسل تفاصيل الدار والتواريخ فورا عند الحفظ
+            // دور المقاولين: إرسال كافة التفاصيل والتواريخ تلقائياً بمجرد إدخال الدار
             if (executionType === "تنفيذ مقاولين") {
                 const msg = `📋 *تفاصيل دار مقاولين جديدة - مجمع الأميرات 2*\n\n` +
                             `🏠 *رقم البلوك والدار:* ${houseNo}\n` +
@@ -1082,15 +1122,10 @@
                             `👤 *اسم المستفيد:* ${ownerName}\n` +
                             `📞 *رقم الهاتف:* ${phoneNo || 'غير محدد'}\n` +
                             `👷‍♂️ *المقاول المسؤول:* ${contractorName}\n` +
-                            `📅 *تاريخ العمل:* ${contractorStartDate}\n` +
+                            `📅 *تاريخ عمل المقاول:* ${contractorStartDate}\n` +
                             `⏳ *تاريخ الجهوزية والتسليم:* ${houseReadyDate}`;
                 
-                const encodedMsg = encodeURIComponent(msg);
-                const waUrl = phoneNo ? `https://wa.me/${phoneNo}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
-                
-                document.getElementById('whatsapp-direct-link').href = waUrl;
-                document.getElementById('whatsapp-notify-text').innerText = `تم حفظ دار المقاولين (${houseNo}) بنجاح. هل تريد إرسال التفاصيل عبر الواتساب؟`;
-                document.getElementById('whatsappNotifyModal').style.display = 'flex';
+                showTeamWhatsAppModal(msg, `تم حفظ دار المقاولين (${houseNo}) بنجاح. اختر الشخص لإرسال التفاصيل إليه عبر واتساب مباشرة:`);
             }
         }
 
