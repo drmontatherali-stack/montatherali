@@ -666,12 +666,33 @@
     dbRef.on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            houseRecords = data.records || [];
+            // السجلات صارت مخزنة كـ object لكل دار بمعرفها الخاص (id) بدل مصفوفة واحدة،
+            // حتى تحديث دار وحدة ما يكتب فوق باقي الدور
+            houseRecords = data.records ? Object.values(data.records) : [];
             if (data.contractors) contractorsList = data.contractors;
             if (data.preCleaned) preCleanedHouses = data.preCleaned;
             saveLocalAndRender();
         }
     });
+
+    // دوال المزامنة الجزئية مع Firebase: تكتب فقط الجزء المتغيّر بدل الشجرة كاملة
+    function syncRecord(rec) {
+        saveLocalAndRender();
+        dbRef.child('records/' + rec.id).set(rec);
+    }
+    function syncRecordFields(id, fields) {
+        saveLocalAndRender();
+        dbRef.child('records/' + id).update(fields);
+    }
+    function deleteRecordFromDB(id) {
+        saveLocalAndRender();
+        dbRef.child('records/' + id).remove();
+    }
+    function syncLists() {
+        saveLocalAndRender();
+        dbRef.child('contractors').set(contractorsList);
+        dbRef.child('preCleaned').set(preCleanedHouses);
+    }
 
     function addDays(dateStr, days) {
         if (!dateStr) return "";
@@ -695,7 +716,7 @@
             const newName = prompt("أدخل اسم المقاول الجديد:");
             if (newName && newName.trim() !== "") {
                 const trimmed = newName.trim();
-                if (!contractorsList.includes(trimmed)) { contractorsList.push(trimmed); saveAndRefresh(); }
+                if (!contractorsList.includes(trimmed)) { contractorsList.push(trimmed); syncLists(); }
                 populateContractorsDropdown();
                 selectElement.value = trimmed;
             } else { selectElement.selectedIndex = 0; }
@@ -769,7 +790,7 @@
         const rec = houseRecords.find(r => r.id === activeRecordIdForSig);
         if (rec) {
             rec.signatureImg = dataUrl;
-            saveAndRefresh();
+            syncRecordFields(rec.id, { signatureImg: dataUrl });
             alert("✅ تم اعتماد التوقيع الرقمي بنجاح تام!");
         }
         closeSignatureModal();
@@ -784,11 +805,11 @@
         text.split(/[\n,]+/).map(i => i.trim()).filter(i => i !== '').forEach(item => {
             if (!preCleanedHouses.includes(item)) preCleanedHouses.push(item);
         });
-        saveAndRefresh();
+        syncLists();
         document.getElementById('bulkPreCleanedInput').value = '';
         renderPreCleanedList();
     }
-    function removePreCleanedHouse(index) { preCleanedHouses.splice(index, 1); saveAndRefresh(); renderPreCleanedList(); }
+    function removePreCleanedHouse(index) { preCleanedHouses.splice(index, 1); syncLists(); renderPreCleanedList(); }
     function renderPreCleanedList() {
         const container = document.getElementById('preCleanedListContainer');
         container.innerHTML = preCleanedHouses.length === 0 ? "<p style='color:var(--text-muted); text-align:center;'>لا توجد دور.</p>" : "";
@@ -1147,7 +1168,7 @@
         if (!rec) return;
         if (!rec.notifications) rec.notifications = [null, null, null];
         rec.notifications[index] = event.target.checked ? todayStr : null;
-        saveAndRefresh();
+        syncRecordFields(id, { notifications: rec.notifications });
     }
 
     let selectedRecordIdForStatus = null;
@@ -1182,7 +1203,7 @@
 
     function markCleaningCompletedWithoutInspection() {
         const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
-        if (rec) { rec.isCleaned = true; saveAndRefresh(); closeStatusModal(); }
+        if (rec) { rec.isCleaned = true; syncRecordFields(rec.id, { isCleaned: true }); closeStatusModal(); }
     }
 
     function setInspectionAndHandoverDate() {
@@ -1191,7 +1212,8 @@
             const inspDate = prompt("أدخل تاريخ الكشف بدقة:", todayStr);
             if (inspDate) {
                 rec.inspectionDate = inspDate; rec.handoverDate = addDays(inspDate, 10);
-                saveAndRefresh(); closeStatusModal();
+                syncRecordFields(rec.id, { inspectionDate: rec.inspectionDate, handoverDate: rec.handoverDate });
+                closeStatusModal();
             }
         }
     }
@@ -1201,7 +1223,8 @@
         if (!rec) return;
         if (val === true) {
             rec.isReady = true; rec.secondHandoverDate = ""; rec.notReadyReason = "";
-            saveAndRefresh(); closeStatusModal();
+            syncRecordFields(rec.id, { isReady: true, secondHandoverDate: "", notReadyReason: "" });
+            closeStatusModal();
             openSignatureModal(rec.id);
         } else {
             const secondDate = prompt("أدخل موعد التسليم الثاني الجديد:", addDays(todayStr, 5));
@@ -1209,7 +1232,8 @@
                 const reason = prompt("إلزامي: اذكر سبب عدم جهزية الدار بالتفصيل:", "وجود نواقص فنية تتطلب معالجة");
                 if (reason && reason.trim() !== "") {
                     rec.isReady = false; rec.secondHandoverDate = secondDate; rec.notReadyReason = reason;
-                    saveAndRefresh(); closeStatusModal();
+                    syncRecordFields(rec.id, { isReady: false, secondHandoverDate: secondDate, notReadyReason: reason });
+                    closeStatusModal();
                     alert("⚠️ تم حفظ حالة 'غير جاهز' مع السبب وإظهار كاميرا الملاحظات بدقة.");
                 } else {
                     alert("❌ خطأ: لا يمكن حفظ الدار غير جاهز بدون ذكر السبب بوضوح!");
@@ -1226,7 +1250,7 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const rec = houseRecords.find(r => r.id === activeRecordIdForCamera);
-            if (rec) { rec.noteImage = e.target.result; saveAndRefresh(); alert("✅ تم توثيق وحفظ الصورة برقم تدقيقي معتمد!"); }
+            if (rec) { rec.noteImage = e.target.result; syncRecordFields(rec.id, { noteImage: rec.noteImage }); alert("✅ تم توثيق وحفظ الصورة برقم تدقيقي معتمد!"); }
             event.target.value = "";
         };
         reader.readAsDataURL(file);
@@ -1293,6 +1317,7 @@
             houseReadyDate = document.getElementById('houseReadyDate').value;
         }
 
+        let recordToSync = null;
         if (editId) {
             const item = houseRecords.find(r => r.id == editId);
             if (item) {
@@ -1301,23 +1326,26 @@
                 item.arrivalDate = arrivalDate; item.cleaningStartDate = cleaningStartDate;
                 item.cleaningEndDate = cleaningEndDate; item.contractorStartDate = contractorStartDate;
                 item.houseReadyDate = houseReadyDate;
+                recordToSync = item;
             }
         } else {
-            houseRecords.push({
+            recordToSync = {
                 id: Date.now(), houseNo, phoneNo, executionType, contractorName,
                 sectorNo, ownerName, arrivalDate, cleaningStartDate, cleaningEndDate,
                 contractorStartDate, houseReadyDate, inspectionDate: "", handoverDate: "",
                 secondHandoverDate: "", notReadyReason: "", noteImage: "", signatureImg: "",
                 isCleaned: isPreCleaned, isReady: false, notifications: [null, null, null]
-            });
+            };
+            houseRecords.push(recordToSync);
         }
-        saveAndRefresh(); closeAddModal();
+        if (recordToSync) syncRecord(recordToSync);
+        closeAddModal();
     }
 
     function deleteRecord(id) {
         if (confirm("⚠️ تحذير: هل أنت متأكد تماماً من رغبتك في حذف هذا السجل الهندسي؟")) {
             houseRecords = houseRecords.filter(r => r.id !== id);
-            saveAndRefresh();
+            deleteRecordFromDB(id);
         }
     }
 
@@ -1327,11 +1355,6 @@
         localStorage.setItem('preCleanedHouses', JSON.stringify(preCleanedHouses));
         populateContractorsDropdown();
         renderTable();
-    }
-
-    function saveAndRefresh() {
-        saveLocalAndRender();
-        dbRef.set({ records: houseRecords, contractors: contractorsList, preCleaned: preCleanedHouses });
     }
 
     saveLocalAndRender();
