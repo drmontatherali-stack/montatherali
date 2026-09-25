@@ -296,10 +296,6 @@
             <div class="title" style="color: #f43f5e;">⚠️ تجاوزت موعد التسليم (10 أيام)</div>
             <div class="value" style="color: #f43f5e;" id="not-ready-overdue-count">0</div>
         </div>
-        <div class="metric-card" onclick="setFilterStatus('today_cleaning')">
-            <div class="title" style="color: #38bdf8;">متابعة موقف التنظيف اليوم</div>
-            <div class="value" style="color: #38bdf8;" id="today-cleaning-count">0</div>
-        </div>
         <div class="metric-card" onclick="setFilterStatus('completed_cleaning')">
             <div class="title" style="color: #10b981;">دور تم إكمال تنظيفها</div>
             <div class="value" style="color: #10b981;" id="clean-completed-count">0</div>
@@ -351,7 +347,7 @@
             <thead>
                 <tr>
                     <th>ت ت</th>
-                    <th>رقم الدار</th>
+                    <th>رقم الدار والبلوك</th>
                     <th>اسم المستفيد</th>
                     <th>القطاع</th>
                     <th>نوع التنفيذ والمقاول</th>
@@ -371,7 +367,7 @@
     </div>
 </div>
 
-<!-- Modal لائحة المتابعة اليومية (القائمتان المطلوبتان) -->
+<!-- Modal لائحة المتابعة اليومية -->
 <div id="dailyChecklistModal" class="modal">
     <div class="modal-content" style="max-width: 800px;">
         <span class="close-btn" onclick="closeDailyChecklistModal()">&times;</span>
@@ -391,23 +387,24 @@
     </div>
 </div>
 
-<!-- Modal إدارة الدور المنظفة مسبقاً (سجل متكامل) -->
+<!-- Modal إدارة الدور المنظفة مسبقاً (سجل بيوت دفعة واحدة) -->
 <div id="preCleanedModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closePreCleanedModal()">&times;</span>
         <h3 style="margin-bottom: 15px; color: #fff;">إدارة الدور المنظفة مسبقاً (سجل)</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">أدخل مجموعة بيوت (كل دار بسطر أو مفصولة بفاصلة):</p>
         
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <input type="text" id="newPreCleanedInput" class="form-control" placeholder="أدخل اسم/رقم الدار (مثل: القطاع الأول - دار 12)">
-            <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="addSinglePreCleanedHouse()">إضافة للسجل</button>
+        <div class="form-group">
+            <textarea id="bulkPreCleanedInput" class="form-control" rows="4" placeholder="مثال: بلوك A - دار 12&#10;بلوك B - دار 5"></textarea>
         </div>
+        <button class="btn-primary" style="margin-bottom: 20px;" onclick="addBulkPreCleanedHouses()">إضافة المجموعة للسجل</button>
 
-        <div id="preCleanedListContainer" style="max-height: 300px; overflow-y: auto; background: var(--bg-primary); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);">
+        <div id="preCleanedListContainer" style="max-height: 250px; overflow-y: auto; background: var(--bg-primary); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);">
         </div>
     </div>
 </div>
 
-<!-- Modal إضافة / تعديل دار جديد -->
+<!-- Modal إضافة / تعديل دار جديد (بالترتيب الجديد المطلوب) -->
 <div id="addRecordModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeAddModal()">&times;</span>
@@ -416,39 +413,17 @@
             <input type="hidden" id="edit-id">
             
             <div class="form-group">
-                <label>رقم القطاع</label>
-                <select id="sectorNo" class="form-control" onchange="checkPreCleanedMatch()">
-                    <option value="القطاع الأول">القطاع الأول</option>
-                    <option value="القطاع الثاني">القطاع الثاني</option>
-                    <option value="القطاع الثالث">القطاع الثالث</option>
-                    <option value="القطاع الرابع">القطاع الرابع</option>
-                    <option value="القطاع الخامس">القطاع الخامس</option>
-                    <option value="القطاع السادس">القطاع السادس</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>رقم الدار</label>
-                <input type="text" id="houseNo" class="form-control" required placeholder="مثال: بلوك A - دار 12 أو 12" oninput="checkPreCleanedMatch()">
+                <label>رقم البلوك والدار</label>
+                <input type="text" id="houseNo" class="form-control" required placeholder="مثال: بلوك A - دار 12" oninput="checkPreCleanedMatch()">
             </div>
 
             <div id="preCleanedAlertBox" style="display:none; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; padding: 12px; border-radius: 10px; margin-bottom: 15px; color: #10b981; font-weight: 700;">
-                ✨ هذا الدار مدرج ضمن "الدور المنظفة مسبقاً"! تم تخطي مواعيد التنظيف وإعطاؤه صفة نظيف مباشرة.
-            </div>
-
-            <div class="form-group">
-                <label>اسم المستفيد</label>
-                <input type="text" id="ownerName" class="form-control" required placeholder="اسم المستفيد">
+                ✨ هذا الدار مدرج ضمن "الدور المنظفة مسبقاً"! تم تعيين حالته "نظيف" مباشرة وتخطي تواريخ التنظيف.
             </div>
 
             <div class="form-group">
                 <label>رقم الهاتف (لإرسال رسائل واتساب)</label>
                 <input type="text" id="phoneNo" class="form-control" placeholder="مثال: 9647800000000">
-            </div>
-
-            <div class="form-group">
-                <label>تاريخ حضور / مجيء المستفيد</label>
-                <input type="date" id="arrivalDate" class="form-control" required onchange="handleArrivalDateChange()">
             </div>
 
             <div class="form-group">
@@ -464,6 +439,28 @@
                 <label>اسم المقاول</label>
                 <select id="contractorName" class="form-control" onchange="checkNewContractorOption(this)">
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label>رقم القطاع</label>
+                <select id="sectorNo" class="form-control" onchange="checkPreCleanedMatch()">
+                    <option value="القطاع الأول">القطاع الأول</option>
+                    <option value="القطاع الثاني">القطاع الثاني</option>
+                    <option value="القطاع الثالث">القطاع الثالث</option>
+                    <option value="القطاع الرابع">القطاع الرابع</option>
+                    <option value="القطاع الخامس">القطاع الخامس</option>
+                    <option value="القطاع السادس">القطاع السادس</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>اسم المستفيد</label>
+                <input type="text" id="ownerName" class="form-control" required placeholder="اسم المستفيد">
+            </div>
+
+            <div class="form-group">
+                <label>تاريخ حضور / مجيء المستفيد</label>
+                <input type="date" id="arrivalDate" class="form-control" required onchange="handleArrivalDateChange()">
             </div>
 
             <div id="direct-dates-group" class="hidden-field">
@@ -584,7 +581,7 @@
         }
     }
 
-    // إدارة الدور المنظفة مسبقاً (كسجل مستقل ومتكامل)
+    // إدارة سجل الدور المنظفة مسبقاً (مجموعة بيوت دفعة واحدة)
     function openPreCleanedModal() {
         renderPreCleanedList();
         document.getElementById('preCleanedModal').style.display = 'flex';
@@ -592,17 +589,18 @@
     function closePreCleanedModal() {
         document.getElementById('preCleanedModal').style.display = 'none';
     }
-    function addSinglePreCleanedHouse() {
-        const input = document.getElementById('newPreCleanedInput');
-        const val = input.value.trim();
-        if (val) {
-            if (!preCleanedHouses.includes(val)) {
-                preCleanedHouses.push(val);
-                saveAndRefresh();
-                input.value = '';
-                renderPreCleanedList();
+    function addBulkPreCleanedHouses() {
+        const text = document.getElementById('bulkPreCleanedInput').value;
+        if (!text.trim()) return;
+        const items = text.split(/[\n,]+/).map(i => i.trim()).filter(i => i !== '');
+        items.forEach(item => {
+            if (!preCleanedHouses.includes(item)) {
+                preCleanedHouses.push(item);
             }
-        }
+        });
+        saveAndRefresh();
+        document.getElementById('bulkPreCleanedInput').value = '';
+        renderPreCleanedList();
     }
     function removePreCleanedHouse(index) {
         preCleanedHouses.splice(index, 1);
@@ -613,7 +611,7 @@
         const container = document.getElementById('preCleanedListContainer');
         container.innerHTML = "";
         if (preCleanedHouses.length === 0) {
-            container.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>لا توجد دور مسجلة ضمن الدور المنظفة مسبقاً حالياً.</p>";
+            container.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>لا توجد دور مسجلة ضمن الدور المنظفة مسبقاً.</p>";
             return;
         }
         preCleanedHouses.forEach((item, idx) => {
@@ -626,7 +624,20 @@
         });
     }
 
-    // إدارة لائحة المتابعة اليومية (المستطيل والقائمتان)
+    // الفحص الفوري لمطابقة الدور المنظفة مسبقاً
+    function checkPreCleanedMatch() {
+        const houseInput = document.getElementById('houseNo').value.trim().toLowerCase();
+        const alertBox = document.getElementById('preCleanedAlertBox');
+        
+        const isMatch = preCleanedHouses.some(item => houseInput.includes(item.toLowerCase()) || item.toLowerCase().includes(houseInput));
+        if (isMatch && houseInput !== "") {
+            alertBox.style.display = 'block';
+        } else {
+            alertBox.style.display = 'none';
+        }
+        onExecutionTypeChange();
+    }
+
     function openDailyChecklistModal() {
         const cleaningListDiv = document.getElementById('cleaning-checklist-list');
         const readinessListDiv = document.getElementById('readiness-checklist-list');
@@ -638,11 +649,9 @@
         let readinessCount = 0;
 
         houseRecords.forEach(rec => {
-            const sector = rec.sectorNo || '';
             const house = rec.houseNo || '';
-            const isPreCleaned = preCleanedHouses.some(item => item.includes(sector) && item.includes(house));
+            const isPreCleaned = preCleanedHouses.some(item => house.toLowerCase().includes(item.toLowerCase()) || item.toLowerCase().includes(house.toLowerCase()));
 
-            // دور تحتاج متابعة تنظيفها (تنفيذ مباشر وغير مكتملة أو تجاوزت)
             if (rec.executionType === "تنفيذ مباشر" && !isPreCleaned && !rec.isCleaned) {
                 cleaningCount++;
                 cleaningListDiv.innerHTML += `
@@ -652,7 +661,6 @@
                 `;
             }
 
-            // دور تحتاج متابعة جاهزيتها (تسليم أو 10 أيام أو مقاولين)
             if (!rec.isReady) {
                 readinessCount++;
                 const targetDate = rec.handoverDate || rec.houseReadyDate || 'غير محدد';
@@ -669,23 +677,7 @@
 
         document.getElementById('dailyChecklistModal').style.display = 'flex';
     }
-    function closeDailyChecklistModal() {
-        document.getElementById('dailyChecklistModal').style.display = 'none';
-    }
-
-    function checkPreCleanedMatch() {
-        const sector = document.getElementById('sectorNo').value.trim();
-        const house = document.getElementById('houseNo').value.trim();
-        const alertBox = document.getElementById('preCleanedAlertBox');
-        
-        const isMatch = preCleanedHouses.some(item => item.includes(sector) && item.includes(house));
-        if (isMatch) {
-            alertBox.style.display = 'block';
-        } else {
-            alertBox.style.display = 'none';
-        }
-        onExecutionTypeChange();
-    }
+    function closeDailyChecklistModal() { document.getElementById('dailyChecklistModal').style.display = 'none'; }
 
     function onExecutionTypeChange() {
         const type = document.getElementById('executionType').value;
@@ -702,9 +694,8 @@
 
         contractorGroup.classList.remove('hidden-field');
         const arrival = document.getElementById('arrivalDate').value || todayStr;
-        const sector = document.getElementById('sectorNo').value.trim();
-        const house = document.getElementById('houseNo').value.trim();
-        const isPreCleaned = preCleanedHouses.some(item => item.includes(sector) && item.includes(house));
+        const houseInput = document.getElementById('houseNo').value.trim().toLowerCase();
+        const isPreCleaned = preCleanedHouses.some(item => houseInput.includes(item.toLowerCase()) || item.toLowerCase().includes(houseInput));
 
         if (type === "تنفيذ مباشر") {
             if (isPreCleaned) {
@@ -731,9 +722,8 @@
         let isCleaningOverdue = false;
         let isHandoverOverdue = false;
 
-        const sector = rec.sectorNo || '';
         const house = rec.houseNo || '';
-        const isPreCleaned = preCleanedHouses.some(item => item.includes(sector) && item.includes(house));
+        const isPreCleaned = preCleanedHouses.some(item => house.toLowerCase().includes(item.toLowerCase()) || item.toLowerCase().includes(house.toLowerCase()));
 
         if (rec.executionType === "تنفيذ مباشر") {
             if (isPreCleaned || rec.isCleaned) {
@@ -782,22 +772,19 @@
         const searchVal = document.getElementById('search-input').value.toLowerCase();
         const execFilter = document.getElementById('execution-filter').value;
         const sectorFilter = document.getElementById('sector-filter').value;
-        const statusFilter = document.getElementById('status-filter').value || 'all';
+        const statusFilter = window.currentStatusFilter || 'all';
 
         if (!tbody) return;
         tbody.innerHTML = "";
 
-        let cAll = 0, cTodayCleaning = 0, cCleanCompleted = 0, cCleanUncompleted = 0, cReadyAll = 0, cNotReadyOverdue = 0;
+        let cAll = 0, cCleanCompleted = 0, cCleanUncompleted = 0, cReadyAll = 0, cNotReadyOverdue = 0;
 
         houseRecords.forEach((rec, idx) => {
             cAll++;
             const logic = calculateRecordStatus(rec);
-            const sector = rec.sectorNo || '';
             const house = rec.houseNo || '';
-            const isPreCleaned = preCleanedHouses.some(item => item.includes(sector) && item.includes(house));
+            const isPreCleaned = preCleanedHouses.some(item => house.toLowerCase().includes(item.toLowerCase()) || item.toLowerCase().includes(house.toLowerCase()));
 
-            const isTodayCleaning = (rec.executionType === "تنفيذ مباشر" && !isPreCleaned && rec.cleaningEndDate === todayStr && !rec.isCleaned);
-            if (isTodayCleaning) cTodayCleaning++;
             if (rec.isCleaned || isPreCleaned) cCleanCompleted++;
             if (logic.isCleaningOverdue) cCleanUncompleted++;
             if (rec.isReady) cReadyAll++;
@@ -808,8 +795,7 @@
             const matchesSector = sectorFilter === "all" || rec.sectorNo === sectorFilter;
 
             let matchesStatus = true;
-            if (statusFilter === "today_cleaning") matchesStatus = isTodayCleaning;
-            else if (statusFilter === "completed_cleaning") matchesStatus = (rec.isCleaned || isPreCleaned);
+            if (statusFilter === "completed_cleaning") matchesStatus = (rec.isCleaned || isPreCleaned);
             else if (statusFilter === "uncompleted_cleaning") matchesStatus = logic.isCleaningOverdue;
             else if (statusFilter === "ready_all") matchesStatus = rec.isReady;
             else if (statusFilter === "not_ready_overdue") matchesStatus = logic.isHandoverOverdue;
@@ -866,7 +852,6 @@
         });
 
         document.getElementById('total-all-count').innerText = cAll;
-        document.getElementById('today-cleaning-count').innerText = cTodayCleaning;
         document.getElementById('clean-completed-count').innerText = cCleanCompleted;
         document.getElementById('clean-uncompleted-count').innerText = cCleanUncompleted;
         document.getElementById('ready-all-count').innerText = cReadyAll;
@@ -899,9 +884,8 @@
         const rec = houseRecords.find(r => r.id === id);
         if (!rec) return;
 
-        const sector = rec.sectorNo || '';
         const house = rec.houseNo || '';
-        const isPreCleaned = preCleanedHouses.some(item => item.includes(sector) && item.includes(house));
+        const isPreCleaned = preCleanedHouses.some(item => house.toLowerCase().includes(item.toLowerCase()) || item.toLowerCase().includes(house.toLowerCase()));
         const finalHandover = rec.handoverDate || (rec.executionType === 'تنفيذ مقاولين' ? rec.houseReadyDate : 'غير محدد');
 
         const details = document.getElementById('status-modal-details');
@@ -929,7 +913,7 @@
             html += `
                 <div style="background: rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-bottom:15px;">
                     <p style="font-weight:800; color:#fff; margin-bottom:10px;">حضور المستفيد وإعطاء موعد الكشف:</p>
-                    <button class="btn-primary" onclick="setInspectionAndHandoverDate()">حدد موعد الكشف الآن (لتشمل 10 أيام للتسليم)</button>
+                    <button class="btn-primary" onclick="setInspectionAndHandoverDate()">حدد موعد الكشف الآن (لتحتسب 10 أيام للتسليم)</button>
                 </div>
             `;
         }
@@ -1002,12 +986,12 @@
         populateContractorsDropdown();
         document.getElementById('modal-title').innerText = "تعديل بيانات الدار";
         document.getElementById('edit-id').value = rec.id;
-        document.getElementById('sectorNo').value = rec.sectorNo || "القطاع الأول";
         document.getElementById('houseNo').value = rec.houseNo;
-        document.getElementById('ownerName').value = rec.ownerName;
         document.getElementById('phoneNo').value = rec.phoneNo || "";
-        document.getElementById('arrivalDate').value = rec.arrivalDate || todayStr;
         document.getElementById('executionType').value = rec.executionType || "";
+        document.getElementById('sectorNo').value = rec.sectorNo || "القطاع الأول";
+        document.getElementById('ownerName').value = rec.ownerName;
+        document.getElementById('arrivalDate').value = rec.arrivalDate || todayStr;
 
         onExecutionTypeChange();
         if (rec.contractorName) document.getElementById('contractorName').value = rec.contractorName;
@@ -1019,15 +1003,15 @@
     function saveRecord(e) {
         e.preventDefault();
         const editId = document.getElementById('edit-id').value;
-        const sectorNo = document.getElementById('sectorNo').value;
         const houseNo = document.getElementById('houseNo').value;
-        const ownerName = document.getElementById('ownerName').value;
         const phoneNo = document.getElementById('phoneNo').value;
-        const arrivalDate = document.getElementById('arrivalDate').value;
         const executionType = document.getElementById('executionType').value;
         const contractorName = document.getElementById('contractorName').value;
+        const sectorNo = document.getElementById('sectorNo').value;
+        const ownerName = document.getElementById('ownerName').value;
+        const arrivalDate = document.getElementById('arrivalDate').value;
 
-        const isPreCleaned = preCleanedHouses.some(item => item.includes(sectorNo) && item.includes(houseNo));
+        const isPreCleaned = preCleanedHouses.some(item => houseNo.toLowerCase().includes(item.toLowerCase()) || item.toLowerCase().includes(houseNo.toLowerCase()));
 
         let cleaningStartDate = "", cleaningEndDate = "", contractorStartDate = "", houseReadyDate = "";
         if (executionType === "تنفيذ مباشر" && !isPreCleaned) {
@@ -1041,13 +1025,13 @@
         if (editId) {
             const item = houseRecords.find(r => r.id == editId);
             if (item) {
-                item.sectorNo = sectorNo;
                 item.houseNo = houseNo;
-                item.ownerName = ownerName;
                 item.phoneNo = phoneNo;
-                item.arrivalDate = arrivalDate;
                 item.executionType = executionType;
                 item.contractorName = contractorName;
+                item.sectorNo = sectorNo;
+                item.ownerName = ownerName;
+                item.arrivalDate = arrivalDate;
                 item.cleaningStartDate = cleaningStartDate;
                 item.cleaningEndDate = cleaningEndDate;
                 item.contractorStartDate = contractorStartDate;
@@ -1056,8 +1040,9 @@
         } else {
             houseRecords.push({
                 id: Date.now(),
-                sectorNo, houseNo, ownerName, phoneNo, arrivalDate, executionType,
-                contractorName, cleaningStartDate, cleaningEndDate,
+                houseNo, phoneNo, executionType, contractorName,
+                sectorNo, ownerName, arrivalDate,
+                cleaningStartDate, cleaningEndDate,
                 contractorStartDate, houseReadyDate,
                 inspectionDate: "", handoverDate: "",
                 isCleaned: isPreCleaned, isReady: false,
