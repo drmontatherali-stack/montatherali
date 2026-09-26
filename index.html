@@ -424,7 +424,7 @@
 
         <div class="header-info-box">
             <div class="designer-title-large">
-                <span>✨</span> Design by: <strong>Montather Ali</strong>
+                <span>✨</span> Design by: <strong>Montather Ali</strong>[cite: 8]
             </div>
 
             <div class="date-badge">
@@ -793,6 +793,13 @@
         "سبتمبر (أيلول)", "أكتوبر (تشرين الأول)", "نوفمبر (تشرين الثاني)", "ديسمبر (كانون الأول)"
     ];
 
+    function saveLocalAndRender() {
+        localStorage.setItem('contractorsList', JSON.stringify(contractorsList));
+        localStorage.setItem('preCleanedHouses', JSON.stringify(preCleanedHouses));
+        localStorage.setItem('houseRecords', JSON.stringify(houseRecords));
+        renderTable();
+    }
+
     function formatPhoneForWhatsApp(phone) {
         if (!phone) return '';
         let cleaned = phone.replace(/[^\d]/g, '');
@@ -809,11 +816,11 @@
         const encodedText = encodeURIComponent(text || '');
         let waUrl = '';
         if (cleanPhone) {
-            waUrl = `whatsapp://send?phone=${cleanPhone}&text=${encodedText}`;
+            waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedText}`;
         } else {
-            waUrl = `whatsapp://send?text=${encodedText}`;
+            waUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
         }
-        window.location.href = waUrl;
+        window.open(waUrl, '_blank');
     }
 
     dbRef.on('value', (snapshot) => {
@@ -1149,7 +1156,6 @@
     }
     function closeTimelineModal() { document.getElementById('timelineModal').style.display = 'none'; }
 
-    // تعديل الدالة لتكوين التقرير اليومي المعتمد على التواريخ والأعداد والأرقام بدقة
     function sendDailySummaryWhatsApp() {
         let allHouses = [];
         let cleanedHouses = [];
@@ -1199,7 +1205,6 @@
         openWhatsAppDirect('', msgText);
     }
 
-    // فتح نافذة اختيار خيارات تصدير الـ Excel المخصص
     function openExcelOptionsModal() {
         document.getElementById('excelOptionsModal').style.display = 'flex';
     }
@@ -1207,7 +1212,6 @@
         document.getElementById('excelOptionsModal').style.display = 'none';
     }
 
-    // دالة تصدير تقرير Excel المخصص مع خيارات التصفية وحساب العدد الكلي تلقائياً
     function exportToExcelFiltered(filterType) {
         if (houseRecords.length === 0) {
             alert("⚠️ لا توجد بيانات مسجلة لتصديرها إلى Excel!");
@@ -1270,7 +1274,6 @@
             };
         });
 
-        // إضافة صف ملخص إجمالي للعدد الكلي في نهاية جدول الـ Excel
         dataForExcel.push({
             "ت": "الإجمالي",
             "رقم الدار والبلوك": `العدد الكلي: ${filteredRecords.length} دار`,
@@ -1658,13 +1661,26 @@
         container.innerHTML = "";
 
         if (ownerPhone) {
-            const escapedText = msgText.replace(/'/g, "\\'");
-            container.innerHTML += `<button class="btn-primary" style="background:#10b981;" onclick="openWhatsAppDirect('${ownerPhone}', '${escapedText}')">📲 إرسال إلى المستفيد (${ownerPhone})</button>`;
+            const btnOwner = document.createElement('button');
+            btnOwner.className = 'btn-primary';
+            btnOwner.style.background = '#10b981';
+            btnOwner.innerText = `📲 إرسال إلى المستفيد (${ownerPhone})`;
+            btnOwner.onclick = function() {
+                openWhatsAppDirect(ownerPhone, msgText);
+            };
+            container.appendChild(btnOwner);
         }
 
         targetTeam.forEach(member => {
-            const escapedText = msgText.replace(/'/g, "\\'");
-            container.innerHTML += `<button class="btn-primary" style="background:rgba(56,189,248,0.2); border:1px solid var(--primary-blue);" onclick="openWhatsAppDirect('${member.phone}', '${escapedText}')">💬 إرسال إلى: ${member.name}</button>`;
+            const btnTeam = document.createElement('button');
+            btnTeam.className = 'btn-primary';
+            btnTeam.style.background = 'rgba(56,189,248,0.2)';
+            btnTeam.style.border = '1px solid var(--primary-blue)';
+            btnTeam.innerText = `💬 إرسال إلى: ${member.name}`;
+            btnTeam.onclick = function() {
+                openWhatsAppDirect(member.phone, msgText);
+            };
+            container.appendChild(btnTeam);
         });
 
         document.getElementById('whatsappNotifyModal').style.display = 'flex';
@@ -1753,31 +1769,10 @@
     }
 
     function deleteRecord(id) {
-        if (confirm("⚠️ تحذير: هل أنت متأكد تماماً من رغبتك في حذف هذا السجل الهندسي؟")) {
+        if (confirm("هل أنت تأكد من حذف هذا السجل بشكل نهائي؟")) {
             houseRecords = houseRecords.filter(r => r.id !== id);
             deleteRecordFromDB(id);
         }
-    }
-
-    function saveLocalAndRender() {
-        localStorage.setItem('houseRecords', JSON.stringify(houseRecords));
-        localStorage.setItem('contractorsList', JSON.stringify(contractorsList));
-        localStorage.setItem('preCleanedHouses', JSON.stringify(preCleanedHouses));
-        populateContractorsDropdown();
-        renderTable();
-    }
-
-    saveLocalAndRender();
-</script>
-
-<script>
-    // تسجيل الـ Service Worker لتفعيل خاصية تثبيت التطبيق (PWA)
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(err => {
-                console.log('فشل تسجيل service worker:', err);
-            });
-        });
     }
 </script>
 </body>
