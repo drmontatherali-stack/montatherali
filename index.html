@@ -1491,12 +1491,12 @@
 
                 const tr = document.createElement('tr');
                 if (logic.isCleaningOverdue || logic.isHandoverOverdue) tr.classList.add('row-overdue-alert');
-                tr.onclick = (e) => { if (e.target.closest('.action-btn') || e.target.closest('input') || e.target.closest('a') || e.target.closest('button') || e.target.closest('.whatsapp-icon')) return; openStatusCheckModal(rec.id); };
+                tr.onclick = (e) => { if (e.target.closest('.action-btn') || e.target.closest('input') || e.target.closest('a') || e.target.closest('button') || e.target.closest('.whatsapp-icon')) return; if (e.target.closest('.timeline-trigger')) return; openStatusCheckModal(rec.id); };
 
                 tr.innerHTML = `
                     <td>${idx + 1}</td>
-                    <td><strong onclick="openTimelineModal(${rec.id})" style="cursor:pointer; color:#38bdf8;" title="اضغط لعرض السجل وجسيم التدقيق">${rec.houseNo} ⏳</strong></td>
-                    <td>${rec.ownerName}</td>
+                    <td><strong class="timeline-trigger" onclick="event.stopPropagation(); openTimelineModal(${rec.id})" style="cursor:pointer; color:#38bdf8; display:inline-block;" title="اضغط لعرض السجل وجسيم التدقيق">${rec.houseNo} ⏳</strong></td>
+                    <td onclick="openTimelineModal(${rec.id})" style="cursor:pointer;" title="اضغط لعرض التفاصيل">${rec.ownerName}</td>
                     <td>${rec.sectorNo || '-'}</td>
                     <td><span class="badge ${rec.executionType === 'تنفيذ مباشر' ? 'badge-direct' : 'badge-contractor'}">${rec.executionType || '-'}</span><div style="font-size: 0.78rem; color: var(--text-muted); margin-top:2px;">${rec.contractorName || '-'}</div></td>
                     <td><span class="badge ${logic.badgeClass}">${logic.statusText}</span></td>
@@ -1774,6 +1774,8 @@
             deleteRecordFromDB(id);
         }
     }
+
+    renderTable();
 </script>
 </body>
 </html>
