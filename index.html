@@ -595,12 +595,12 @@
         <button id="tab-old-houses" class="nav-tab-btn" onclick="switchMainTab('old')">🏛️ دور التسليم القديمة</button>
     </div>
 
-    <!-- مستطيل علوي خاص بإكمال ملاحظات الدور القديمة -->
+    <!-- مستطيل علوي خاص بالدور القديمة التي موعد انتهاء ملاحظاتها بعد يومين -->
     <div id="old-houses-alert-banner" class="old-houses-alert-banner" style="display: none;">
         <span>📌</span>
         <div>
-            <strong>إكمال ملاحظات الدور القديمة:</strong>
-            <span id="old-houses-due-2days-list">لا توجد دور موعد تسليمها بعد يومين.</span>
+            <strong>الدور التي موعد انتهاء ملاحظاتها بعد يومين:</strong>
+            <span id="old-houses-due-2days-list">لا توجد دور قديمة موعد انتهاء ملاحظاتها بعد يومين.</span>
         </div>
     </div>
 
@@ -948,13 +948,41 @@
     firebase.initializeApp(firebaseConfig);
     const dbRef = firebase.database().ref('amirat_houses_db_zero');
 
-    // تم تحديث القائمة الافتراضية وحذف الأرقام الزائدة بدون اسم
-    let targetTeam = JSON.parse(localStorage.getItem('targetTeamList')) || [
-        { name: "مهندس محمد عبد الأمير", phone: "9647825962173" },
-        { name: "مهندس بشير أحمد", phone: "9647826821986" },
-        { name: "منتظر علي", phone: "9647862568787" },
-        { name: "علي نعمان", phone: "9647819743895" }
-    ];
+    // تنظيف قائمة الفريق: إبقاء الأسماء المحددة فقط وحذف أي أرقام بلا اسم حقيقي (رقم المستفيد يُضاف تلقائياً بشكل مؤقت عند الإرسال فقط ولا يُحفظ ضمن هذه القائمة)
+    function ensureTeamList(rawList) {
+        let list = Array.isArray(rawList) ? rawList.slice() : [];
+
+        // حذف أي عنصر بلا اسم أو بلا رقم، أو عنصر أُضيف تلقائياً سابقاً بدون اسم حقيقي (مثل "الرقم المحدد:" أو "رقم المستفيد:")
+        list = list.filter(m => m && m.name && m.phone && !/^(الرقم المحدد|رقم المستفيد|رقم غير مسمى)/.test(String(m.name).trim()));
+
+        // حذف التكرار حسب رقم الهاتف بعد توحيد صيغته
+        const seenPhones = new Set();
+        list = list.filter(m => {
+            const key = formatPhoneForWhatsApp(m.phone);
+            if (seenPhones.has(key)) return false;
+            seenPhones.add(key);
+            return true;
+        });
+
+        // التأكد من وجود مهندس مرتضى ضمن القائمة (الرجاء استبدال الرقم أدناه برقمه الفعلي)
+        if (!list.some(m => m.name.includes('مرتضى'))) {
+            list.unshift({ name: "مهندس مرتضى", phone: "9647XXXXXXXXX" /* ضع هنا رقم مهندس مرتضى الصحيح */ });
+        }
+
+        return list;
+    }
+
+    let targetTeam = ensureTeamList(JSON.parse(localStorage.getItem('targetTeamList')));
+    if (targetTeam.length <= 1) {
+        // أول تشغيل أو لا توجد بيانات محفوظة بعد: القائمة الافتراضية المطلوبة
+        targetTeam = ensureTeamList([
+            { name: "مهندس مرتضى", phone: "9647XXXXXXXXX" /* ضع هنا رقم مهندس مرتضى الصحيح */ },
+            { name: "مهندس محمد عبد الأمير", phone: "9647825962173" },
+            { name: "مهندس بشير أحمد", phone: "9647826821986" },
+            { name: "منتظر علي", phone: "9647862568787" },
+            { name: "علي نعمان", phone: "9647819743895" }
+        ]);
+    }
 
     let contractorsList = JSON.parse(localStorage.getItem('contractorsList')) || [
         "أحمد عواد", "عادل عرار", "محمد عرار", "جاسم زراك", "دياري كريم", 
@@ -1026,11 +1054,13 @@
 
         let isDefaultInTeam = targetTeam.some(member => formatPhoneForWhatsApp(member.phone) === formattedDefault);
 
+        // قائمة عرض مؤقتة خاصة بهذه النافذة فقط (رقم المستفيد الخاص بالدار)، لا تُضاف أبداً إلى قائمة الفريق الدائمة ولا تُحفظ
+        let displayTeam = targetTeam.slice();
         if (!isDefaultInTeam && targetPhoneToUse) {
-            targetTeam.unshift({ name: "الرقم المحدد: " + targetPhoneToUse, phone: targetPhoneToUse });
+            displayTeam.unshift({ name: "📱 رقم المستفيد", phone: targetPhoneToUse });
         }
 
-        targetTeam.forEach((member, idx) => {
+        displayTeam.forEach((member, idx) => {
             let isChecked = (formatPhoneForWhatsApp(member.phone) === formattedDefault || idx === 0) ? "checked" : "";
             container.innerHTML += `
                 <div class="team-select-item">
@@ -1083,7 +1113,14 @@
             oldHouseRecords = data.oldRecords ? Object.values(data.oldRecords) : [];
             if (data.contractors) contractorsList = data.contractors;
             if (data.preCleaned) preCleanedHouses = data.preCleaned;
-            if (data.teamList) targetTeam = data.teamList;
+            if (data.teamList) {
+                const cleanedTeam = ensureTeamList(data.teamList);
+                targetTeam = cleanedTeam;
+                // إذا كانت القائمة على قاعدة البيانات تحتوي أرقاماً بلا اسم، يتم تحديثها هناك أيضاً فور اكتشافها
+                if (JSON.stringify(cleanedTeam) !== JSON.stringify(data.teamList)) {
+                    dbRef.child('teamList').set(cleanedTeam);
+                }
+            }
             saveLocalAndRender();
         }
     });
@@ -1425,13 +1462,12 @@
     function checkOldHousesAlerts() {
         const alertBanner = document.getElementById('old-houses-alert-banner');
         const listSpan = document.getElementById('old-houses-due-2days-list');
-        
+
+        // فقط الدور القديمة التي موعد انتهاء ملاحظاتها (notesEndDate) بعد يومين بالضبط من اليوم
         let dueHouses = oldHouseRecords.filter(r => {
-            if (r.status === 'قيد التسليم' && r.handoverDate) {
-                let diff = daysBetween(todayStr, r.handoverDate);
-                return diff === 2;
-            }
-            return false;
+            if (!r.notesEndDate) return false;
+            let diff = daysBetween(todayStr, r.notesEndDate);
+            return diff === 2;
         });
 
         if (dueHouses.length > 0) {
