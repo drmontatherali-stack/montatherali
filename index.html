@@ -686,7 +686,7 @@
             </div>
             <div class="form-group">
                 <label>رقم الهاتف (964...)</label>
-                <input type="text" id="phoneNo" class="form-control" placeholder="9647800000000">
+                <input type="text" id="phoneNo" class="form-control" placeholder="9647840971766">
             </div>
             <div class="form-group">
                 <label>نوع التنفيذ</label>
@@ -797,6 +797,7 @@
     const dbRef = firebase.database().ref('amirat_houses_db_zero');
 
     let targetTeam = JSON.parse(localStorage.getItem('targetTeamList')) || [
+        { name: "الرقم الرئيسي للواتساب العادي", phone: "9647840971766" },
         { name: "مهندس محمد عبد الأمير", phone: "9647825962173" },
         { name: "منتظر علي", phone: "9647862568787" },
         { name: "مهندس بشير أحمد", phone: "9647826821986" },
@@ -838,7 +839,7 @@
     }
 
     function formatPhoneForWhatsApp(phone) {
-        if (!phone) return '';
+        if (!phone) return '9647840971766';
         let cleaned = phone.replace(/[^\d]/g, '');
         if (cleaned.startsWith('0')) {
             cleaned = '964' + cleaned.substring(1);
@@ -848,17 +849,73 @@
         return cleaned;
     }
 
-    // فتح الواتساب مباشره دون المتصفح باستعمال بروتوكول الرابط المباشر للواتساب
+    // فتح الواتساب العادي مباشره دون المتصفح باستعمال بروتوكول الرابط المباشر للواتساب
     function openWhatsAppDirect(phone, text) {
-        const cleanPhone = formatPhoneForWhatsApp(phone);
+        const targetPhone = phone ? phone : "07840971766";
+        const cleanPhone = formatPhoneForWhatsApp(targetPhone);
         const encodedText = encodeURIComponent(text || '');
-        let waUrl = '';
-        if (cleanPhone) {
-            waUrl = `whatsapp://send?phone=${cleanPhone}&text=${encodedText}`;
-        } else {
-            waUrl = `whatsapp://send?text=${encodedText}`;
-        }
+        let waUrl = `whatsapp://send?phone=${cleanPhone}&text=${encodedText}`;
         window.location.href = waUrl;
+    }
+
+    function openWhatsappNotifyDialog(msg, defaultPhone) {
+        pendingWhatsAppMsg = msg;
+        const container = document.getElementById('target-team-checkboxes');
+        container.innerHTML = "";
+        
+        let targetPhoneToUse = defaultPhone ? defaultPhone : "07840971766";
+        let formattedDefault = formatPhoneForWhatsApp(targetPhoneToUse);
+
+        let isDefaultInTeam = targetTeam.some(member => formatPhoneForWhatsApp(member.phone) === formattedDefault);
+
+        if (!isDefaultInTeam && targetPhoneToUse) {
+            targetTeam.unshift({ name: "الرقم المحدد: " + targetPhoneToUse, phone: targetPhoneToUse });
+        }
+
+        targetTeam.forEach((member, idx) => {
+            let isChecked = (formatPhoneForWhatsApp(member.phone) === formattedDefault || idx === 0) ? "checked" : "";
+            container.innerHTML += `
+                <div class="team-select-item">
+                    <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" value="${member.phone}" class="wa-target-checkbox" ${isChecked}>
+                        <span>${member.name} (${member.phone})</span>
+                    </label>
+                </div>
+            `;
+        });
+
+        document.getElementById('whatsappNotifyModal').style.display = 'flex';
+    }
+
+    function closeWhatsappNotifyModal() {
+        document.getElementById('whatsappNotifyModal').style.display = 'none';
+    }
+
+    function addNewTeamMemberPrompt() {
+        let name = prompt("أدخل اسم العضو أو المسمى الوظيفي:");
+        if (!name) return;
+        let phone = prompt("أدخل رقم الواتساب (مثال: 07840971766):");
+        if (!phone) return;
+        
+        targetTeam.push({ name: name, phone: phone });
+        syncLists();
+        openWhatsappNotifyDialog(pendingWhatsAppMsg, phone);
+    }
+
+    function executeMultiWhatsAppSend() {
+        const checkboxes = document.querySelectorAll('.wa-target-checkbox:checked');
+        if (checkboxes.length === 0) {
+            alert("⚠️ يرجى تحديد شخص واحد على الأقل للإرسال!");
+            return;
+        }
+
+        checkboxes.forEach((cb, index) => {
+            setTimeout(() => {
+                openWhatsAppDirect(cb.value, pendingWhatsAppMsg);
+            }, index * 800);
+        });
+
+        closeWhatsappNotifyModal();
     }
 
     dbRef.on('value', (snapshot) => {
@@ -1250,7 +1307,7 @@
 
                       `_صادر عن مكتب التسليم الفني_`;
 
-        openWhatsappNotifyDialog(msgText, '');
+        openWhatsappNotifyDialog(msgText, '07840971766');
     }
 
     function openExcelOptionsModal() {
@@ -1475,7 +1532,7 @@
 
     function triggerWhatsAppNotify(phone, name, houseNo, sectorNo) {
         let msg = `السلام عليكم ورحمة الله وبركاته\nالأخ المستفيد: ${name}\nنود إعلامكم بأن الدار رقم (${houseNo}) في ${sectorNo} أصبح جاهزاً للإنهاء والتسليم.\nيرجى المراجعة لإكمال الإجراءات.`;
-        openWhatsappNotifyDialog(msg, phone);
+        openWhatsappNotifyDialog(msg, phone ? phone : "07840971766");
     }
 
     function renderTable() {
@@ -1566,7 +1623,7 @@
                     }
                 }
 
-                const phone = rec.phoneNo || '';
+                const phone = rec.phoneNo || '07840971766';
                 const escapedOwner = rec.ownerName ? rec.ownerName.replace(/'/g, "\\'") : '';
                 const escapedHouse = rec.houseNo ? rec.houseNo.replace(/'/g, "\\'") : '';
                 const escapedSector = rec.sectorNo ? rec.sectorNo.replace(/'/g, "\\'") : '';
@@ -1709,7 +1766,7 @@
                     `🔍 تاريخ الكشف المعتمد: ${rec.inspectionDate || todayStr}\n` +
                     `⏱️ موعد التسليم النهائـي: ${rec.handoverDate || addDays(rec.arrivalDate, 10)}`;
         
-        openWhatsappNotifyDialog(msg, rec.phoneNo);
+        openWhatsappNotifyDialog(msg, rec.phoneNo ? rec.phoneNo : "07840971766");
     }
 
     function updateReadyFlag(val) {
@@ -1725,194 +1782,146 @@
             if (secondDate) {
                 const reason = prompt("إلزامي: اذكر سبب عدم جهزية الدار بالتفصيل:", "وجود نواقص فنية تتطلب معالجة");
                 if (reason && reason.trim() !== "") {
-                    rec.isReady = false; rec.secondHandoverDate = secondDate; rec.notReadyReason = reason;
-                    syncRecordFields(rec.id, { isReady: false, secondHandoverDate: secondDate, notReadyReason: reason });
+                    rec.isReady = false; rec.secondHandoverDate = secondDate; rec.notReadyReason = reason.trim();
+                    syncRecordFields(rec.id, { isReady: false, secondHandoverDate: secondDate, notReadyReason: rec.notReadyReason });
                     closeStatusModal();
-                    alert("⚠️ تم حفظ حالة 'غير جاهز' مع السبب وإظهار كاميرا الملاحظات بدقة.");
-                } else {
-                    alert("❌ خطأ: لا يمكن حفظ الدار غير جاهز بدون ذكر السبب بوضوح!");
+                    triggerCamera(rec.id);
                 }
             }
         }
     }
+
     function closeStatusModal() { document.getElementById('statusCheckModal').style.display = "none"; }
 
-    function triggerCamera(id) { activeRecordIdForCamera = id; document.getElementById('cameraFileInput').click(); }
-    function handleImageCapture(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const rec = houseRecords.find(r => r.id === activeRecordIdForCamera);
-            if (rec) { rec.noteImage = e.target.result; syncRecordFields(rec.id, { noteImage: rec.noteImage }); alert("✅ تم توثيق وحفظ الصورة برقم تدقيقي معتمد!"); }
-            event.target.value = "";
-        };
-        reader.readAsDataURL(file);
-    }
-    function viewImage(imgUrl) { document.getElementById('previewImgElement').src = imgUrl; document.getElementById('imagePreviewModal').style.display = 'flex'; }
-    function closeImageModal() { document.getElementById('imagePreviewModal').style.display = 'none'; }
-
     function openAddModal() {
-        document.getElementById('modal-title').innerText = "إضافة دار جديد";
-        document.getElementById('record-form').reset();
+        populateContractorsDropdown();
         document.getElementById('edit-id').value = "";
+        document.getElementById('record-form').reset();
+        document.getElementById('modal-title').innerText = "إضافة دار جديد (مع التدقيق الصارم)";
         document.getElementById('arrivalDate').value = todayStr;
         document.getElementById('preCleanedAlertBox').style.display = 'none';
-        populateContractorsDropdown(); onExecutionTypeChange();
+        onExecutionTypeChange();
         document.getElementById('addRecordModal').style.display = "flex";
     }
-    function closeAddModal() { document.getElementById('addRecordModal').style.display = 'none'; }
-    function closeWhatsappNotifyModal() { document.getElementById('whatsappNotifyModal').style.display = 'none'; }
 
-    // إعداد واجهة اختيار الأشخاص المتعددين للواتساب وإضافة مستخدم جديد
-    function openWhatsappNotifyDialog(msgText, ownerPhone) {
-        pendingWhatsAppMsg = msgText;
-        const container = document.getElementById('target-team-checkboxes');
-        container.innerHTML = "";
+    function closeAddModal() { document.getElementById('addRecordModal').style.display = "none"; }
 
-        if (ownerPhone) {
-            container.innerHTML += `
-                <div class="team-select-item">
-                    <label for="check-owner" style="cursor:pointer; color:#10b981;"><strong>📲 المستفيد (${ownerPhone})</strong></label>
-                    <input type="checkbox" id="check-owner" value="${ownerPhone}" class="team-wa-check" checked style="width:20px; height:20px;">
-                </div>
-            `;
-        }
-
-        targetTeam.forEach((member, idx) => {
-            container.innerHTML += `
-                <div class="team-select-item">
-                    <label for="team-check-${idx}" style="cursor:pointer; color:#fff;">👤 ${member.name} (${member.phone})</label>
-                    <input type="checkbox" id="team-check-${idx}" value="${member.phone}" class="team-wa-check" style="width:20px; height:20px;">
-                </div>
-            `;
-        });
-
-        document.getElementById('whatsappNotifyModal').style.display = 'flex';
-    }
-
-    function addNewTeamMemberPrompt() {
-        const name = prompt("أدخل اسم المهندس / المستخدم الجديد:");
-        if (name && name.trim()) {
-            const phone = prompt("أدخل رقم الواتساب (مثال: 9647800000000):");
-            if (phone && phone.trim()) {
-                targetTeam.push({ name: name.trim(), phone: formatPhoneForWhatsApp(phone.trim()) });
-                syncLists();
-                openWhatsappNotifyDialog(pendingWhatsAppMsg, '');
-            }
-        }
-    }
-
-    function executeMultiWhatsAppSend() {
-        const checkboxes = document.querySelectorAll('.team-wa-check:checked');
-        if (checkboxes.length === 0) {
-            alert("⚠️ يرجى اختيار شخص واحد على الأقل لإرسال الرسالة إليه عبر الواتساب!");
+    function saveRecord(e) {
+        e.preventDefault();
+        const editId = document.getElementById('edit-id').value;
+        const houseNo = document.getElementById('houseNo').value.trim();
+        
+        if (!editId && houseRecords.some(r => r.houseNo.trim().toLowerCase() === houseNo.toLowerCase())) {
+            alert("❌ خطأ تدقيقي: رقم الدار هذا مسجل مسبقاً في النظام ولا يمكن تكراره!");
             return;
         }
 
-        checkboxes.forEach((cb, i) => {
-            setTimeout(() => {
-                openWhatsAppDirect(cb.value, pendingWhatsAppMsg);
-            }, i * 1200); // فاصل زمني سلس لفتح الواتساب لكل شخص
-        });
+        const execType = document.getElementById('executionType').value;
+        const arrival = document.getElementById('arrivalDate').value;
+        const isPreCleaned = preCleanedHouses.some(item => item.trim() === houseNo);
 
-        closeWhatsappNotifyModal();
+        const record = {
+            id: editId ? parseInt(editId) : Date.now(),
+            houseNo: houseNo,
+            phoneNo: document.getElementById('phoneNo').value.trim() || '07840971766',
+            executionType: execType,
+            contractorName: execType === "تنفيذ مقاولين" ? document.getElementById('contractorName').value : "",
+            sectorNo: document.getElementById('sectorNo').value,
+            ownerName: document.getElementById('ownerName').value.trim(),
+            arrivalDate: arrival,
+            cleaningStartDate: (execType === "تنفيذ مباشر" && !isPreCleaned) ? document.getElementById('cleaningStartDate').value : "",
+            cleaningEndDate: (execType === "تنفيذ مباشر" && !isPreCleaned) ? document.getElementById('cleaningEndDate').value : "",
+            contractorStartDate: execType === "تنفيذ مقاولين" ? document.getElementById('contractorStartDate').value : "",
+            houseReadyDate: execType === "تنفيذ مقاولين" ? document.getElementById('houseReadyDate').value : addDays(arrival, 10),
+            handoverDate: addDays(arrival, 10),
+            isCleaned: isPreCleaned ? true : false,
+            isReady: false
+        };
+
+        if (editId) {
+            const oldRec = houseRecords.find(r => r.id === parseInt(editId));
+            if (oldRec) {
+                record.isCleaned = oldRec.isCleaned;
+                record.isReady = oldRec.isReady;
+                record.inspectionDate = oldRec.inspectionDate || "";
+                record.secondHandoverDate = oldRec.secondHandoverDate || "";
+                record.notReadyReason = oldRec.notReadyReason || "";
+                record.noteImage = oldRec.noteImage || "";
+                record.signatureImg = oldRec.signatureImg || "";
+                record.notifications = oldRec.notifications || [null, null, null];
+            }
+        }
+
+        syncRecord(record);
+        closeAddModal();
+        alert("✅ تم حفظ وتدقيق بيانات الدار بنجاح تام!");
     }
 
     function editRecord(id) {
         const rec = houseRecords.find(r => r.id === id);
         if (!rec) return;
         populateContractorsDropdown();
-        document.getElementById('modal-title').innerText = "تعديل بيانات الدار (مع التدقيق)";
         document.getElementById('edit-id').value = rec.id;
         document.getElementById('houseNo').value = rec.houseNo;
-        document.getElementById('phoneNo').value = rec.phoneNo || "";
-        document.getElementById('executionType').value = rec.executionType || "";
-        document.getElementById('sectorNo').value = rec.sectorNo || "القطاع الأول";
-        document.getElementById('ownerName').value = rec.ownerName;
-        document.getElementById('arrivalDate').value = rec.arrivalDate || todayStr;
+        document.getElementById('phoneNo').value = rec.phoneNo || '';
+        document.getElementById('executionType').value = rec.executionType;
         onExecutionTypeChange();
-        if (rec.contractorName) document.getElementById('contractorName').value = rec.contractorName;
-        checkPreCleanedMatch();
+        if (rec.executionType === "تنفيذ مقاولين") document.getElementById('contractorName').value = rec.contractorName || "";
+        document.getElementById('sectorNo').value = rec.sectorNo;
+        document.getElementById('ownerName').value = rec.ownerName;
+        document.getElementById('arrivalDate').value = rec.arrivalDate;
+        
+        if (rec.executionType === "تنفيذ مباشر") {
+            document.getElementById('cleaningStartDate').value = rec.cleaningStartDate || "";
+            document.getElementById('cleaningEndDate').value = rec.cleaningEndDate || "";
+        } else if (rec.executionType === "تنفيذ مقاولين") {
+            document.getElementById('contractorStartDate').value = rec.contractorStartDate || "";
+            document.getElementById('houseReadyDate').value = rec.houseReadyDate || "";
+        }
+
+        document.getElementById('modal-title').innerText = "تعديل بيانات الدار";
         document.getElementById('addRecordModal').style.display = "flex";
     }
 
-    function saveRecord(e) {
-        e.preventDefault();
-        const editId = document.getElementById('edit-id').value;
-        const houseNo = document.getElementById('houseNo').value.trim();
-        const phoneNo = document.getElementById('phoneNo').value.trim();
-        const executionType = document.getElementById('executionType').value;
-        const contractorName = document.getElementById('contractorName').value;
-        const sectorNo = document.getElementById('sectorNo').value;
-        const ownerName = document.getElementById('ownerName').value.trim();
-        const arrivalDate = document.getElementById('arrivalDate').value;
-        const isPreCleaned = preCleanedHouses.some(item => item.trim() === houseNo);
-
-        if (!editId) {
-            const isDuplicate = houseRecords.some(r => r.houseNo.toLowerCase() === houseNo.toLowerCase());
-            if (isDuplicate) {
-                alert(`❌ خطأ تدقيقي: الدار رقم (${houseNo}) مسجل مسبقاً في النظام ولا يمكن تكراره!`);
-                return;
-            }
-        }
-
-        let cleaningStartDate = "", cleaningEndDate = "", contractorStartDate = "", houseReadyDate = "", handoverDate = "";
-        
-        // حساب الـ 10 أيام تلقائياً للمباشر والمقاولين عند الإدخال
-        handoverDate = addDays(arrivalDate, 10);
-
-        if (executionType === "تنفيذ مباشر" && !isPreCleaned) {
-            cleaningStartDate = arrivalDate;
-            cleaningEndDate = addDays(arrivalDate, 2); // 2 يوم تنظيف
-        } else if (executionType === "تنفيذ مقاولين") {
-            contractorStartDate = document.getElementById('contractorStartDate').value || addDays(arrivalDate, 1);
-            houseReadyDate = handoverDate;
-        }
-
-        let recordToSync = null;
-        if (editId) {
-            const item = houseRecords.find(r => r.id == editId);
-            if (item) {
-                item.houseNo = houseNo; item.phoneNo = phoneNo; item.executionType = executionType;
-                item.contractorName = executionType === "تنفيذ مقاولين" ? contractorName : "";
-                item.sectorNo = sectorNo; item.ownerName = ownerName; item.arrivalDate = arrivalDate;
-                item.cleaningStartDate = cleaningStartDate; item.cleaningEndDate = cleaningEndDate;
-                item.contractorStartDate = contractorStartDate; item.houseReadyDate = houseReadyDate;
-                item.handoverDate = handoverDate;
-                recordToSync = item;
-            }
-        } else {
-            const newObj = {
-                id: Date.now(), houseNo, phoneNo, executionType,
-                contractorName: executionType === "تنفيذ مقاولين" ? contractorName : "",
-                sectorNo, ownerName, arrivalDate,
-                cleaningStartDate, cleaningEndDate, contractorStartDate, houseReadyDate, handoverDate,
-                isCleaned: isPreCleaned, isReady: false, secondHandoverDate: "", notReadyReason: "",
-                notifications: [null, null, null]
-            };
-            houseRecords.push(newObj);
-            recordToSync = newObj;
-        }
-
-        if (recordToSync) syncRecord(recordToSync);
-        closeAddModal();
-
-        const msg = `✨ *تم إضافة/تعديل سجل الدار بنجاح*\n` +
-                    `🏠 رقم الدار: ${houseNo} (${sectorNo})\n` +
-                    `👤 المستفيد: ${ownerName}\n` +
-                    `📍 نوع التنفيذ: ${executionType}\n` +
-                    `⏱️ موعد التسليم الـ 10 أيام: ${handoverDate}`;
-
-        openWhatsappNotifyDialog(msg, phoneNo);
-    }
-
     function deleteRecord(id) {
-        if (confirm("🚨 هل أنت متأكد من حذف هذا السجل نهائياً؟")) {
-            houseRecords = houseRecords.filter(r => r.id !== id);
+        if (confirm("هل أنت أصل ومقتنع بحذف هذا الدار نهائياً من السجل التاريخي؟")) {
             deleteRecordFromDB(id);
         }
     }
+
+    function triggerCamera(id) {
+        activeRecordIdForCamera = id;
+        document.getElementById('cameraFileInput').click();
+    }
+
+    function handleImageCapture(event) {
+        const file = event.target.files[0];
+        if (file && activeRecordIdForCamera) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Img = e.target.result;
+                const rec = houseRecords.find(r => r.id === activeRecordIdForCamera);
+                if (rec) {
+                    rec.noteImage = base64Img;
+                    syncRecordFields(rec.id, { noteImage: base64Img });
+                    alert("📷 تم التقاط صورة الملاحظات واعتمادها بالدار بنجاح!");
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function viewImage(imgUrl) {
+        document.getElementById('previewImgElement').src = imgUrl;
+        document.getElementById('imagePreviewModal').style.display = 'flex';
+    }
+    function closeImageModal() { document.getElementById('imagePreviewModal').style.display = 'none'; }
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = "none";
+        }
+    };
 </script>
 </body>
 </html>
