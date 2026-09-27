@@ -679,6 +679,21 @@
                 <option value="القطاع الخامس">القطاع الخامس</option>
                 <option value="القطاع السادس">القطاع السادس</option>
             </select>
+
+            <label>ترتيب حسب:</label>
+            <select id="new-sort-select" onchange="renderTable()">
+                <option value="default">الترتيب الافتراضي</option>
+                <option value="handover_asc">📅 الأقرب موعد تسليم أولاً</option>
+                <option value="overdue_first">⚠️ الأكثر تأخراً أولاً</option>
+                <option value="ready_first">✅ الجاهزة أولاً</option>
+                <option value="not_ready_first">🔧 غير الجاهزة أولاً</option>
+            </select>
+            <select id="old-sort-select" onchange="renderTable()" style="display:none;">
+                <option value="default">الترتيب الافتراضي</option>
+                <option value="notes_end_asc">📌 الأقرب انتهاء ملاحظات أولاً</option>
+                <option value="overdue_first">⚠️ الأكثر تأخراً أولاً</option>
+                <option value="incomplete_first">📝 غير المكتملة أولاً</option>
+            </select>
         </div>
 
         <button class="btn-add" onclick="openAddModal()">+ إضافة دار جديدة</button>
@@ -1270,6 +1285,8 @@
         activeTab = tab;
         document.getElementById('tab-new-houses').classList.toggle('active', tab === 'new');
         document.getElementById('tab-old-houses').classList.toggle('active', tab === 'old');
+        document.getElementById('new-sort-select').style.display = (tab === 'new') ? 'inline-block' : 'none';
+        document.getElementById('old-sort-select').style.display = (tab === 'old') ? 'inline-block' : 'none';
         renderTable();
     }
 
@@ -2467,6 +2484,32 @@
                 return true;
             });
 
+            const newSortMode = document.getElementById('new-sort-select') ? document.getElementById('new-sort-select').value : 'default';
+            if (newSortMode === 'handover_asc') {
+                filtered.sort((a, b) => {
+                    const da = a.secondHandoverDate || a.handoverDate || a.houseReadyDate || '9999-12-31';
+                    const db = b.secondHandoverDate || b.handoverDate || b.houseReadyDate || '9999-12-31';
+                    return da.localeCompare(db);
+                });
+            } else if (newSortMode === 'overdue_first') {
+                const rankOf = rec => {
+                    if (rec.isReady) return 2;
+                    const st = calculateRecordStatus(rec);
+                    return (st.isHandoverOverdue || st.isCleaningOverdue) ? 0 : 1;
+                };
+                filtered.sort((a, b) => {
+                    const rankDiff = rankOf(a) - rankOf(b);
+                    if (rankDiff !== 0) return rankDiff;
+                    const da = a.secondHandoverDate || a.handoverDate || a.houseReadyDate || '9999-12-31';
+                    const db = b.secondHandoverDate || b.handoverDate || b.houseReadyDate || '9999-12-31';
+                    return da.localeCompare(db);
+                });
+            } else if (newSortMode === 'ready_first') {
+                filtered.sort((a, b) => (a.isReady ? 0 : 1) - (b.isReady ? 0 : 1));
+            } else if (newSortMode === 'not_ready_first') {
+                filtered.sort((a, b) => (a.isReady ? 1 : 0) - (b.isReady ? 1 : 0));
+            }
+
             filtered.forEach((rec, idx) => {
                 const st = calculateRecordStatus(rec);
                 const tr = document.createElement('tr');
@@ -2575,6 +2618,26 @@
 
                 return true;
             });
+
+            const oldSortMode = document.getElementById('old-sort-select') ? document.getElementById('old-sort-select').value : 'default';
+            if (oldSortMode === 'notes_end_asc') {
+                filteredOld.sort((a, b) => {
+                    const da = a.notesEndDate || '9999-12-31';
+                    const db = b.notesEndDate || '9999-12-31';
+                    return da.localeCompare(db);
+                });
+            } else if (oldSortMode === 'overdue_first') {
+                filteredOld.sort((a, b) => {
+                    const rankOf = rec => (rec.status === 'مستلم') ? 1 : 0;
+                    const rankDiff = rankOf(a) - rankOf(b);
+                    if (rankDiff !== 0) return rankDiff;
+                    const da = a.notesEndDate || '9999-12-31';
+                    const db = b.notesEndDate || '9999-12-31';
+                    return da.localeCompare(db);
+                });
+            } else if (oldSortMode === 'incomplete_first') {
+                filteredOld.sort((a, b) => (a.notesCompleted ? 1 : 0) - (b.notesCompleted ? 1 : 0));
+            }
 
             filteredOld.forEach((rec, idx) => {
                 const tr = document.createElement('tr');
