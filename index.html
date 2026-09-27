@@ -42,6 +42,7 @@
             --status-ready: #10b981;
             --status-direct: #06b6d4;
             --status-contractor: #a855f7;
+            --status-warning: #f97316;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
@@ -158,7 +159,7 @@
 
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
@@ -195,6 +196,8 @@
         .metric-card.alert-card { border-color: rgba(244, 63, 94, 0.3); background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(225, 29, 72, 0.15) 100%); }
         .metric-card.alert-card:hover { border-color: var(--status-overdue); box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(244, 63, 94, 0.3); }
         .metric-card.alert-card:hover::before { background: var(--status-overdue); box-shadow: 0 0 15px var(--status-overdue); }
+        .metric-card.warning-card { border-color: rgba(249, 115, 22, 0.3); background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(249, 115, 22, 0.15) 100%); }
+        .metric-card.warning-card:hover { border-color: var(--status-warning); box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(249, 115, 22, 0.3); }
 
         .filter-section {
             background: var(--glass-bg);
@@ -260,6 +263,7 @@
         tbody tr { border-bottom: 1px solid var(--glass-border); transition: all 0.2s ease; cursor: pointer; }
         tbody tr:hover { background: rgba(56, 189, 248, 0.08); }
         tbody tr.row-overdue-alert { background: rgba(244, 63, 94, 0.12) !important; border-right: 4px solid var(--status-overdue) !important; }
+        tbody tr.row-warning-3days { background: rgba(249, 115, 22, 0.12) !important; border-right: 4px solid var(--status-warning) !important; }
         td { padding: 16px 18px; font-size: 0.88rem; vertical-align: middle; }
 
         .badge { display: inline-block; padding: 7px 16px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.3px; backdrop-filter: blur(6px); }
@@ -268,6 +272,7 @@
         .badge-ready { background-color: rgba(16, 185, 129, 0.15); color: var(--status-ready); border: 1px solid rgba(16, 185, 129, 0.35); box-shadow: 0 0 12px rgba(16, 185, 129, 0.25); }
         .badge-direct { background-color: rgba(6, 182, 212, 0.15); color: var(--status-direct); border: 1px solid rgba(6, 182, 212, 0.35); }
         .badge-contractor { background-color: rgba(168, 85, 247, 0.15); color: var(--status-contractor); border: 1px solid rgba(168, 85, 247, 0.35); }
+        .badge-warning { background-color: rgba(249, 115, 22, 0.18); color: var(--status-warning); border: 1px solid rgba(249, 115, 22, 0.35); }
 
         .whatsapp-icon { color: #34d399; font-size: 1.3rem; text-decoration: none; margin-left: 10px; display: inline-block; cursor: pointer; transition: transform 0.2s, text-shadow 0.2s; }
         .whatsapp-icon:hover { transform: scale(1.3); text-shadow: 0 0 12px #34d399; }
@@ -411,6 +416,21 @@
             color: #000;
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
         }
+
+        .team-select-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(5, 11, 20, 0.6);
+            border: 1px solid var(--glass-border);
+            padding: 10px 16px;
+            border-radius: 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .team-select-item:hover {
+            border-color: var(--primary-blue);
+        }
     </style>
 </head>
 <body>
@@ -452,6 +472,14 @@
         <div class="metric-card" onclick="setFilterStatus('all')">
             <div class="title" style="color: #38bdf8;">كل الدور المسجلة</div>
             <div class="value" style="color: #38bdf8;" id="total-all-count">0</div>
+        </div>
+        <div class="metric-card warning-card" onclick="setFilterStatus('2day_cleaning_needed')">
+            <div class="title" style="color: #f97316;">🧹 يجب تنظيفها خلال يومين</div>
+            <div class="value" style="color: #f97316;" id="clean-2day-needed-count">0</div>
+        </div>
+        <div class="metric-card warning-card" onclick="setFilterStatus('3days_remaining')">
+            <div class="title" style="color: #fbbf24;">🚨 متبقي لموعدها 3 أيام (موقف)</div>
+            <div class="value" style="color: #fbbf24;" id="three-days-remaining-count">0</div>
         </div>
         <div class="metric-card alert-card" onclick="setFilterStatus('uncompleted_cleaning')">
             <div class="title" style="color: #f43f5e;">⚠️ تجاوزت موعد التنظيف</div>
@@ -692,12 +720,12 @@
                 <input type="date" id="arrivalDate" class="form-control" required onchange="handleArrivalDateChange()">
             </div>
             <div id="direct-dates-group" class="hidden-field">
-                <div class="form-group"><label>تاريخ التنظيف</label><input type="date" id="cleaningStartDate" class="form-control"></div>
-                <div class="form-group"><label>تاريخ انتهاء التنظيف</label><input type="date" id="cleaningEndDate" class="form-control"></div>
+                <div class="form-group"><label>تاريخ التنظيف المتوقع</label><input type="date" id="cleaningStartDate" class="form-control"></div>
+                <div class="form-group"><label>تاريخ انتهاء التنظيف (أقصاه يومين)</label><input type="date" id="cleaningEndDate" class="form-control"></div>
             </div>
             <div id="contractor-dates-group" class="hidden-field">
                 <div class="form-group"><label>تاريخ عمل المقاول</label><input type="date" id="contractorStartDate" class="form-control"></div>
-                <div class="form-group"><label>تاريخ جهوزية الدار</label><input type="date" id="houseReadyDate" class="form-control"></div>
+                <div class="form-group"><label>تاريخ جهوزية الدار (10 أيام تلقائي)</label><input type="date" id="houseReadyDate" class="form-control"></div>
             </div>
             <button type="submit" class="btn-primary" style="margin-top: 10px;">حفظ وتدقيق السجل</button>
         </form>
@@ -716,12 +744,19 @@
     </div>
 </div>
 
+<!-- نافذة الواتساب المطورة متعددة الاختيارات وإضافة المستخدمين -->
 <div id="whatsappNotifyModal" class="modal">
-    <div class="modal-content" style="text-align: center;">
+    <div class="modal-content" style="text-align: center; max-width: 600px;">
         <span class="close-btn" onclick="closeWhatsappNotifyModal()">&times;</span>
-        <h3 style="margin-bottom: 10px; color: #10b981;">✅ تم التدقيق والحفظ بنجاح!</h3>
-        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;" id="whatsapp-notify-subtitle">اختر الشخص لإرسال التفاصيل إليه عبر واتساب:</p>
-        <div id="whatsapp-buttons-container" style="display:flex; flex-direction:column; gap:10px;"></div>
+        <h3 style="margin-bottom: 10px; color: #10b981;">💬 إرسال عبر الواتساب المباشر (07840971766)</h3>
+        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.88rem;" id="whatsapp-notify-subtitle">حدد الأشخاص المراد إرسال الرسالة لهم أو أضف عضواً جديداً للارسال الفوري المباشر دون فتح المتصفح:</p>
+        
+        <div id="target-team-checkboxes" style="max-height: 220px; overflow-y: auto; text-align: right; margin-bottom: 15px;"></div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button class="btn-primary" style="background: rgba(168, 85, 247, 0.8); border-color: rgba(168, 85, 247, 0.4);" onclick="addNewTeamMemberPrompt()">➕ إضافة رقم / مستخدم جديد</button>
+            <button class="btn-primary" style="background: #10b981;" onclick="executeMultiWhatsAppSend()">🚀 إرسال للأشخاص المحددين</button>
+        </div>
     </div>
 </div>
 
@@ -761,7 +796,7 @@
     firebase.initializeApp(firebaseConfig);
     const dbRef = firebase.database().ref('amirat_houses_db_zero');
 
-    const targetTeam = [
+    let targetTeam = JSON.parse(localStorage.getItem('targetTeamList')) || [
         { name: "مهندس محمد عبد الأمير", phone: "9647825962173" },
         { name: "منتظر علي", phone: "9647862568787" },
         { name: "مهندس بشير أحمد", phone: "9647826821986" },
@@ -778,6 +813,7 @@
     let houseRecords = JSON.parse(localStorage.getItem('houseRecords')) || [];
     let activeRecordIdForCamera = null;
     let activeRecordIdForSig = null;
+    let pendingWhatsAppMsg = "";
 
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('current-date-display').innerText = todayStr;
@@ -797,6 +833,7 @@
         localStorage.setItem('contractorsList', JSON.stringify(contractorsList));
         localStorage.setItem('preCleanedHouses', JSON.stringify(preCleanedHouses));
         localStorage.setItem('houseRecords', JSON.stringify(houseRecords));
+        localStorage.setItem('targetTeamList', JSON.stringify(targetTeam));
         renderTable();
     }
 
@@ -811,16 +848,17 @@
         return cleaned;
     }
 
+    // فتح الواتساب مباشره دون المتصفح باستعمال بروتوكول الرابط المباشر للواتساب
     function openWhatsAppDirect(phone, text) {
         const cleanPhone = formatPhoneForWhatsApp(phone);
         const encodedText = encodeURIComponent(text || '');
         let waUrl = '';
         if (cleanPhone) {
-            waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedText}`;
+            waUrl = `whatsapp://send?phone=${cleanPhone}&text=${encodedText}`;
         } else {
-            waUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+            waUrl = `whatsapp://send?text=${encodedText}`;
         }
-        window.open(waUrl, '_blank');
+        window.location.href = waUrl;
     }
 
     dbRef.on('value', (snapshot) => {
@@ -829,6 +867,7 @@
             houseRecords = data.records ? Object.values(data.records) : [];
             if (data.contractors) contractorsList = data.contractors;
             if (data.preCleaned) preCleanedHouses = data.preCleaned;
+            if (data.teamList) targetTeam = data.teamList;
             saveLocalAndRender();
         }
     });
@@ -849,6 +888,7 @@
         saveLocalAndRender();
         dbRef.child('contractors').set(contractorsList);
         dbRef.child('preCleaned').set(preCleanedHouses);
+        dbRef.child('teamList').set(targetTeam);
     }
 
     function addDays(dateStr, days) {
@@ -856,6 +896,14 @@
         let d = new Date(dateStr);
         d.setDate(d.getDate() + days);
         return d.toISOString().split('T')[0];
+    }
+
+    function daysBetween(date1Str, date2Str) {
+        if (!date1Str || !date2Str) return 999;
+        const d1 = new Date(date1Str);
+        const d2 = new Date(date2Str);
+        const diffTime = d2 - d1;
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     }
 
     function populateContractorsDropdown() {
@@ -1025,7 +1073,7 @@
         canvas.onmousemove = (e) => { if (!drawing) return; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); };
         canvas.onmouseup = () => { drawing = false; };
         canvas.ontouchstart = (e) => { drawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault(); };
-        canvas.ontouchmove = (e) => { if (!drawing) return; const rect = canvas.getBoundingClientRect(); ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); ctx.stroke(); e.preventDefault(); };
+        canvas.ontouchmove = (e) => { if (!drawing) return; const rect = canvas.getBoundingClientRect(); ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault(); };
         canvas.ontouchend = () => { drawing = false; };
     }
     function openSignatureModal(id) {
@@ -1146,9 +1194,9 @@
             <p>🛡️ <strong>حالة التدقيق:</strong> بيانات موثقة وصفرية الأخطاء</p>
         `;
         if (rec.cleaningStartDate) html += `<p>🧹 <strong>تاريخ بدء التنظيف:</strong> ${rec.cleaningStartDate}</p>`;
-        if (rec.cleaningEndDate) html += `<p>⏳ <strong>تاريخ انتهاء التنظيف:</strong> ${rec.cleaningEndDate}</p>`;
+        if (rec.cleaningEndDate) html += `<p>⏳ <strong>تاريخ انتهاء التنظيف (يومين):</strong> ${rec.cleaningEndDate}</p>`;
         if (rec.inspectionDate) html += `<p>🔍 <strong>تاريخ الكشف:</strong> ${rec.inspectionDate}</p>`;
-        if (rec.handoverDate) html += `<p>⏱️ <strong>موعد التسليم (10 أيام):</strong> ${rec.handoverDate}</p>`;
+        if (rec.handoverDate) html += `<p>⏱️ <strong>موعد التسليم النهائي (10 أيام):</strong> ${rec.handoverDate}</p>`;
         if (rec.secondHandoverDate) html += `<p style="color:#fbbf24;">🔄 <strong>موعد التسليم الثاني:</strong> ${rec.secondHandoverDate} (السبب: ${rec.notReadyReason})</p>`;
         if (rec.signatureImg) html += `<p style="color:#10b981;">✍️ <strong>يوجد توقيع رقمي معتمد</strong></p>`;
         document.getElementById('timeline-content-box').innerHTML = html;
@@ -1202,7 +1250,7 @@
 
                       `_صادر عن مكتب التسليم الفني_`;
 
-        openWhatsAppDirect('', msgText);
+        openWhatsappNotifyDialog(msgText, '');
     }
 
     function openExcelOptionsModal() {
@@ -1307,6 +1355,7 @@
         closeExcelOptionsModal();
     }
 
+    // تعديل آلية التنفيذ المباشر لتكون 10 أيام تلقائية وحساب تنظيف يومين مباشرةً
     function onExecutionTypeChange() {
         const type = document.getElementById('executionType').value;
         const contractorGroup = document.getElementById('contractor-group');
@@ -1314,35 +1363,58 @@
         const contractorDates = document.getElementById('contractor-dates-group');
 
         if (!type) { contractorGroup.classList.add('hidden-field'); directDates.classList.add('hidden-field'); contractorDates.classList.add('hidden-field'); return; }
-        contractorGroup.classList.remove('hidden-field');
+        
         const arrival = document.getElementById('arrivalDate').value || todayStr;
         const isPreCleaned = preCleanedHouses.some(item => item.trim() === document.getElementById('houseNo').value.trim());
 
         if (type === "تنفيذ مباشر") {
-            if (isPreCleaned) { directDates.classList.add('hidden-field'); }
-            else { directDates.classList.remove('hidden-field'); document.getElementById('cleaningStartDate').value = addDays(arrival, 1); document.getElementById('cleaningEndDate').value = addDays(arrival, 3); }
+            contractorGroup.classList.add('hidden-field');
             contractorDates.classList.add('hidden-field');
+            if (isPreCleaned) { 
+                directDates.classList.add('hidden-field'); 
+            } else { 
+                directDates.classList.remove('hidden-field'); 
+                document.getElementById('cleaningStartDate').value = arrival; 
+                document.getElementById('cleaningEndDate').value = addDays(arrival, 2); // شرط التنظيف خلال يومين
+            }
         } else if (type === "تنفيذ مقاولين") {
-            contractorDates.classList.remove('hidden-field'); directDates.classList.add('hidden-field');
-            document.getElementById('contractorStartDate').value = addDays(arrival, 1); document.getElementById('houseReadyDate').value = addDays(arrival, 11);
+            contractorGroup.classList.remove('hidden-field');
+            contractorDates.classList.remove('hidden-field'); 
+            directDates.classList.add('hidden-field');
+            document.getElementById('contractorStartDate').value = addDays(arrival, 1); 
+            document.getElementById('houseReadyDate').value = addDays(arrival, 10); // 10 أيام تلقائي نفس المقاولين
         }
     }
 
     function handleArrivalDateChange() { onExecutionTypeChange(); }
 
+    // حساب حالة الدار بدقة مع آلية 3 أيام المتبقية والتنظيف خلال يومين
     function calculateRecordStatus(rec) {
-        let statusText = "", badgeClass = "", isCleaningOverdue = false, isHandoverOverdue = false;
+        let statusText = "", badgeClass = "", isCleaningOverdue = false, isHandoverOverdue = false, is3DaysRemaining = false, is2DayCleaningNeeded = false;
         const house = rec.houseNo || '';
         const isPreCleaned = preCleanedHouses.some(item => item.trim() === house.trim());
-        const effectiveHandoverDate = rec.secondHandoverDate || rec.handoverDate || (rec.executionType === 'تنفيذ مقاولين' ? rec.houseReadyDate : '');
+        
+        // حساب موعد التسليم النهائـي بـ 10 أيام تلقائياً للمباشر والمقاولين
+        const effectiveHandoverDate = rec.secondHandoverDate || rec.handoverDate || addDays(rec.arrivalDate, 10);
+
+        const remDays = daysBetween(todayStr, effectiveHandoverDate);
 
         if (rec.executionType === "تنفيذ مباشر") {
-            if (isPreCleaned || rec.isCleaned) {
-                statusText = "نظيف وبانتظار المستفيد"; badgeClass = "badge-ready";
-                if (rec.inspectionDate) statusText = rec.isReady ? "الدار جاهز للكشف والتسليم" : "تم التنظيف وتحدد الكشف";
+            const cleanRemDays = daysBetween(todayStr, rec.cleaningEndDate);
+            if (!isPreCleaned && !rec.isCleaned) {
+                if (rec.cleaningEndDate && rec.cleaningEndDate < todayStr) { 
+                    statusText = "🚨 تجاوزت موعد التنظيف (يومين)"; 
+                    badgeClass = "badge-overdue"; 
+                    isCleaningOverdue = true; 
+                } else { 
+                    statusText = "🧹 يجب تنظيفها خلال يومين"; 
+                    badgeClass = "badge-warning"; 
+                    is2DayCleaningNeeded = true;
+                }
+            } else if (rec.isReady) {
+                statusText = "الدار جاهزة للإنهاء"; badgeClass = "badge-ready";
             } else {
-                if (rec.cleaningEndDate && rec.cleaningEndDate < todayStr) { statusText = "🚨 عبر موعد التنظيف"; badgeClass = "badge-overdue"; isCleaningOverdue = true; }
-                else { statusText = "بانتظار التنظيف"; badgeClass = "badge-waiting"; }
+                statusText = "نظيف وبانتظار التسليم"; badgeClass = "badge-ready";
             }
         } else if (rec.executionType === "تنفيذ مقاولين") {
             if (rec.isReady) { statusText = "الدار جاهزة للإنهاء"; badgeClass = "badge-ready"; }
@@ -1351,8 +1423,16 @@
                 else { statusText = "قيد تنفيذ المقاول"; badgeClass = "badge-contractor"; }
             }
         }
-        if (effectiveHandoverDate && effectiveHandoverDate < todayStr && !rec.isReady) { statusText = "🚨 عبرت موعد التسليم"; badgeClass = "badge-overdue"; isHandoverOverdue = true; }
-        return { statusText, badgeClass, isCleaningOverdue, isHandoverOverdue };
+
+        if (!rec.isReady && effectiveHandoverDate && effectiveHandoverDate < todayStr) { 
+            statusText = "🚨 عبرت موعد التسليم (10 أيام)"; badgeClass = "badge-overdue"; isHandoverOverdue = true; 
+        } else if (!rec.isReady && remDays >= 0 && remDays <= 3) {
+            statusText = `⚠️ متبقي ${remDays} أيام على التسليم`; 
+            badgeClass = "badge-warning"; 
+            is3DaysRemaining = true;
+        }
+
+        return { statusText, badgeClass, isCleaningOverdue, isHandoverOverdue, is3DaysRemaining, is2DayCleaningNeeded };
     }
 
     function renderCharts() {
@@ -1395,7 +1475,7 @@
 
     function triggerWhatsAppNotify(phone, name, houseNo, sectorNo) {
         let msg = `السلام عليكم ورحمة الله وبركاته\nالأخ المستفيد: ${name}\nنود إعلامكم بأن الدار رقم (${houseNo}) في ${sectorNo} أصبح جاهزاً للإنهاء والتسليم.\nيرجى المراجعة لإكمال الإجراءات.`;
-        openWhatsAppDirect(phone, msg);
+        openWhatsappNotifyDialog(msg, phone);
     }
 
     function renderTable() {
@@ -1409,7 +1489,7 @@
         if (!tbody) return;
         tbody.innerHTML = ""; cardsContainer.innerHTML = "";
 
-        let cAll = 0, cCleanCompleted = 0, cCleanUncompleted = 0, cReadyAll = 0, cNotReadyOverdue = 0;
+        let cAll = 0, cCleanCompleted = 0, cCleanUncompleted = 0, cReadyAll = 0, cNotReadyOverdue = 0, c3DaysRem = 0, c2DayClean = 0;
         let hasAnyNotReadyRecord = false;
 
         houseRecords.forEach(rec => { if (rec.secondHandoverDate) hasAnyNotReadyRecord = true; });
@@ -1426,6 +1506,8 @@
             if (logic.isCleaningOverdue) cCleanUncompleted++;
             if (rec.isReady) cReadyAll++;
             if (logic.isHandoverOverdue) cNotReadyOverdue++;
+            if (logic.is3DaysRemaining) c3DaysRem++;
+            if (logic.is2DayCleaningNeeded) c2DayClean++;
 
             let matchesSearch = true;
             if (searchVal !== "") {
@@ -1453,17 +1535,23 @@
             else if (statusFilter === "uncompleted_cleaning") matchesStatus = logic.isCleaningOverdue;
             else if (statusFilter === "ready_all") matchesStatus = rec.isReady;
             else if (statusFilter === "not_ready_overdue") matchesStatus = logic.isHandoverOverdue;
+            else if (statusFilter === "3days_remaining") matchesStatus = logic.is3DaysRemaining;
+            else if (statusFilter === "2day_cleaning_needed") matchesStatus = logic.is2DayCleaningNeeded;
 
             if (matchesSearch && matchesExec && matchesSector && matchesStatus) {
                 let startWorkDate = '-', endWorkDate = '-', inspectionDisplay = '-', finalHandover = '-';
+                
+                // حساب 10 أيام تلقائي للتنفيذ المباشر أيضاً
+                const autoHandover = addDays(rec.arrivalDate, 10);
+                
                 if (rec.executionType === 'تنفيذ مباشر') {
-                    startWorkDate = isPreCleaned ? '-' : (rec.cleaningStartDate || '-');
-                    endWorkDate = isPreCleaned ? '-' : (rec.cleaningEndDate || '-');
-                    inspectionDisplay = rec.inspectionDate || 'غير محدد';
-                    finalHandover = rec.handoverDate || '-';
+                    startWorkDate = isPreCleaned ? '-' : (rec.cleaningStartDate || rec.arrivalDate);
+                    endWorkDate = isPreCleaned ? '-' : (rec.cleaningEndDate || addDays(rec.arrivalDate, 2));
+                    inspectionDisplay = rec.inspectionDate || 'تلقائي مع الـ 10 أيام';
+                    finalHandover = rec.handoverDate || autoHandover;
                 } else if (rec.executionType === 'تنفيذ مقاولين') {
                     startWorkDate = rec.contractorStartDate || '-';
-                    finalHandover = rec.houseReadyDate || '-';
+                    finalHandover = rec.houseReadyDate || autoHandover;
                 }
 
                 let secondHandoverTd = '', cameraTd = '';
@@ -1483,7 +1571,7 @@
                 const escapedHouse = rec.houseNo ? rec.houseNo.replace(/'/g, "\\'") : '';
                 const escapedSector = rec.sectorNo ? rec.sectorNo.replace(/'/g, "\\'") : '';
                 
-                let checkboxesHtml = `<span class="whatsapp-icon" onclick="triggerWhatsAppNotify('${phone}', '${escapedOwner}', '${escapedHouse}', '${escapedSector}')" title="إرسال تبليغ عبر واتساب ميتا المباشر">💬</span>`;
+                let checkboxesHtml = `<span class="whatsapp-icon" onclick="triggerWhatsAppNotify('${phone}', '${escapedOwner}', '${escapedHouse}', '${escapedSector}')" title="إرسال تبليغ عبر الواتساب المباشر">💬</span>`;
                 for (let i = 0; i < 3; i++) {
                     const checked = rec.notifications && rec.notifications[i] ? 'checked' : '';
                     checkboxesHtml += `<input type="checkbox" class="notif-box" ${checked} onclick="toggleNotification(${rec.id}, ${i}, event)">`;
@@ -1491,6 +1579,8 @@
 
                 const tr = document.createElement('tr');
                 if (logic.isCleaningOverdue || logic.isHandoverOverdue) tr.classList.add('row-overdue-alert');
+                else if (logic.is3DaysRemaining || logic.is2DayCleaningNeeded) tr.classList.add('row-warning-3days');
+
                 tr.onclick = (e) => { if (e.target.closest('.action-btn') || e.target.closest('input') || e.target.closest('a') || e.target.closest('button') || e.target.closest('.whatsapp-icon')) return; if (e.target.closest('.timeline-trigger')) return; openStatusCheckModal(rec.id); };
 
                 tr.innerHTML = `
@@ -1532,6 +1622,8 @@
         document.getElementById('clean-uncompleted-count').innerText = cCleanUncompleted;
         document.getElementById('ready-all-count').innerText = cReadyAll;
         document.getElementById('not-ready-overdue-count').innerText = cNotReadyOverdue;
+        document.getElementById('three-days-remaining-count').innerText = c3DaysRem;
+        document.getElementById('clean-2day-needed-count').innerText = c2DayClean;
         renderCharts();
     }
 
@@ -1550,21 +1642,27 @@
         selectedRecordIdForStatus = id;
         const rec = houseRecords.find(r => r.id === id);
         if (!rec) return;
-        const finalHandover = rec.secondHandoverDate || rec.handoverDate || (rec.executionType === 'تنفيذ مقاولين' ? rec.houseReadyDate : 'غير محدد');
+        const finalHandover = rec.secondHandoverDate || rec.handoverDate || addDays(rec.arrivalDate, 10);
 
         document.getElementById('status-modal-details').innerHTML = `
             <p><strong>رقم الدار:</strong> ${rec.houseNo} (${rec.sectorNo})</p>
             <p><strong>اسم المستفيد:</strong> ${rec.ownerName} | هاتف: ${rec.phoneNo || '-'}</p>
-            <p><strong>موعد التسليم الحالي:</strong> ${finalHandover}</p>
+            <p><strong>موعد التسليم النهائـي (10 أيام):</strong> ${finalHandover}</p>
         `;
 
         let html = "";
         if (rec.executionType === "تنفيذ مباشر" && !rec.isCleaned) {
-            html += `<button class="btn-action-success" style="width:100%; margin-bottom:12px;" onclick="markCleaningCompletedWithoutInspection()">تم التنظيف (وبانتظار المستفيد)</button>`;
+            html += `
+                <div style="background:rgba(249,115,22,0.15); border:1px solid #f97316; padding:12px; border-radius:14px; margin-bottom:15px; color:#f97316;">
+                    <strong>🧹 موقف تنظيف الدار (خـلال يومين):</strong> هل تم تنظيف الدار بنجاح خلال اليومين؟
+                    <div style="display:flex; gap:10px; margin-top:8px;">
+                        <button class="btn-action-success" style="padding:8px;" onclick="confirmCleaningStatus(true)">نعم (تنظيف مكتمل)</button>
+                        <button class="btn-action-danger" style="padding:8px;" onclick="confirmCleaningStatus(false)">لا (لم يتنظيف بعد)</button>
+                    </div>
+                </div>
+            `;
         }
-        if (rec.executionType === "تنفيذ مباشر" && !rec.inspectionDate) {
-            html += `<button class="btn-primary" style="margin-bottom:12px;" onclick="setInspectionAndHandoverDate()">حدد موعد الكشف الآن (10 أيام للتسليم)</button>`;
-        }
+        
         html += `
             <div class="modal-action-grid">
                 <button class="btn-action-success" onclick="updateReadyFlag(true)">الدار جاهز وتسلم</button>
@@ -1573,6 +1671,16 @@
         `;
         document.getElementById('status-interactive-questions').innerHTML = html;
         document.getElementById('statusCheckModal').style.display = "flex";
+    }
+
+    function confirmCleaningStatus(isCleaned) {
+        const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
+        if (rec) {
+            rec.isCleaned = isCleaned;
+            syncRecordFields(rec.id, { isCleaned: isCleaned });
+            alert(isCleaned ? "✅ تم اعتماد الدار (نظيف)" : "⚠️ تم إبقاء الدار قيد المتابعة للتنظيف");
+            closeStatusModal();
+        }
     }
 
     function markCleaningCompletedWithoutInspection() {
@@ -1598,8 +1706,8 @@
                     `🏠 الدار: ${rec.houseNo} (${rec.sectorNo})\n` +
                     `👤 المستفيد: ${rec.ownerName}\n` +
                     `🧹 تم إكمال التنظيف بنجاح.\n` +
-                    `🔍 تاريخ الكشف المعتمد: ${rec.inspectionDate}\n` +
-                    `⏱️ موعد التسليم النهائـي: ${rec.handoverDate}`;
+                    `🔍 تاريخ الكشف المعتمد: ${rec.inspectionDate || todayStr}\n` +
+                    `⏱️ موعد التسليم النهائـي: ${rec.handoverDate || addDays(rec.arrivalDate, 10)}`;
         
         openWhatsappNotifyDialog(msg, rec.phoneNo);
     }
@@ -1656,34 +1764,59 @@
     function closeAddModal() { document.getElementById('addRecordModal').style.display = 'none'; }
     function closeWhatsappNotifyModal() { document.getElementById('whatsappNotifyModal').style.display = 'none'; }
 
+    // إعداد واجهة اختيار الأشخاص المتعددين للواتساب وإضافة مستخدم جديد
     function openWhatsappNotifyDialog(msgText, ownerPhone) {
-        const container = document.getElementById('whatsapp-buttons-container');
+        pendingWhatsAppMsg = msgText;
+        const container = document.getElementById('target-team-checkboxes');
         container.innerHTML = "";
 
         if (ownerPhone) {
-            const btnOwner = document.createElement('button');
-            btnOwner.className = 'btn-primary';
-            btnOwner.style.background = '#10b981';
-            btnOwner.innerText = `📲 إرسال إلى المستفيد (${ownerPhone})`;
-            btnOwner.onclick = function() {
-                openWhatsAppDirect(ownerPhone, msgText);
-            };
-            container.appendChild(btnOwner);
+            container.innerHTML += `
+                <div class="team-select-item">
+                    <label for="check-owner" style="cursor:pointer; color:#10b981;"><strong>📲 المستفيد (${ownerPhone})</strong></label>
+                    <input type="checkbox" id="check-owner" value="${ownerPhone}" class="team-wa-check" checked style="width:20px; height:20px;">
+                </div>
+            `;
         }
 
-        targetTeam.forEach(member => {
-            const btnTeam = document.createElement('button');
-            btnTeam.className = 'btn-primary';
-            btnTeam.style.background = 'rgba(56,189,248,0.2)';
-            btnTeam.style.border = '1px solid var(--primary-blue)';
-            btnTeam.innerText = `💬 إرسال إلى: ${member.name}`;
-            btnTeam.onclick = function() {
-                openWhatsAppDirect(member.phone, msgText);
-            };
-            container.appendChild(btnTeam);
+        targetTeam.forEach((member, idx) => {
+            container.innerHTML += `
+                <div class="team-select-item">
+                    <label for="team-check-${idx}" style="cursor:pointer; color:#fff;">👤 ${member.name} (${member.phone})</label>
+                    <input type="checkbox" id="team-check-${idx}" value="${member.phone}" class="team-wa-check" style="width:20px; height:20px;">
+                </div>
+            `;
         });
 
         document.getElementById('whatsappNotifyModal').style.display = 'flex';
+    }
+
+    function addNewTeamMemberPrompt() {
+        const name = prompt("أدخل اسم المهندس / المستخدم الجديد:");
+        if (name && name.trim()) {
+            const phone = prompt("أدخل رقم الواتساب (مثال: 9647800000000):");
+            if (phone && phone.trim()) {
+                targetTeam.push({ name: name.trim(), phone: formatPhoneForWhatsApp(phone.trim()) });
+                syncLists();
+                openWhatsappNotifyDialog(pendingWhatsAppMsg, '');
+            }
+        }
+    }
+
+    function executeMultiWhatsAppSend() {
+        const checkboxes = document.querySelectorAll('.team-wa-check:checked');
+        if (checkboxes.length === 0) {
+            alert("⚠️ يرجى اختيار شخص واحد على الأقل لإرسال الرسالة إليه عبر الواتساب!");
+            return;
+        }
+
+        checkboxes.forEach((cb, i) => {
+            setTimeout(() => {
+                openWhatsAppDirect(cb.value, pendingWhatsAppMsg);
+            }, i * 1200); // فاصل زمني سلس لفتح الواتساب لكل شخص
+        });
+
+        closeWhatsappNotifyModal();
     }
 
     function editRecord(id) {
@@ -1724,13 +1857,17 @@
             }
         }
 
-        let cleaningStartDate = "", cleaningEndDate = "", contractorStartDate = "", houseReadyDate = "";
+        let cleaningStartDate = "", cleaningEndDate = "", contractorStartDate = "", houseReadyDate = "", handoverDate = "";
+        
+        // حساب الـ 10 أيام تلقائياً للمباشر والمقاولين عند الإدخال
+        handoverDate = addDays(arrivalDate, 10);
+
         if (executionType === "تنفيذ مباشر" && !isPreCleaned) {
-            cleaningStartDate = document.getElementById('cleaningStartDate').value;
-            cleaningEndDate = document.getElementById('cleaningEndDate').value;
+            cleaningStartDate = arrivalDate;
+            cleaningEndDate = addDays(arrivalDate, 2); // 2 يوم تنظيف
         } else if (executionType === "تنفيذ مقاولين") {
-            contractorStartDate = document.getElementById('contractorStartDate').value;
-            houseReadyDate = document.getElementById('houseReadyDate').value;
+            contractorStartDate = document.getElementById('contractorStartDate').value || addDays(arrivalDate, 1);
+            houseReadyDate = handoverDate;
         }
 
         let recordToSync = null;
@@ -1738,44 +1875,44 @@
             const item = houseRecords.find(r => r.id == editId);
             if (item) {
                 item.houseNo = houseNo; item.phoneNo = phoneNo; item.executionType = executionType;
-                item.contractorName = contractorName; item.sectorNo = sectorNo; item.ownerName = ownerName;
-                item.arrivalDate = arrivalDate; item.cleaningStartDate = cleaningStartDate;
-                item.cleaningEndDate = cleaningEndDate; item.contractorStartDate = contractorStartDate;
-                item.houseReadyDate = houseReadyDate;
+                item.contractorName = executionType === "تنفيذ مقاولين" ? contractorName : "";
+                item.sectorNo = sectorNo; item.ownerName = ownerName; item.arrivalDate = arrivalDate;
+                item.cleaningStartDate = cleaningStartDate; item.cleaningEndDate = cleaningEndDate;
+                item.contractorStartDate = contractorStartDate; item.houseReadyDate = houseReadyDate;
+                item.handoverDate = handoverDate;
                 recordToSync = item;
             }
         } else {
-            recordToSync = {
-                id: Date.now(), houseNo, phoneNo, executionType, contractorName,
-                sectorNo, ownerName, arrivalDate, cleaningStartDate, cleaningEndDate,
-                contractorStartDate, houseReadyDate, inspectionDate: "", handoverDate: "",
-                secondHandoverDate: "", notReadyReason: "", noteImage: "", signatureImg: "",
-                isCleaned: isPreCleaned, isReady: false, notifications: [null, null, null]
+            const newObj = {
+                id: Date.now(), houseNo, phoneNo, executionType,
+                contractorName: executionType === "تنفيذ مقاولين" ? contractorName : "",
+                sectorNo, ownerName, arrivalDate,
+                cleaningStartDate, cleaningEndDate, contractorStartDate, houseReadyDate, handoverDate,
+                isCleaned: isPreCleaned, isReady: false, secondHandoverDate: "", notReadyReason: "",
+                notifications: [null, null, null]
             };
-            houseRecords.push(recordToSync);
+            houseRecords.push(newObj);
+            recordToSync = newObj;
         }
+
         if (recordToSync) syncRecord(recordToSync);
         closeAddModal();
 
-        if (executionType === "تنفيذ مقاولين") {
-            const msg = `🏗️ *إحالة دار جديد للمقاول - تنفيذ مقاولين*\n` +
-                        `🏠 الدار: ${houseNo} (${sectorNo})\n` +
-                        `👷‍♂️ المقاول المكلف: ${contractorName}\n` +
-                        `👤 المستفيد: ${ownerName}\n` +
-                        `📅 تاريخ البدء: ${contractorStartDate}\n` +
-                        `⏳ موعد جهوزية الدار المتوقع: ${houseReadyDate}`;
-            openWhatsappNotifyDialog(msg, phoneNo);
-        }
+        const msg = `✨ *تم إضافة/تعديل سجل الدار بنجاح*\n` +
+                    `🏠 رقم الدار: ${houseNo} (${sectorNo})\n` +
+                    `👤 المستفيد: ${ownerName}\n` +
+                    `📍 نوع التنفيذ: ${executionType}\n` +
+                    `⏱️ موعد التسليم الـ 10 أيام: ${handoverDate}`;
+
+        openWhatsappNotifyDialog(msg, phoneNo);
     }
 
     function deleteRecord(id) {
-        if (confirm("هل أنت تأكد من حذف هذا السجل بشكل نهائي؟")) {
+        if (confirm("🚨 هل أنت متأكد من حذف هذا السجل نهائياً؟")) {
             houseRecords = houseRecords.filter(r => r.id !== id);
             deleteRecordFromDB(id);
         }
     }
-
-    renderTable();
 </script>
 </body>
 </html>
