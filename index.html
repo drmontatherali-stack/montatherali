@@ -633,6 +633,7 @@
                 <button class="btn-calendar-view" onclick="openCalendarModal()">📅 التقويم الهندسي</button>
                 <button class="btn-whatsapp-daily" onclick="sendDailySummaryWhatsApp()">💬 تقرير اليوم الشامل</button>
                 <button class="btn-excel-export" onclick="openExcelOptionsModal()">📊 تصدير Excel مخصص</button>
+                <button class="btn-excel-export" onclick="exportOldHousesExcelReport()">📊 تقرير Excel الدور القديمة</button>
             </div>
 
             <label>البحث الذكي:</label>
@@ -1820,6 +1821,57 @@
         openWhatsappNotifyDialog(msgText, "07840971766");
     }
 
+    function exportOldHousesExcelReport() {
+        if (oldHouseRecords.length === 0) {
+            alert("⚠️ لا توجد دور قديمة مسجلة لتصديرها إلى Excel!");
+            return;
+        }
+
+        function buildRows(list) {
+            return list.map((rec, idx) => ({
+                "ت": idx + 1,
+                "رقم الدار والبلوك": rec.houseNo || '-',
+                "الحالة": rec.status || '-',
+                "تاريخ التسليم": rec.handoverDate || '-',
+                "نوع التنفيذ": rec.executionType || '-',
+                "المقاول": rec.contractorName || '-',
+                "القطاع": rec.sectorNo || '-',
+                "الملاحظات": rec.notes || '-',
+                "تاريخ المراجعة": rec.reviewDate || '-',
+                "تاريخ إنهاء الملاحظات": rec.notesEndDate || '-',
+                "هل تم إكمال الملاحظات؟": rec.notesCompleted ? 'تم' : 'لم يتم',
+                "تاريخ إكمال الملاحظات": rec.notesCompletedDate || '-'
+            }));
+        }
+
+        // منجزة ضمن الموعد = تم تأشيرها كمكتملة، وتاريخ الإكمال كان في أو قبل تاريخ انتهاء الملاحظات المقرر
+        const isCompletedOnTime = rec => !!(rec.notesCompleted && rec.notesCompletedDate && rec.notesEndDate && rec.notesCompletedDate <= rec.notesEndDate);
+
+        const allRows = buildRows(oldHouseRecords);
+        const onTimeRows = buildRows(oldHouseRecords.filter(isCompletedOnTime));
+        const lateRows = buildRows(oldHouseRecords.filter(rec => !isCompletedOnTime(rec)));
+
+        const colWidths = [
+            { wch: 6 }, { wch: 20 }, { wch: 14 }, { wch: 14 }, { wch: 16 },
+            { wch: 16 }, { wch: 14 }, { wch: 34 }, { wch: 14 }, { wch: 18 },
+            { wch: 20 }, { wch: 20 }
+        ];
+
+        function buildSheet(titleText, rows) {
+            const ws = XLSX.utils.aoa_to_sheet([[titleText]]);
+            XLSX.utils.sheet_add_json(ws, rows.length ? rows : [{ "ملاحظة": "لا توجد دور ضمن هذا التصنيف حالياً" }], { origin: 'A3' });
+            ws['!cols'] = colWidths;
+            return ws;
+        }
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, buildSheet("كل الدور", allRows), "كل الدور");
+        XLSX.utils.book_append_sheet(workbook, buildSheet("الدور التي تم إنجاز ملاحظاتها ضمن الموعد", onTimeRows), "منجزة ضمن الموعد");
+        XLSX.utils.book_append_sheet(workbook, buildSheet("الدور التي لم يتم إنجاز ملاحظاتها ضمن الموعد", lateRows), "غير منجزة ضمن الموعد");
+
+        XLSX.writeFile(workbook, `AlAmirat_تقرير_الدور_القديمة_${todayStr}.xlsx`);
+    }
+
     function sendDailySummaryWhatsApp() {
         let allHouses = [];
         let cleanedHouses = [];
@@ -2422,8 +2474,8 @@
                     <th>تاريخ المراجعة</th>
                     <th>تاريخ إنهاء الملاحظات</th>
                     <th>هل تم إكمال الملاحظات؟</th>
-                    <th>تقرير</th>
                     <th>إجراءات</th>
+                    <th>تقرير</th>
                 </tr>
             `;
 
@@ -2475,11 +2527,11 @@
                         ${rec.notesCompleted && rec.notesCompletedDate ? `<br><small style="color:#10b981;">✅ ${rec.notesCompletedDate}</small>` : ''}
                     </td>
                     <td>
-                        <button class="camera-icon-btn" onclick="generateOldHouseReport(${rec.id})">📄 تقرير</button>
-                    </td>
-                    <td>
                         <button class="action-btn" onclick="editOldRecord(${rec.id})">✏️</button>
                         <button class="action-btn delete" onclick="deleteOldRecord(${rec.id})">🗑️</button>
+                    </td>
+                    <td>
+                        <button class="camera-icon-btn" onclick="generateOldHouseReport(${rec.id})">📄 تقرير</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -2505,9 +2557,9 @@
                                 <input type="checkbox" class="notif-box" ${rec.notesCompleted ? 'checked' : ''} onclick="toggleOldNotesCompleted(${rec.id}, event)">
                                 هل تم إكمال الملاحظات؟
                             </label>
-                            <button class="camera-icon-btn" onclick="generateOldHouseReport(${rec.id})">📄 تقرير</button>
                             <button class="action-btn" onclick="editOldRecord(${rec.id})">✏️ تعديل</button>
                             <button class="action-btn delete" onclick="deleteOldRecord(${rec.id})">🗑️ حذف</button>
+                            <button class="camera-icon-btn" onclick="generateOldHouseReport(${rec.id})">📄 تقرير</button>
                         </div>
                     `;
                     mobileContainer.appendChild(card);
