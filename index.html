@@ -199,6 +199,23 @@
         .metric-card.warning-card { border-color: rgba(249, 115, 22, 0.3); background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(249, 115, 22, 0.15) 100%); }
         .metric-card.warning-card:hover { border-color: var(--status-warning); box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(249, 115, 22, 0.3); }
 
+        .tools-toolbar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 16px 24px;
+            border-radius: 22px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px 28px;
+            align-items: center;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+        }
+        .tools-toolbar-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .tools-toolbar-label { font-weight: 800; color: var(--text-muted); font-size: 0.82rem; white-space: nowrap; }
+
         .filter-section {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -624,18 +641,24 @@
         </div>
     </div>
 
+    <div class="tools-toolbar">
+        <div class="tools-toolbar-group">
+            <span class="tools-toolbar-label">🗓️ أدوات يومية:</span>
+            <button class="btn-daily-checklist" onclick="openDailyChecklistModal()">📋 مواعيد اليوم</button>
+            <button class="btn-calendar-view" onclick="openCalendarModal()">📅 التقويم الهندسي</button>
+            <button class="btn-whatsapp-daily" onclick="sendDailySummaryWhatsApp()">💬 تقرير اليوم الشامل</button>
+        </div>
+        <div class="tools-toolbar-group">
+            <span class="tools-toolbar-label">📁 إدارة وتقارير:</span>
+            <button class="btn-precleaned-manage" onclick="openPreCleanedModal()">🏠 المنظفة مسبقاً</button>
+            <button class="btn-contractors-score" onclick="openContractorScorecardModal()">📊 أداء المقاولين</button>
+            <button class="btn-excel-export" onclick="openExcelOptionsModal()">📊 تصدير Excel مخصص</button>
+            <button class="btn-excel-export" onclick="exportOldHousesExcelReport()">📊 تقرير Excel الدور القديمة</button>
+        </div>
+    </div>
+
     <div class="filter-section">
         <div class="filter-group">
-            <div class="btn-action-group">
-                <button class="btn-daily-checklist" onclick="openDailyChecklistModal()">📋 مواعيد اليوم</button>
-                <button class="btn-precleaned-manage" onclick="openPreCleanedModal()">🏠 المنظفة مسبقاً</button>
-                <button class="btn-contractors-score" onclick="openContractorScorecardModal()">📊 أداء المقاولين</button>
-                <button class="btn-calendar-view" onclick="openCalendarModal()">📅 التقويم الهندسي</button>
-                <button class="btn-whatsapp-daily" onclick="sendDailySummaryWhatsApp()">💬 تقرير اليوم الشامل</button>
-                <button class="btn-excel-export" onclick="openExcelOptionsModal()">📊 تصدير Excel مخصص</button>
-                <button class="btn-excel-export" onclick="exportOldHousesExcelReport()">📊 تقرير Excel الدور القديمة</button>
-            </div>
-
             <label>البحث الذكي:</label>
             <input type="text" id="search-input" placeholder="ابحث برقم الدار، الاسم، أو كلمة (متأخر، جاهز)..." oninput="renderTable()">
             
@@ -765,6 +788,10 @@
         <div>
             <h4 style="color: #a855f7; margin-bottom: 10px;">🏠 دور موعد تسليمها اليوم:</h4>
             <div id="readiness-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(5, 11, 20, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
+        </div>
+        <div style="margin-top: 25px;">
+            <h4 style="color: #f97316; margin-bottom: 10px;">🏛️ دور قديمة موعد إنهاء ملاحظاتها اليوم:</h4>
+            <div id="old-notes-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(5, 11, 20, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
         </div>
     </div>
 </div>
@@ -1729,8 +1756,9 @@
         document.getElementById('modal-today-date').innerText = todayStr;
         const cleaningListDiv = document.getElementById('cleaning-checklist-list');
         const readinessListDiv = document.getElementById('readiness-checklist-list');
-        cleaningListDiv.innerHTML = ""; readinessListDiv.innerHTML = "";
-        let cCount = 0, rCount = 0;
+        const oldNotesListDiv = document.getElementById('old-notes-checklist-list');
+        cleaningListDiv.innerHTML = ""; readinessListDiv.innerHTML = ""; oldNotesListDiv.innerHTML = "";
+        let cCount = 0, rCount = 0, oCount = 0;
 
         houseRecords.forEach(rec => {
             const isPreCleaned = preCleanedHouses.some(item => item.trim() === (rec.houseNo||'').trim());
@@ -1744,8 +1772,17 @@
                 readinessListDiv.innerHTML += `<div style="padding: 8px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.9rem;">📍 القطاع: <strong>${rec.sectorNo}</strong> | الدار: <strong>${rec.houseNo}</strong> | المستفيد: ${rec.ownerName}</div>`;
             }
         });
+
+        oldHouseRecords.forEach(rec => {
+            if (rec.notesEndDate === todayStr && rec.status !== 'مستلم' && !rec.notesCompleted) {
+                oCount++;
+                oldNotesListDiv.innerHTML += `<div style="padding: 8px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.9rem;">📍 القطاع: <strong>${rec.sectorNo}</strong> | الدار: <strong>${rec.houseNo}</strong> | الحالة: ${rec.status}</div>`;
+            }
+        });
+
         if (cCount === 0) cleaningListDiv.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>لا توجد دور موعد تنظيفها اليوم.</p>";
         if (rCount === 0) readinessListDiv.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>لا توجد دور موعد تسليمها اليوم.</p>";
+        if (oCount === 0) oldNotesListDiv.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>لا توجد دور قديمة موعد إنهاء ملاحظاتها اليوم.</p>";
         document.getElementById('dailyChecklistModal').style.display = 'flex';
     }
     function closeDailyChecklistModal() { document.getElementById('dailyChecklistModal').style.display = 'none'; }
@@ -1763,11 +1800,19 @@
                     if (target && target < todayStr && !r.isReady) overdue++;
                 }
             });
+            oldHouseRecords.forEach(r => {
+                if (r.contractorName === contractor) {
+                    total++;
+                    const isCompleted = r.status === 'مستلم';
+                    if (isCompleted) ready++;
+                    if (!isCompleted && r.handoverDate && r.handoverDate < todayStr) overdue++;
+                }
+            });
             container.innerHTML += `
                 <div style="background:rgba(5, 11, 20, 0.5); backdrop-filter:blur(12px); border:1px solid var(--glass-border); padding:16px; border-radius:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
                     <div>
                         <strong style="color:#38bdf8; font-size:1.05rem;">👷‍♂️ ${contractor}</strong>
-                        <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">إجمالي الدور المسجلة: ${total}</div>
+                        <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">إجمالي الدور المسجلة (جديدة + قديمة): ${total}</div>
                     </div>
                     <div style="text-align:left; display:flex; gap:8px;">
                         <span class="badge badge-ready">منجزة: ${ready}</span>
@@ -1899,9 +1944,27 @@
             }
         });
 
+        let oldAllHouses = [];
+        let oldCompletedHouses = [];
+        let oldNotesDueTodayOr2Days = [];
+        let oldNotesOverdueHouses = [];
+
+        oldHouseRecords.forEach(rec => {
+            const houseNum = rec.houseNo || '-';
+            oldAllHouses.push(houseNum);
+
+            if (rec.status === 'مستلم') {
+                oldCompletedHouses.push(houseNum);
+            } else if (rec.notesEndDate) {
+                const diff = daysBetween(todayStr, rec.notesEndDate);
+                if (diff <= 2 && diff >= 0) oldNotesDueTodayOr2Days.push(houseNum);
+                if (diff < 0) oldNotesOverdueHouses.push(houseNum);
+            }
+        });
+
         let msgText = `📊 *التقرير اليومي الشامل - مجمع الأميرات 2*\n` +
                       `📅 التاريخ: ${todayStr}\n\n` +
-                      `🏠 *إجمالي الدور المسجلة:* (${allHouses.length})\n` +
+                      `🏠 *إجمالي الدور الجديدة المسجلة:* (${allHouses.length})\n` +
                       `📌 أرقام الدور: ${allHouses.length > 0 ? allHouses.join('، ') : 'لا يوجد'}\n\n` +
 
                       `🧹 *الدور المنظفة:* (${cleanedHouses.length})\n` +
@@ -1915,6 +1978,18 @@
 
                       `⚠️ *الدور الغير جاهزة:* (${notReadyHouses.length})\n` +
                       `📌 أرقام الدور: ${notReadyHouses.length > 0 ? notReadyHouses.join('، ') : 'لا يوجد'}\n\n` +
+
+                      `-------------------------------\n` +
+                      `🏛️ *إجمالي الدور القديمة:* (${oldAllHouses.length})\n\n` +
+
+                      `✅ *دور قديمة مستلمة (مكتملة):* (${oldCompletedHouses.length})\n` +
+                      `📌 أرقام الدور: ${oldCompletedHouses.length > 0 ? oldCompletedHouses.join('، ') : 'لا يوجد'}\n\n` +
+
+                      `📌 *دور قديمة يجب إنهاء ملاحظاتها خلال يومين:* (${oldNotesDueTodayOr2Days.length})\n` +
+                      `📌 أرقام الدور: ${oldNotesDueTodayOr2Days.length > 0 ? oldNotesDueTodayOr2Days.join('، ') : 'لا يوجد'}\n\n` +
+
+                      `⚠️ *دور قديمة متأخرة عن إنهاء الملاحظات:* (${oldNotesOverdueHouses.length})\n` +
+                      `📌 أرقام الدور: ${oldNotesOverdueHouses.length > 0 ? oldNotesOverdueHouses.join('، ') : 'لا يوجد'}\n\n` +
 
                       `_صادر عن مكتب التسليم الفني_`;
 
