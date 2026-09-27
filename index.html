@@ -218,7 +218,7 @@
         .filter-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1; }
         .filter-group label { font-weight: 700; color: var(--text-muted); font-size: 0.88rem; }
 
-        select, input[type="text"], input[type="date"], input[type="number"] {
+        select, input[type="text"], input[type="date"], input[type="number"], textarea {
             background: rgba(5, 11, 20, 0.7);
             border: 1px solid var(--glass-border);
             color: var(--text-main);
@@ -229,7 +229,7 @@
             backdrop-filter: blur(12px);
             transition: all 0.25s;
         }
-        select:focus, input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), 0 0 20px rgba(56, 189, 248, 0.25); }
+        select:focus, input:focus, textarea:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), 0 0 20px rgba(56, 189, 248, 0.25); }
 
         .btn-action-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         
@@ -431,6 +431,36 @@
         .team-select-item:hover {
             border-color: var(--primary-blue);
         }
+
+        /* تنسيق خانة عداد المراجعات للدور القديمة */
+        .visit-counter-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 800;
+            color: var(--primary-blue);
+        }
+        .visit-counter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .visit-counter-btn:hover {
+            background: var(--primary-blue);
+            color: #000;
+        }
     </style>
 </head>
 <body>
@@ -544,6 +574,7 @@
                     <th>اسم المستفيد</th>
                     <th>القطاع</th>
                     <th>نوع التنفيذ والمقاول</th>
+                    <th>مراجعات المستفيد (القديمة)</th>
                     <th>الحالة الحالية</th>
                     <th>تاريخ الحضور</th>
                     <th>تاريخ العمل/التنظيف</th>
@@ -551,7 +582,7 @@
                     <th>تاريخ الكشف</th>
                     <th>موعد التسليم الـ 10 أيام</th>
                     <th id="th-second-handover" style="display:none;">موعد التسليم الثاني والسبب</th>
-                    <th id="th-camera" style="display:none;">صورة الملاحظات والتوقيع</th>
+                    <th>الملاحظات والتوقيع</th>
                     <th>واتساب والتبليغ (3 مرات)</th>
                     <th>تعديل</th>
                 </tr>
@@ -696,10 +727,19 @@
                     <option value="تنفيذ مقاولين">تنفيذ مقاولين</option>
                 </select>
             </div>
+            
+            <!-- إضافة خانة اسم المقاول مع الجلب من القائمة -->
             <div id="contractor-group" class="form-group hidden-field">
-                <label>اسم المقاول</label>
+                <label>اسم المقاول المعتمد</label>
                 <select id="contractorName" class="form-control" onchange="checkNewContractorOption(this)"></select>
             </div>
+
+            <!-- إضافة خانة عداد المراجعات للدور القديمة -->
+            <div id="visit-count-group" class="form-group hidden-field">
+                <label>عدد مرات مراجعة المستفيد (الدور القديمة فقط)</label>
+                <input type="number" id="visitCountInput" class="form-control" min="0" value="0">
+            </div>
+
             <div class="form-group">
                 <label>رقم القطاع</label>
                 <select id="sectorNo" class="form-control">
@@ -727,6 +767,12 @@
                 <div class="form-group"><label>تاريخ عمل المقاول</label><input type="date" id="contractorStartDate" class="form-control"></div>
                 <div class="form-group"><label>تاريخ جهوزية الدار (10 أيام تلقائي)</label><input type="date" id="houseReadyDate" class="form-control"></div>
             </div>
+
+            <div class="form-group">
+                <label>ملاحظات إضافية على الدار</label>
+                <textarea id="houseNotes" class="form-control" rows="3" placeholder="أدخل الملاحظات الفنية الخاصة بالدار..."></textarea>
+            </div>
+
             <button type="submit" class="btn-primary" style="margin-top: 10px;">حفظ وتدقيق السجل</button>
         </form>
     </div>
@@ -772,10 +818,18 @@
 <div id="imagePreviewModal" class="modal">
     <div class="modal-content" style="text-align:center;">
         <span class="close-btn" onclick="closeImageModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #fff;">المرفقات المعتمدة (صور وتوقيع)</h3>
-        <img id="previewImgElement" src="" alt="صورة الملاحظات" style="max-width: 100%; max-height: 70vh; border-radius: 16px; margin-bottom:15px; border:1px solid var(--glass-border);">
-        <br>
-        <button class="btn-primary" onclick="openSignatureModalForCurrent()">✍️ تعديل التوقيع الرقمي</button>
+        <h3 style="margin-bottom: 15px; color: #fff;">الملاحظات والمرفقات المعاينة</h3>
+        
+        <div id="notesTextPreview" style="background: rgba(5, 11, 20, 0.7); border: 1px solid var(--glass-border); padding: 16px; border-radius: 16px; margin-bottom: 15px; text-align: right; color: #38bdf8; font-weight: 700; white-space: pre-wrap;"></div>
+
+        <div id="imagePreviewContainer">
+            <img id="previewImgElement" src="" alt="صورة الملاحظات" style="max-width: 100%; max-height: 50vh; border-radius: 16px; margin-bottom:15px; border:1px solid var(--glass-border); display:none;">
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="btn-primary" style="flex:1;" onclick="triggerCamera(activeRecordIdForCamera)">📷 التقاط / إرفاق صورة ملاحظات</button>
+            <button class="btn-primary" style="flex:1;" onclick="openSignatureModalForCurrent()">✍️ التوقيع الرقمي</button>
+        </div>
     </div>
 </div>
 
@@ -796,12 +850,14 @@
     firebase.initializeApp(firebaseConfig);
     const dbRef = firebase.database().ref('amirat_houses_db_zero');
 
+    // تصحيح قائمة الأسماء والأرقام حسب المطلوب بالضبط وحذف الأرقام الزائدة والجهولة
     let targetTeam = JSON.parse(localStorage.getItem('targetTeamList')) || [
         { name: "الرقم الرئيسي للواتساب العادي", phone: "9647840971766" },
-        { name: "مهندس محمد عبد الأمير", phone: "9647825962173" },
+        { name: "مهندس محمد عبد الامير", phone: "9647825962173" },
+        { name: "مهندس بشير احمد", phone: "9647826821986" },
+        { name: "المهندس مرتضى", phone: "" },
         { name: "منتظر علي", phone: "9647862568787" },
-        { name: "مهندس بشير أحمد", phone: "9647826821986" },
-        { name: "علي نعمان هادي", phone: "9647819743895" }
+        { name: "علي نعمان", phone: "9647819743895" }
     ];
 
     let contractorsList = JSON.parse(localStorage.getItem('contractorsList')) || [
@@ -839,7 +895,7 @@
     }
 
     function formatPhoneForWhatsApp(phone) {
-        if (!phone) return '9647840971766';
+        if (!phone) return '';
         let cleaned = phone.replace(/[^\d]/g, '');
         if (cleaned.startsWith('0')) {
             cleaned = '964' + cleaned.substring(1);
@@ -849,12 +905,12 @@
         return cleaned;
     }
 
-    // فتح الواتساب العادي مباشره دون المتصفح باستعمال بروتوكول الرابط المباشر للواتساب
+    // فتح الواتساب العادي مباشره باستخدام بروتوكول واتساب المباشر
     function openWhatsAppDirect(phone, text) {
         const targetPhone = phone ? phone : "07840971766";
         const cleanPhone = formatPhoneForWhatsApp(targetPhone);
         const encodedText = encodeURIComponent(text || '');
-        let waUrl = `whatsapp://send?phone=${cleanPhone}&text=${encodedText}`;
+        let waUrl = cleanPhone ? `whatsapp://send?phone=${cleanPhone}&text=${encodedText}` : `whatsapp://send?text=${encodedText}`;
         window.location.href = waUrl;
     }
 
@@ -878,7 +934,7 @@
                 <div class="team-select-item">
                     <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
                         <input type="checkbox" value="${member.phone}" class="wa-target-checkbox" ${isChecked}>
-                        <span>${member.name} (${member.phone})</span>
+                        <span>${member.name} ${member.phone ? `(${member.phone})` : ''}</span>
                     </label>
                 </div>
             `;
@@ -892,12 +948,11 @@
     }
 
     function addNewTeamMemberPrompt() {
-        let name = prompt("أدخل اسم العضو أو المسمى الوظيفي:");
+        let name = prompt("أدخل اسم المستخدم الجديد:");
         if (!name) return;
         let phone = prompt("أدخل رقم الواتساب (مثال: 07840971766):");
-        if (!phone) return;
         
-        targetTeam.push({ name: name, phone: phone });
+        targetTeam.push({ name: name, phone: phone || '' });
         syncLists();
         openWhatsappNotifyDialog(pendingWhatsAppMsg, phone);
     }
@@ -967,7 +1022,7 @@
         const select = document.getElementById('contractorName');
         if (!select) return;
         const currentVal = select.value;
-        select.innerHTML = "";
+        select.innerHTML = `<option value="">-- اختر المقاول --</option>`;
         contractorsList.forEach(c => { select.innerHTML += `<option value="${c}">${c}</option>`; });
         select.innerHTML += `<option value="ADD_NEW">+ إضافة مقاول جديد</option>`;
         if (currentVal && contractorsList.includes(currentVal)) select.value = currentVal;
@@ -988,7 +1043,8 @@
     function openAddModal() {
         document.getElementById('edit-id').value = "";
         document.getElementById('record-form').reset();
-        document.getElementById('arrivalDate').value = todayStr; // إرجاع تاريخ مجيء المستفيد تلقائياً كـ تاريخ اليوم
+        document.getElementById('arrivalDate').value = todayStr;
+        document.getElementById('visitCountInput').value = 0;
         document.getElementById('modal-title').innerText = "إضافة دار جديد (مع التدقيق الصارم)";
         populateContractorsDropdown();
         document.getElementById('preCleanedAlertBox').style.display = 'none';
@@ -1014,9 +1070,12 @@
         document.getElementById('cleaningEndDate').value = rec.cleaningEndDate || '';
         document.getElementById('contractorStartDate').value = rec.contractorStartDate || '';
         document.getElementById('houseReadyDate').value = rec.houseReadyDate || '';
+        document.getElementById('houseNotes').value = rec.notes || '';
+        document.getElementById('visitCountInput').value = rec.visitCount || 0;
 
         document.getElementById('modal-title').innerText = "تعديل بيانات الدار والتدقيق";
         document.getElementById('addRecordModal').style.display = 'flex';
+        onExecutionTypeChange();
         checkPreCleanedMatch();
     }
 
@@ -1027,7 +1086,7 @@
         }
     }
 
-    // حفظ السجل وتفعيل ميزة الإرسال التلقائي لعدة أشخاص عند إدخال تواريخ حضور المستفيد
+    // حفظ السجل وتحديث عداد الزيارات والرسائل والبيانات
     function saveRecord(e) {
         e.preventDefault();
         const editId = document.getElementById('edit-id').value;
@@ -1038,6 +1097,8 @@
         const sectorNo = document.getElementById('sectorNo').value;
         const ownerName = document.getElementById('ownerName').value.trim();
         const arrivalDate = document.getElementById('arrivalDate').value || todayStr;
+        const notes = document.getElementById('houseNotes').value.trim();
+        const visitCount = parseInt(document.getElementById('visitCountInput').value) || 0;
 
         if (!editId) {
             const exists = houseRecords.some(r => r.houseNo.toLowerCase() === houseNo.toLowerCase());
@@ -1058,6 +1119,8 @@
         rec.sectorNo = sectorNo;
         rec.ownerName = ownerName;
         rec.arrivalDate = arrivalDate;
+        rec.notes = notes;
+        rec.visitCount = visitCount;
 
         if (executionType === "تنفيذ مباشر") {
             if (isPreCleaned) {
@@ -1069,7 +1132,7 @@
                 rec.cleaningEndDate = document.getElementById('cleaningEndDate').value || addDays(arrivalDate, 2);
             }
             rec.handoverDate = addDays(arrivalDate, 10);
-            rec.inspectionDate = arrivalDate; // تاريخ الكشف يساوي تاريخ الحضور
+            rec.inspectionDate = arrivalDate;
         } else if (executionType === "تنفيذ مقاولين") {
             rec.contractorStartDate = document.getElementById('contractorStartDate').value || addDays(arrivalDate, 1);
             rec.houseReadyDate = document.getElementById('houseReadyDate').value || addDays(arrivalDate, 10);
@@ -1084,31 +1147,50 @@
         syncRecord(rec);
         closeAddModal();
 
-        // إرجاع ميزة إرسال الرسالة لعدة أشخاص فور إدخال تواريخ الحضور للمستفيد
-        if (arrivalDate) {
-            let msgText = "";
-            if (executionType === "تنفيذ مقاولين") {
-                msgText = `🚨 *تبليغ جديد - تسجيل موعد حضور مستفيد (تنفيذ مقاولين)*\n` +
-                          `🏠 الدار: *${rec.houseNo}* (${rec.sectorNo})\n` +
-                          `👤 المستفيد: *${rec.ownerName}*\n` +
-                          `👷‍♂️ المقاول: *${rec.contractorName || '-'}\n` +
-                          `📅 تاريخ الحضور: ${rec.arrivalDate}\n` +
-                          `🛠️ تاريخ بدء عمل المقاول: ${rec.contractorStartDate || '-'}\n` +
-                          `⏱️ موعد جهوزية الدار والتسليم (10 أيام): ${rec.houseReadyDate}\n\n` +
-                          `_مكتب التسليم الفني - مجمع الأميرات 2_`;
-            } else {
-                msgText = `📢 *تبليغ جديد - تسجيل موعد حضور مستفيد (تنفيذ مباشر)*\n` +
-                          `🏠 الدار: *${rec.houseNo}* (${rec.sectorNo})\n` +
-                          `👤 المستفيد: *${rec.ownerName}*\n` +
-                          `📅 تاريخ الحضور والتفتيش: ${rec.arrivalDate}\n` +
-                          `🧹 تاريخ انتهاء التنظيف المتوقع: ${rec.cleaningEndDate || 'خلال يومين'}\n` +
-                          `⏱️ موعد التسليم النهائي (10 أيام): ${rec.handoverDate}\n\n` +
-                          `_مكتب التسليم الفني - مجمع الأميرات 2_`;
-            }
+        // إرسال رسالة التفاصيل التلقائية عبر الواتساب
+        let msgText = generateWhatsAppText(rec);
+        setTimeout(() => {
+            openWhatsappNotifyDialog(msgText, rec.phoneNo || "07840971766");
+        }, 300);
+    }
 
-            setTimeout(() => {
-                openWhatsappNotifyDialog(msgText, rec.phoneNo || "07840971766");
-            }, 300);
+    // كتابة النص التلقائي المنظم لمعلومات الدار والتفاصيل
+    function generateWhatsAppText(rec) {
+        let text = `📢 *تقرير تفاصيل الدار - مجمع الأميرات 2*\n` +
+                   `🏠 *رقم الدار والبلوك:* ${rec.houseNo}\n` +
+                   `📍 *القطاع:* ${rec.sectorNo}\n` +
+                   `👤 *اسم المستفيد:* ${rec.ownerName}\n` +
+                   `📱 *الهاتف:* ${rec.phoneNo || '-'}\n` +
+                   `⚙️ *نوع التنفيذ:* ${rec.executionType}\n`;
+
+        if (rec.executionType === "تنفيذ مقاولين") {
+            text += `👷‍♂️ *المقاول المسؤول:* ${rec.contractorName || '-'}\n` +
+                    `🛠️ *تاريخ بدء العمل:* ${rec.contractorStartDate || '-'}\n` +
+                    `⏱️ *موعد التسليم المتوقع:* ${rec.houseReadyDate || '-'}\n`;
+        } else {
+            text += `🧹 *تاريخ بدء التنظيف:* ${rec.cleaningStartDate || '-'}\n` +
+                    `⏳ *انتهاء التنظيف:* ${rec.cleaningEndDate || '-'}\n` +
+                    `⏱️ *موعد التسليم النهائي (10 أيام):* ${rec.handoverDate || '-'}\n`;
+        }
+
+        if (rec.visitCount > 0) {
+            text += `🔄 *عدد مراجعات المستفيد:* ${rec.visitCount}\n`;
+        }
+
+        if (rec.notes) {
+            text += `📝 *الملاحظات الفنية:* ${rec.notes}\n`;
+        }
+
+        text += `\n_صادر من مكتب التسليم الفني_`;
+        return text;
+    }
+
+    function adjustVisitCount(id, delta, event) {
+        if(event) event.stopPropagation();
+        const rec = houseRecords.find(r => r.id === id);
+        if (rec) {
+            rec.visitCount = Math.max(0, (rec.visitCount || 0) + delta);
+            syncRecordFields(rec.id, { visitCount: rec.visitCount });
         }
     }
 
@@ -1373,6 +1455,7 @@
         let html = `
             <p>👤 <strong>اسم المستفيد:</strong> ${rec.ownerName} | الهاتف: ${rec.phoneNo || '-'}</p>
             <p>📍 <strong>القطاع:</strong> ${rec.sectorNo} | نوع التنفيذ: ${rec.executionType || '-'}</p>
+            <p>🔄 <strong>عدد مراجعات المستفيد:</strong> ${rec.visitCount || 0}</p>
             <hr style="border-color:var(--glass-border); margin:12px 0;">
             <p>📅 <strong>تاريخ الحضور:</strong> ${rec.arrivalDate || '-'}</p>
             <p>🛡️ <strong>حالة التدقيق:</strong> بيانات موثقة وصفرية الأخطاء</p>
@@ -1382,6 +1465,7 @@
         if (rec.inspectionDate) html += `<p>🔍 <strong>تاريخ الكشف:</strong> ${rec.inspectionDate}</p>`;
         if (rec.handoverDate) html += `<p>⏱️ <strong>موعد التسليم النهائي (10 أيام):</strong> ${rec.handoverDate}</p>`;
         if (rec.secondHandoverDate) html += `<p style="color:#fbbf24;">🔄 <strong>موعد التسليم الثاني:</strong> ${rec.secondHandoverDate} (السبب: ${rec.notReadyReason})</p>`;
+        if (rec.notes) html += `<p style="color:#38bdf8;">📝 <strong>الملاحظات:</strong> ${rec.notes}</p>`;
         if (rec.signatureImg) html += `<p style="color:#10b981;">✍️ <strong>يوجد توقيع رقمي معتمد</strong></p>`;
         document.getElementById('timeline-content-box').innerHTML = html;
         document.getElementById('timelineModal').style.display = 'flex';
@@ -1495,14 +1579,14 @@
                 "القطاع": rec.sectorNo || '-',
                 "نوع التنفيذ": rec.executionType || '-',
                 "المقاول": rec.contractorName || '-',
+                "عدد المراجعات": rec.visitCount || 0,
                 "الحالة الحالية": logic.statusText,
                 "تاريخ الحضور": rec.arrivalDate || '-',
                 "تاريخ بدء العمل/التنظيف": rec.cleaningStartDate || rec.contractorStartDate || '-',
                 "موعد انتهاء التنظيف": rec.cleaningEndDate || '-',
                 "تاريخ الكشف": rec.inspectionDate || '-',
                 "موعد التسليم الـ 10 أيام": rec.handoverDate || rec.houseReadyDate || '-',
-                "موعد التسليم الثاني": rec.secondHandoverDate || '-',
-                "سبب تأخير التسليم الثاني": rec.notReadyReason || '-'
+                "الملاحظات": rec.notes || '-'
             };
         });
 
@@ -1514,14 +1598,14 @@
             "القطاع": "",
             "نوع التنفيذ": "",
             "المقاول": "",
+            "عدد المراجعات": "",
             "الحالة الحالية": "",
             "تاريخ الحضور": "",
             "تاريخ بدء العمل/التنظيف": "",
             "موعد انتهاء التنظيف": "",
             "تاريخ الكشف": "",
             "موعد التسليم الـ 10 أيام": "",
-            "موعد التسليم الثاني": "",
-            "سبب تأخير التسليم الثاني": ""
+            "الملاحظات": ""
         });
 
         const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
@@ -1530,8 +1614,8 @@
 
         const colWidths = [
             { wch: 10 }, { wch: 22 }, { wch: 24 }, { wch: 18 }, { wch: 16 },
-            { wch: 16 }, { wch: 20 }, { wch: 26 }, { wch: 15 }, { wch: 22 },
-            { wch: 20 }, { wch: 15 }, { wch: 22 }, { wch: 20 }, { wch: 32 }
+            { wch: 16 }, { wch: 20 }, { wch: 15 }, { wch: 26 }, { wch: 15 },
+            { wch: 22 }, { wch: 20 }, { wch: 15 }, { wch: 22 }, { wch: 32 }
         ];
         worksheet['!cols'] = colWidths;
 
@@ -1539,15 +1623,14 @@
         closeExcelOptionsModal();
     }
 
-    // تعديل آلية التنفيذ المباشر لتكون 10 أيام تلقائية وحساب تنظيف يومين مباشرةً
-    // وتم جعل تاريخ الكشف للتنفيذ المباشر يساوي تاريخ حضور المستفيد تلقائياً
     function onExecutionTypeChange() {
         const type = document.getElementById('executionType').value;
         const contractorGroup = document.getElementById('contractor-group');
         const directDates = document.getElementById('direct-dates-group');
         const contractorDates = document.getElementById('contractor-dates-group');
+        const visitGroup = document.getElementById('visit-count-group');
 
-        if (!type) { contractorGroup.classList.add('hidden-field'); directDates.classList.add('hidden-field'); contractorDates.classList.add('hidden-field'); return; }
+        if (!type) { contractorGroup.classList.add('hidden-field'); directDates.classList.add('hidden-field'); contractorDates.classList.add('hidden-field'); visitGroup.classList.add('hidden-field'); return; }
         
         const arrival = document.getElementById('arrivalDate').value || todayStr;
         const isPreCleaned = preCleanedHouses.some(item => item.trim() === document.getElementById('houseNo').value.trim());
@@ -1555,37 +1638,35 @@
         if (type === "تنفيذ مباشر") {
             contractorGroup.classList.add('hidden-field');
             contractorDates.classList.add('hidden-field');
+            visitGroup.classList.remove('hidden-field');
             if (isPreCleaned) { 
                 directDates.classList.add('hidden-field'); 
             } else { 
                 directDates.classList.remove('hidden-field'); 
                 document.getElementById('cleaningStartDate').value = arrival; 
-                document.getElementById('cleaningEndDate').value = addDays(arrival, 2); // شرط التنظيف خلال يومين
+                document.getElementById('cleaningEndDate').value = addDays(arrival, 2);
             }
         } else if (type === "تنفيذ مقاولين") {
             contractorGroup.classList.remove('hidden-field');
             contractorDates.classList.remove('hidden-field'); 
             directDates.classList.add('hidden-field');
+            visitGroup.classList.remove('hidden-field');
             document.getElementById('contractorStartDate').value = addDays(arrival, 1); 
-            document.getElementById('houseReadyDate').value = addDays(arrival, 10); // 10 أيام تلقائي نفس المقاولين
+            document.getElementById('houseReadyDate').value = addDays(arrival, 10);
         }
     }
 
     function handleArrivalDateChange() { onExecutionTypeChange(); }
 
-    // حساب حالة الدار بدقة مع آلية 3 أيام المتبقية والتنظيف خلال يومين
     function calculateRecordStatus(rec) {
         let statusText = "", badgeClass = "", isCleaningOverdue = false, isHandoverOverdue = false, is3DaysRemaining = false, is2DayCleaningNeeded = false;
         const house = rec.houseNo || '';
         const isPreCleaned = preCleanedHouses.some(item => item.trim() === house.trim());
         
-        // حساب موعد التسليم النهائـي بـ 10 أيام تلقائياً للمباشر والمقاولين
         const effectiveHandoverDate = rec.secondHandoverDate || rec.handoverDate || addDays(rec.arrivalDate, 10);
-
         const remDays = daysBetween(todayStr, effectiveHandoverDate);
 
         if (rec.executionType === "تنفيذ مباشر") {
-            const cleanRemDays = daysBetween(todayStr, rec.cleaningEndDate);
             if (!isPreCleaned && !rec.isCleaned) {
                 if (rec.cleaningEndDate && rec.cleaningEndDate < todayStr) { 
                     statusText = "🚨 تجاوزت موعد التنظيف (يومين)"; 
@@ -1658,8 +1739,9 @@
         });
     }
 
-    function triggerWhatsAppNotify(phone, name, houseNo, sectorNo) {
-        let msg = `السلام عليكم ورحمة الله وبركاته\nالأخ المستفيد: ${name}\nنود إعلامكم بأن الدار رقم (${houseNo}) في ${sectorNo} أصبح جاهزاً للإنهاء والتسليم.\nيرجى المراجعة لإكمال الإجراءات.`;
+    function triggerWhatsAppNotify(phone, name, houseNo, sectorNo, id) {
+        const rec = houseRecords.find(r => r.id === id);
+        let msg = rec ? generateWhatsAppText(rec) : `السلام عليكم\nنود إعلامكم بأن الدار رقم (${houseNo}) في ${sectorNo} أصبح جاهزاً للإنهاء والتسليم.`;
         openWhatsappNotifyDialog(msg, phone ? phone : "07840971766");
     }
 
@@ -1693,14 +1775,31 @@
                     rec.noteImage = e.target.result;
                     syncRecordFields(rec.id, { noteImage: rec.noteImage });
                     alert("✅ تم إرفاق صورة الملاحظات بنجاح!");
+                    viewImage(rec.id);
                 }
             };
             reader.readAsDataURL(file);
         }
     }
 
-    function viewImage(imgUrl) {
-        document.getElementById('previewImgElement').src = imgUrl;
+    // تصحيح أيقونة ونافذة الملاحظات لتعمل بسلاسة عند الضغط عليها
+    function viewImage(id) {
+        const rec = houseRecords.find(r => r.id === id);
+        if (!rec) return;
+
+        activeRecordIdForCamera = id;
+        const notesContainer = document.getElementById('notesTextPreview');
+        const imgElement = document.getElementById('previewImgElement');
+
+        notesContainer.innerText = rec.notes ? `📝 الملاحظات المسجلة:\n${rec.notes}` : "📝 لا توجد ملاحظات نصية مدونة للدار.";
+
+        if (rec.noteImage || rec.signatureImg) {
+            imgElement.src = rec.noteImage || rec.signatureImg;
+            imgElement.style.display = 'inline-block';
+        } else {
+            imgElement.style.display = 'none';
+        }
+
         document.getElementById('imagePreviewModal').style.display = 'flex';
     }
 
@@ -1716,6 +1815,7 @@
             <p><strong>رقم الدار:</strong> ${rec.houseNo} | <strong>المستفيد:</strong> ${rec.ownerName}</p>
             <p><strong>نوع التنفيذ:</strong> ${rec.executionType} ${rec.contractorName ? `(${rec.contractorName})` : ''}</p>
             <p><strong>تاريخ الحضور:</strong> ${rec.arrivalDate || '-'}</p>
+            <p><strong>عدد المراجعات:</strong> ${rec.visitCount || 0}</p>
         `;
         document.getElementById('status-modal-details').innerHTML = detailsHtml;
 
@@ -1797,18 +1897,12 @@
         tbody.innerHTML = ""; cardsContainer.innerHTML = "";
 
         let cAll = 0, cCleanCompleted = 0, cCleanUncompleted = 0, cReadyAll = 0, cNotReadyOverdue = 0, c3DaysRem = 0, c2DayClean = 0;
-        let hasAnyNotReadyRecord = false;
-
-        houseRecords.forEach(rec => { if (rec.secondHandoverDate) hasAnyNotReadyRecord = true; });
-        document.getElementById('th-second-handover').style.display = hasAnyNotReadyRecord ? '' : 'none';
-        document.getElementById('th-camera').style.display = hasAnyNotReadyRecord ? '' : 'none';
 
         houseRecords.forEach((rec, idx) => {
-            cAll++;
+            const isPreCleaned = preCleanedHouses.some(item => item.trim() === (rec.houseNo || '').trim());
             const logic = calculateRecordStatus(rec);
-            const house = rec.houseNo || '';
-            const isPreCleaned = preCleanedHouses.some(item => item.trim() === house.trim());
 
+            cAll++;
             if (rec.isCleaned || isPreCleaned) cCleanCompleted++;
             if (logic.isCleaningOverdue) cCleanUncompleted++;
             if (rec.isReady) cReadyAll++;
@@ -1816,145 +1910,112 @@
             if (logic.is3DaysRemaining) c3DaysRem++;
             if (logic.is2DayCleaningNeeded) c2DayClean++;
 
-            let matchesSearch = true;
+            // تطبيق الفلاتر
             if (searchVal !== "") {
-                if (searchVal === "متأخر" || searchVal === "عبرت") {
-                    matchesSearch = (logic.isCleaningOverdue || logic.isHandoverOverdue);
-                } else if (searchVal === "جاهز") {
-                    matchesSearch = rec.isReady;
-                } else if (searchVal === "مباشر") {
-                    matchesSearch = rec.executionType === "تنفيذ مباشر";
-                } else if (searchVal === "مقاولين") {
-                    matchesSearch = rec.executionType === "تنفيذ مقاولين";
-                } else {
-                    matchesSearch = rec.houseNo.toLowerCase().includes(searchVal) || 
-                                    rec.ownerName.toLowerCase().includes(searchVal) || 
-                                    (rec.contractorName && rec.contractorName.toLowerCase().includes(searchVal)) ||
-                                    (rec.sectorNo && rec.sectorNo.toLowerCase().includes(searchVal));
-                }
+                const matchHouse = (rec.houseNo || '').toLowerCase().includes(searchVal);
+                const matchOwner = (rec.ownerName || '').toLowerCase().includes(searchVal);
+                const matchStatus = logic.statusText.toLowerCase().includes(searchVal);
+                const matchContractor = (rec.contractorName || '').toLowerCase().includes(searchVal);
+                if (!matchHouse && !matchOwner && !matchStatus && !matchContractor) return;
             }
 
-            const matchesExec = execFilter === "all" || rec.executionType === execFilter;
-            const matchesSector = sectorFilter === "all" || rec.sectorNo === sectorFilter;
+            if (execFilter !== 'all' && rec.executionType !== execFilter) return;
+            if (sectorFilter !== 'all' && rec.sectorNo !== sectorFilter) return;
 
-            let matchesStatus = true;
-            if (statusFilter === "completed_cleaning") matchesStatus = (rec.isCleaned || isPreCleaned);
-            else if (statusFilter === "uncompleted_cleaning") matchesStatus = logic.isCleaningOverdue;
-            else if (statusFilter === "ready_all") matchesStatus = rec.isReady;
-            else if (statusFilter === "not_ready_overdue") matchesStatus = logic.isHandoverOverdue;
-            else if (statusFilter === "3days_remaining") matchesStatus = logic.is3DaysRemaining;
-            else if (statusFilter === "2day_cleaning_needed") matchesStatus = logic.is2DayCleaningNeeded;
+            if (statusFilter === '2day_cleaning_needed' && !logic.is2DayCleaningNeeded) return;
+            if (statusFilter === '3days_remaining' && !logic.is3DaysRemaining) return;
+            if (statusFilter === 'uncompleted_cleaning' && !logic.isCleaningOverdue) return;
+            if (statusFilter === 'not_ready_overdue' && !logic.isHandoverOverdue) return;
+            if (statusFilter === 'completed_cleaning' && (!rec.isCleaned && !isPreCleaned)) return;
+            if (statusFilter === 'ready_all' && !rec.isReady) return;
 
-            if (matchesSearch && matchesExec && matchesSector && matchesStatus) {
-                let startWorkDate = '-', endWorkDate = '-', inspectionDisplay = '-', finalHandover = '-';
-                
-                // حساب 10 أيام تلقائي للتنفيذ المباشر أيضاً
-                const autoHandover = addDays(rec.arrivalDate, 10);
-                
-                if (rec.executionType === 'تنفيذ مباشر') {
-                    startWorkDate = isPreCleaned ? '-' : (rec.cleaningStartDate || rec.arrivalDate);
-                    endWorkDate = isPreCleaned ? '-' : (rec.cleaningEndDate || addDays(rec.arrivalDate, 2));
-                    
-                    // تم جعل تاريخ الكشف للتنفيذ المباشر مساوياً لتاريخ حضور المستفيد دائماً
-                    inspectionDisplay = rec.arrivalDate || '-';
-                    finalHandover = rec.handoverDate || autoHandover;
-                } else if (rec.executionType === 'تنفيذ مقاولين') {
-                    startWorkDate = rec.contractorStartDate || '-';
-                    inspectionDisplay = rec.inspectionDate || '-';
-                    finalHandover = rec.houseReadyDate || autoHandover;
-                }
+            let rowClass = "";
+            if (logic.isHandoverOverdue || logic.isCleaningOverdue) rowClass = "row-overdue-alert";
+            else if (logic.is3DaysRemaining) rowClass = "row-warning-3days";
 
-                let secondHandoverTd = '', cameraTd = '';
-                if (hasAnyNotReadyRecord) {
-                    if (rec.secondHandoverDate) {
-                        secondHandoverTd = `<td><span style="color:#fbbf24; font-weight:800;">${rec.secondHandoverDate}</span><br><small style="color:var(--text-muted);">السبب: ${rec.notReadyReason || '-'}</small></td>`;
-                        let cameraBtn = rec.noteImage ? `<button class="camera-icon-btn" style="background:rgba(16,185,129,0.18); border-color:rgba(16,185,129,0.4); color:#10b981;" onclick="viewImage('${rec.noteImage}')">🖼️ عرض</button>` : `<button class="camera-icon-btn" onclick="triggerCamera(${rec.id})">📷 تصوير</button>`;
-                        cameraTd = `<td>${cameraBtn}</td>`;
-                    } else {
-                        secondHandoverTd = `<td style="color:var(--text-muted); text-align:center;">-</td>`;
-                        cameraTd = `<td style="color:var(--text-muted); text-align:center;">-</td>`;
-                    }
-                }
+            const notifs = rec.notifications || [null, null, null];
 
-                const phone = rec.phoneNo || '07840971766';
-                const escapedOwner = rec.ownerName ? rec.ownerName.replace(/'/g, "\\'") : '';
-                const escapedHouse = rec.houseNo ? rec.houseNo.replace(/'/g, "\\'") : '';
-                const escapedSector = rec.sectorNo ? rec.sectorNo.replace(/'/g, "\\'") : '';
-                
-                let checkboxesHtml = `<span class="whatsapp-icon" onclick="triggerWhatsAppNotify('${phone}', '${escapedOwner}', '${escapedHouse}', '${escapedSector}')" title="إرسال تبليغ عبر الواتساب المباشر">💬</span>`;
-                for (let i = 0; i < 3; i++) {
-                    const checked = rec.notifications && rec.notifications[i] ? 'checked' : '';
-                    checkboxesHtml += `<input type="checkbox" class="notif-box" ${checked} onclick="toggleNotification(${rec.id}, ${i}, event)">`;
-                }
+            const tr = document.createElement('tr');
+            tr.className = rowClass;
+            tr.onclick = () => openStatusModal(rec.id);
 
-                const tr = document.createElement('tr');
-                if (logic.isCleaningOverdue || logic.isHandoverOverdue) tr.classList.add('row-overdue-alert');
-                else if (logic.is3DaysRemaining || logic.is2DayCleaningNeeded) tr.classList.add('row-warning-3days');
-
-                tr.onclick = (e) => {
-                    if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && !e.target.classList.contains('whatsapp-icon')) {
-                        openStatusModal(rec.id);
-                    }
-                };
-
-                tr.innerHTML = `
-                    <td><strong>${idx + 1}</strong></td>
-                    <td style="color:#38bdf8; font-weight:900;">${rec.houseNo}</td>
-                    <td><strong>${rec.ownerName}</strong></td>
-                    <td>${rec.sectorNo}</td>
-                    <td><span class="badge ${rec.executionType === 'تنفيذ مباشر' ? 'badge-direct' : 'badge-contractor'}">${rec.executionType} ${rec.contractorName ? `(${rec.contractorName})` : ''}</span></td>
-                    <td><span class="badge ${logic.badgeClass}">${logic.statusText}</span></td>
-                    <td>${rec.arrivalDate || '-'}</td>
-                    <td>${startWorkDate}</td>
-                    <td>${endWorkDate}</td>
-                    <td>${inspectionDisplay}</td>
-                    <td style="font-weight:800; color:#38bdf8;">${finalHandover}</td>
-                    ${secondHandoverTd}
-                    ${cameraTd}
-                    <td><div class="checkbox-container">${checkboxesHtml}</div></td>
-                    <td>
-                        <button class="action-btn" onclick="editRecord(${rec.id})" title="تعديل">✏️</button>
-                        <button class="action-btn delete" onclick="deleteRecord(${rec.id})" title="حذف">🗑️</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-
-                cardsContainer.innerHTML += `
-                    <div class="mobile-card-item">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <strong style="color:#38bdf8; font-size:1.2rem;">${rec.houseNo}</strong>
-                            <span class="badge ${logic.badgeClass}">${logic.statusText}</span>
-                        </div>
-                        <p style="margin-bottom:6px;">👤 <strong>المستفيد:</strong> ${rec.ownerName}</p>
-                        <p style="margin-bottom:6px;">📍 <strong>القطاع:</strong> ${rec.sectorNo}</p>
-                        <p style="margin-bottom:6px;">🛠️ <strong>التنفيذ:</strong> ${rec.executionType} ${rec.contractorName ? `(${rec.contractorName})` : ''}</p>
-                        <p style="margin-bottom:6px;">📅 <strong>الحضور:</strong> ${rec.arrivalDate || '-'}</p>
-                        <p style="margin-bottom:12px;">⏱️ <strong>التسليم الـ 10 أيام:</strong> ${finalHandover}</p>
-                        <div style="display:flex; gap:10px; justify-content:flex-end;">
-                            <button class="btn-primary" style="padding:8px 16px; font-size:0.85rem;" onclick="openStatusModal(${rec.id})">تحديث الموقف</button>
-                            <button class="action-btn" onclick="editRecord(${rec.id})">✏️</button>
-                            <button class="action-btn delete" onclick="deleteRecord(${rec.id})">🗑️</button>
-                        </div>
+            tr.innerHTML = `
+                <td>${idx + 1}</td>
+                <td><strong style="color:#38bdf8; font-size:0.95rem;">${rec.houseNo || '-'}</strong></td>
+                <td>${rec.ownerName || '-'}</td>
+                <td>${rec.sectorNo || '-'}</td>
+                <td>${rec.executionType || '-'} ${rec.contractorName ? `<br><small style="color:#a855f7;">👷‍♂️ ${rec.contractorName}</small>` : ''}</td>
+                <td onclick="event.stopPropagation();">
+                    <div class="visit-counter-badge">
+                        <button class="visit-counter-btn" onclick="adjustVisitCount(${rec.id}, -1, event)">-</button>
+                        <span>${rec.visitCount || 0} مراجعة</span>
+                        <button class="visit-counter-btn" onclick="adjustVisitCount(${rec.id}, 1, event)">+</button>
                     </div>
-                `;
-            }
+                </td>
+                <td><span class="badge ${logic.badgeClass}">${logic.statusText}</span></td>
+                <td>${rec.arrivalDate || '-'}</td>
+                <td>${rec.cleaningStartDate || rec.contractorStartDate || '-'}</td>
+                <td>${rec.cleaningEndDate || '-'}</td>
+                <td>${rec.inspectionDate || '-'}</td>
+                <td>${rec.handoverDate || rec.houseReadyDate || '-'}</td>
+                <td onclick="event.stopPropagation();">
+                    <button class="camera-icon-btn" onclick="viewImage(${rec.id})">📝 الملاحظات ${rec.noteImage || rec.signatureImg ? '📷' : ''}</button>
+                </td>
+                <td onclick="event.stopPropagation();">
+                    <span class="whatsapp-icon" onclick="triggerWhatsAppNotify('${rec.phoneNo}', '${rec.ownerName}', '${rec.houseNo}', '${rec.sectorNo}', ${rec.id})">💬</span>
+                    <div class="checkbox-container">
+                        <input type="checkbox" class="notif-box" ${notifs[0] ? 'checked' : ''} onchange="toggleNotification(${rec.id}, 0, event)" title="التبليغ الأول">
+                        <input type="checkbox" class="notif-box" ${notifs[1] ? 'checked' : ''} onchange="toggleNotification(${rec.id}, 1, event)" title="التبليغ الثاني">
+                        <input type="checkbox" class="notif-box" ${notifs[2] ? 'checked' : ''} onchange="toggleNotification(${rec.id}, 2, event)" title="التبليغ الثالث">
+                    </div>
+                </td>
+                <td onclick="event.stopPropagation();">
+                    <button class="action-btn" onclick="editRecord(${rec.id})">✏️</button>
+                    <button class="action-btn delete" onclick="deleteRecord(${rec.id})">🗑️</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+
+            // إعداد بطاقات الهاتف المحمول
+            const card = document.createElement('div');
+            card.className = 'mobile-card-item';
+            card.onclick = () => openStatusModal(rec.id);
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <strong style="color:#38bdf8; font-size:1.1rem;">🏠 ${rec.houseNo}</strong>
+                    <span class="badge ${logic.badgeClass}">${logic.statusText}</span>
+                </div>
+                <div style="font-size:0.88rem; color:var(--text-muted); line-height:1.7;">
+                    <div>👤 المستفيد: <strong>${rec.ownerName}</strong></div>
+                    <div>📍 القطاع: ${rec.sectorNo}</div>
+                    <div>⚙️ التنفيذ: ${rec.executionType} ${rec.contractorName ? `(${rec.contractorName})` : ''}</div>
+                    <div>🔄 المراجعات: <strong>${rec.visitCount || 0} مرات</strong></div>
+                    <div>📅 الحضور: ${rec.arrivalDate || '-'} | التسليم: ${rec.handoverDate || rec.houseReadyDate || '-'}</div>
+                    ${rec.notes ? `<div style="color:#38bdf8;">📝 ملاحظات: ${rec.notes}</div>` : ''}
+                </div>
+                <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;" onclick="event.stopPropagation();">
+                    <button class="camera-icon-btn" onclick="viewImage(${rec.id})">📝 الملاحظات</button>
+                    <div>
+                        <span class="whatsapp-icon" onclick="triggerWhatsAppNotify('${rec.phoneNo}', '${rec.ownerName}', '${rec.houseNo}', '${rec.sectorNo}', ${rec.id})">💬</span>
+                        <button class="action-btn" onclick="editRecord(${rec.id})">✏️</button>
+                        <button class="action-btn delete" onclick="deleteRecord(${rec.id})">🗑️</button>
+                    </div>
+                </div>
+            `;
+            cardsContainer.appendChild(card);
         });
 
+        // تحديث العدادات الإحصائية
         document.getElementById('total-all-count').innerText = cAll;
-        document.getElementById('clean-completed-count').innerText = cCleanCompleted;
-        document.getElementById('clean-uncompleted-count').innerText = cCleanUncompleted;
-        document.getElementById('ready-all-count').innerText = cReadyAll;
-        document.getElementById('not-ready-overdue-count').innerText = cNotReadyOverdue;
-        document.getElementById('three-days-remaining-count').innerText = c3DaysRem;
         document.getElementById('clean-2day-needed-count').innerText = c2DayClean;
+        document.getElementById('three-days-remaining-count').innerText = c3DaysRem;
+        document.getElementById('clean-uncompleted-count').innerText = cCleanUncompleted;
+        document.getElementById('not-ready-overdue-count').innerText = cNotReadyOverdue;
+        document.getElementById('clean-completed-count').innerText = cCleanCompleted;
+        document.getElementById('ready-all-count').innerText = cReadyAll;
 
         renderCharts();
     }
-
-    window.onload = () => {
-        saveLocalAndRender();
-    };
 </script>
-
 </body>
 </html>
