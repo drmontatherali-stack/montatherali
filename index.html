@@ -1499,9 +1499,10 @@
         const alertBanner = document.getElementById('old-houses-alert-banner');
         const listSpan = document.getElementById('old-houses-due-2days-list');
 
-        // فقط الدور القديمة التي موعد انتهاء ملاحظاتها (notesEndDate) بعد يومين بالضبط من اليوم
+        // فقط الدور القديمة (غير المستلمة/غير المكتملة) التي موعد انتهاء ملاحظاتها (notesEndDate) بعد يومين بالضبط من اليوم
         let dueHouses = oldHouseRecords.filter(r => {
             if (!r.notesEndDate) return false;
+            if (r.status === 'مستلم') return false;
             let diff = daysBetween(todayStr, r.notesEndDate);
             return diff === 2;
         });
