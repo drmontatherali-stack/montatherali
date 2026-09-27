@@ -2115,6 +2115,16 @@
         }
     }
 
+    function toggleOldNotesCompleted(id, event) {
+        event.stopPropagation();
+        const rec = oldHouseRecords.find(r => r.id === id);
+        if (rec) {
+            rec.notesCompleted = event.target.checked;
+            rec.notesCompletedDate = event.target.checked ? todayStr : "";
+            syncOldRecordFields(rec.id, { notesCompleted: rec.notesCompleted, notesCompletedDate: rec.notesCompletedDate });
+        }
+    }
+
     function triggerCamera(id) {
         activeRecordIdForCamera = id;
         document.getElementById('cameraFileInput').click();
@@ -2411,6 +2421,7 @@
                     <th>الملاحظات</th>
                     <th>تاريخ المراجعة</th>
                     <th>تاريخ إنهاء الملاحظات</th>
+                    <th>هل تم إكمال الملاحظات؟</th>
                     <th>تقرير</th>
                     <th>إجراءات</th>
                 </tr>
@@ -2459,6 +2470,10 @@
                     </td>
                     <td>${rec.reviewDate || '-'}</td>
                     <td>${rec.notesEndDate || '-'}</td>
+                    <td onclick="event.stopPropagation();" style="text-align:center;">
+                        <input type="checkbox" class="notif-box" ${rec.notesCompleted ? 'checked' : ''} onclick="toggleOldNotesCompleted(${rec.id}, event)">
+                        ${rec.notesCompleted && rec.notesCompletedDate ? `<br><small style="color:#10b981;">✅ ${rec.notesCompletedDate}</small>` : ''}
+                    </td>
                     <td>
                         <button class="camera-icon-btn" onclick="generateOldHouseReport(${rec.id})">📄 تقرير</button>
                     </td>
@@ -2483,8 +2498,13 @@
                             <div>📝 الملاحظات: ${rec.notes || 'لا يوجد'}</div>
                             <div>📅 المراجعة: ${rec.reviewDate || '-'}</div>
                             <div>⏳ إنهاء الملاحظات: ${rec.notesEndDate || '-'}</div>
+                            <div>✅ إكمال الملاحظات: ${rec.notesCompleted ? `تم (${rec.notesCompletedDate || '-'})` : 'لم يتم بعد'}</div>
                         </div>
-                        <div style="margin-top:12px; display:flex; gap:10px;">
+                        <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;" onclick="event.stopPropagation();">
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.85rem; color:var(--text-muted);">
+                                <input type="checkbox" class="notif-box" ${rec.notesCompleted ? 'checked' : ''} onclick="toggleOldNotesCompleted(${rec.id}, event)">
+                                هل تم إكمال الملاحظات؟
+                            </label>
                             <button class="camera-icon-btn" onclick="generateOldHouseReport(${rec.id})">📄 تقرير</button>
                             <button class="action-btn" onclick="editOldRecord(${rec.id})">✏️ تعديل</button>
                             <button class="action-btn delete" onclick="deleteOldRecord(${rec.id})">🗑️ حذف</button>
