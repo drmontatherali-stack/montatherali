@@ -1499,10 +1499,9 @@
         const alertBanner = document.getElementById('old-houses-alert-banner');
         const listSpan = document.getElementById('old-houses-due-2days-list');
 
-        // فقط الدور القديمة (غير المستلمة/غير المكتملة) التي موعد انتهاء ملاحظاتها (notesEndDate) بعد يومين بالضبط من اليوم
+        // كل الدور القديمة، بغض النظر عن حالتها، التي موعد انتهاء ملاحظاتها (notesEndDate) بعد يومين بالضبط من اليوم
         let dueHouses = oldHouseRecords.filter(r => {
             if (!r.notesEndDate) return false;
-            if (r.status === 'مستلم') return false;
             let diff = daysBetween(todayStr, r.notesEndDate);
             return diff === 2;
         });
@@ -2270,9 +2269,8 @@
         let oldCompleted = 0;
 
         oldHouseRecords.forEach(r => {
-            const isCompleted = r.status === 'مستلم';
-            if (isCompleted) oldCompleted++;
-            if (r.notesEndDate && !isCompleted) {
+            if (r.status === 'مستلم') oldCompleted++;
+            if (r.notesEndDate) {
                 const diff = daysBetween(todayStr, r.notesEndDate);
                 if (diff === 2) oldNotesDue2Days++;
                 if (diff < 0) oldNotesOverdue++;
@@ -2428,8 +2426,8 @@
 
                 const recIsCompleted = rec.status === 'مستلم';
                 const recNotesDiff = rec.notesEndDate ? daysBetween(todayStr, rec.notesEndDate) : null;
-                if (oldStatusFilter === 'notes_due_2days' && !(recNotesDiff === 2 && !recIsCompleted)) return false;
-                if (oldStatusFilter === 'notes_overdue' && !(recNotesDiff !== null && recNotesDiff < 0 && !recIsCompleted)) return false;
+                if (oldStatusFilter === 'notes_due_2days' && recNotesDiff !== 2) return false;
+                if (oldStatusFilter === 'notes_overdue' && !(recNotesDiff !== null && recNotesDiff < 0)) return false;
                 if (oldStatusFilter === 'completed' && !recIsCompleted) return false;
 
                 if (searchVal) {
