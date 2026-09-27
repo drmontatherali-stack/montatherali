@@ -595,6 +595,26 @@
         <button id="tab-old-houses" class="nav-tab-btn" onclick="switchMainTab('old')">🏛️ دور التسليم القديمة</button>
     </div>
 
+    <!-- مستطيلات ملخص الدور القديمة (على غرار باقي مستطيلات النظام: كل الدور، المستحقة، المتأخرة، المكتملة) -->
+    <div class="metrics-grid" style="margin-bottom: 20px;">
+        <div class="metric-card" onclick="setOldFilterStatus('all')">
+            <div class="title" style="color: #38bdf8;">🏛️ كل الدور القديمة</div>
+            <div class="value" style="color: #38bdf8;" id="old-total-count">0</div>
+        </div>
+        <div class="metric-card warning-card" onclick="setOldFilterStatus('notes_due_2days')">
+            <div class="title" style="color: #f97316;">📌 يجب إنهاء ملاحظاتها خلال يومين</div>
+            <div class="value" style="color: #f97316;" id="old-notes-due-2days-count">0</div>
+        </div>
+        <div class="metric-card alert-card" onclick="setOldFilterStatus('notes_overdue')">
+            <div class="title" style="color: #f43f5e;">⚠️ متأخرة عن إنهاء الملاحظات</div>
+            <div class="value" style="color: #f43f5e;" id="old-notes-overdue-count">0</div>
+        </div>
+        <div class="metric-card" onclick="setOldFilterStatus('completed')">
+            <div class="title" style="color: #10b981;">✅ دور مستلمة (مكتملة)</div>
+            <div class="value" style="color: #10b981;" id="old-completed-count">0</div>
+        </div>
+    </div>
+
     <!-- مستطيل علوي خاص بالدور القديمة التي موعد انتهاء ملاحظاتها بعد يومين -->
     <div id="old-houses-alert-banner" class="old-houses-alert-banner" style="display: none;">
         <span>📌</span>
@@ -872,12 +892,12 @@
                 <textarea id="old-notes" class="form-control" rows="3" placeholder="أدخل الملاحظات..."></textarea>
             </div>
             <div class="form-group">
-                <label>تاريخ المراجعة (تلقائي اليوم)</label>
-                <input type="date" id="old-reviewDate" class="form-control" readonly>
+                <label>تاريخ المراجعة (تلقائي اليوم، قابل للتعديل)</label>
+                <input type="date" id="old-reviewDate" class="form-control">
             </div>
             <div class="form-group">
-                <label>تاريخ إنهاء الملاحظات (تلقائي بعد 5 أيام من تاريخ مجيء المستفيد)</label>
-                <input type="date" id="old-notesEndDate" class="form-control" readonly>
+                <label>تاريخ إنهاء الملاحظات (تلقائي بعد 5 أيام، قابل للتعديل)</label>
+                <input type="date" id="old-notesEndDate" class="form-control">
             </div>
             <button type="submit" class="btn-primary" style="margin-top: 10px;">حفظ بيانات الدار القديمة</button>
         </form>
@@ -964,9 +984,9 @@
             return true;
         });
 
-        // التأكد من وجود مهندس مرتضى ضمن القائمة (الرجاء استبدال الرقم أدناه برقمه الفعلي)
+        // التأكد من وجود مهندس مرتضى ضمن القائمة
         if (!list.some(m => m.name.includes('مرتضى'))) {
-            list.unshift({ name: "مهندس مرتضى", phone: "9647XXXXXXXXX" /* ضع هنا رقم مهندس مرتضى الصحيح */ });
+            list.unshift({ name: "مهندس مرتضى", phone: "9647831130550" });
         }
 
         return list;
@@ -976,7 +996,7 @@
     if (targetTeam.length <= 1) {
         // أول تشغيل أو لا توجد بيانات محفوظة بعد: القائمة الافتراضية المطلوبة
         targetTeam = ensureTeamList([
-            { name: "مهندس مرتضى", phone: "9647XXXXXXXXX" /* ضع هنا رقم مهندس مرتضى الصحيح */ },
+            { name: "مهندس مرتضى", phone: "9647831130550" },
             { name: "مهندس محمد عبد الأمير", phone: "9647825962173" },
             { name: "مهندس بشير أحمد", phone: "9647826821986" },
             { name: "منتظر علي", phone: "9647862568787" },
@@ -1040,8 +1060,23 @@
         const targetPhone = phone ? phone : "07840971766";
         const cleanPhone = formatPhoneForWhatsApp(targetPhone);
         const encodedText = encodeURIComponent(text || '');
-        let waUrl = `https://wa.me/${cleanPhone}?text=${encodedText}`;
-        window.open(waUrl, '_blank');
+        // فتح تطبيق الواتساب مباشرة (بدون المرور بمتصفح الويب) عبر رابط التطبيق الأصلي
+        let waAppUrl = `whatsapp://send?phone=${cleanPhone}&text=${encodedText}`;
+        let waWebFallback = `https://wa.me/${cleanPhone}?text=${encodedText}`;
+
+        // محاولة فتح التطبيق مباشرة؛ وإن تعذر ذلك (مثلاً على جهاز حاسوب بلا واتساب مثبت) يتم الانتقال لصيغة الويب كحل بديل فقط
+        let didHide = false;
+        const onVisibilityChange = () => { if (document.hidden) didHide = true; };
+        document.addEventListener('visibilitychange', onVisibilityChange, { once: true });
+
+        window.location.href = waAppUrl;
+
+        setTimeout(() => {
+            document.removeEventListener('visibilitychange', onVisibilityChange);
+            if (!didHide) {
+                window.open(waWebFallback, '_blank');
+            }
+        }, 1200);
     }
 
     function openWhatsappNotifyDialog(msg, defaultPhone) {
@@ -1338,8 +1373,8 @@
         const sectorNo = document.getElementById('old-sectorNo').value;
         const contractorName = executionType === 'مقاولين' ? document.getElementById('old-contractorName').value : '';
         const notes = document.getElementById('old-notes').value.trim();
-        const reviewDate = todayStr;
-        const notesEndDate = addDays(todayStr, 5);
+        const reviewDate = document.getElementById('old-reviewDate').value || todayStr;
+        const notesEndDate = document.getElementById('old-notesEndDate').value || addDays(todayStr, 5);
 
         let rec = editId ? oldHouseRecords.find(r => r.id == editId) : { id: Date.now() };
 
@@ -1454,7 +1489,8 @@
             }
 
             setTimeout(() => {
-                openWhatsappNotifyDialog(msgText, rec.phoneNo || "07840971766");
+                // هذا التبليغ موجه لفريق العمل عند تسجيل الدار لأول مرة، لذا لا داعي لإدراج رقم المستفيد هنا تلقائياً
+                openWhatsappNotifyDialog(msgText, "07840971766");
             }, 300);
         }
     }
@@ -2060,6 +2096,15 @@
         renderTable();
     }
 
+    function setOldFilterStatus(status) {
+        window.currentOldStatusFilter = status;
+        if (activeTab !== 'old') {
+            switchMainTab('old');
+        } else {
+            renderTable();
+        }
+    }
+
     function toggleNotification(id, index, event) {
         event.stopPropagation();
         const rec = houseRecords.find(r => r.id === id);
@@ -2216,6 +2261,30 @@
         document.getElementById('clean-completed-count').innerText = cleanCompleted;
         document.getElementById('ready-all-count').innerText = readyAll;
 
+        // مستطيلات ملخص الدور القديمة (على غرار باقي مستطيلات الإحصائيات في النظام)
+        const oldStatusFilter = window.currentOldStatusFilter || 'all';
+        let oldTotal = oldHouseRecords.length;
+        let oldNotesDue2Days = 0;
+        let oldNotesOverdue = 0;
+        let oldCompleted = 0;
+
+        oldHouseRecords.forEach(r => {
+            const isCompleted = r.status === 'مستلم';
+            if (isCompleted) oldCompleted++;
+            if (r.notesEndDate && !isCompleted) {
+                const diff = daysBetween(todayStr, r.notesEndDate);
+                if (diff === 2) oldNotesDue2Days++;
+                if (diff < 0) oldNotesOverdue++;
+            }
+        });
+
+        if (document.getElementById('old-total-count')) {
+            document.getElementById('old-total-count').innerText = oldTotal;
+            document.getElementById('old-notes-due-2days-count').innerText = oldNotesDue2Days;
+            document.getElementById('old-notes-overdue-count').innerText = oldNotesOverdue;
+            document.getElementById('old-completed-count').innerText = oldCompleted;
+        }
+
         if (activeTab === 'new') {
             thead.innerHTML = `
                 <tr>
@@ -2355,6 +2424,12 @@
                 }
 
                 if (sectorFilter !== 'all' && rec.sectorNo !== sectorFilter) return false;
+
+                const recIsCompleted = rec.status === 'مستلم';
+                const recNotesDiff = rec.notesEndDate ? daysBetween(todayStr, rec.notesEndDate) : null;
+                if (oldStatusFilter === 'notes_due_2days' && !(recNotesDiff === 2 && !recIsCompleted)) return false;
+                if (oldStatusFilter === 'notes_overdue' && !(recNotesDiff !== null && recNotesDiff < 0 && !recIsCompleted)) return false;
+                if (oldStatusFilter === 'completed' && !recIsCompleted) return false;
 
                 if (searchVal) {
                     const str = `${rec.houseNo} ${rec.sectorNo} ${rec.contractorName || ''} ${rec.notes || ''} ${rec.status}`.toLowerCase();
