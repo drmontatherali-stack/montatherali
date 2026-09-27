@@ -444,7 +444,7 @@
 
         <div class="header-info-box">
             <div class="designer-title-large">
-                <span>✨</span> Design by: <strong>Montather Ali</strong>[cite: 8]
+                <span>✨</span> Design by: <strong>Montather Ali</strong>
             </div>
 
             <div class="date-badge">
@@ -1413,6 +1413,7 @@
     }
 
     // تعديل آلية التنفيذ المباشر لتكون 10 أيام تلقائية وحساب تنظيف يومين مباشرةً
+    // وتم جعل تاريخ الكشف للتنفيذ المباشر يساوي تاريخ حضور المستفيد تلقائياً
     function onExecutionTypeChange() {
         const type = document.getElementById('executionType').value;
         const contractorGroup = document.getElementById('contractor-group');
@@ -1604,10 +1605,13 @@
                 if (rec.executionType === 'تنفيذ مباشر') {
                     startWorkDate = isPreCleaned ? '-' : (rec.cleaningStartDate || rec.arrivalDate);
                     endWorkDate = isPreCleaned ? '-' : (rec.cleaningEndDate || addDays(rec.arrivalDate, 2));
-                    inspectionDisplay = rec.inspectionDate || 'تلقائي مع الـ 10 أيام';
+                    
+                    // تم جعل تاريخ الكشف للتنفيذ المباشر مساوياً لتاريخ حضور المستفيد دائماً
+                    inspectionDisplay = rec.arrivalDate || '-';
                     finalHandover = rec.handoverDate || autoHandover;
                 } else if (rec.executionType === 'تنفيذ مقاولين') {
                     startWorkDate = rec.contractorStartDate || '-';
+                    inspectionDisplay = rec.inspectionDate || '-';
                     finalHandover = rec.houseReadyDate || autoHandover;
                 }
 
@@ -1740,67 +1744,43 @@
         }
     }
 
-    function markCleaningCompletedWithoutInspection() {
-        const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
-        if (rec) { rec.isCleaned = true; syncRecordFields(rec.id, { isCleaned: true }); closeStatusModal(); }
-    }
-
-    function setInspectionAndHandoverDate() {
-        const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
-        if (rec) {
-            const inspDate = prompt("أدخل تاريخ الكشف بدقة:", todayStr);
-            if (inspDate) {
-                rec.inspectionDate = inspDate; rec.handoverDate = addDays(inspDate, 10);
-                syncRecordFields(rec.id, { inspectionDate: rec.inspectionDate, handoverDate: rec.handoverDate });
-                closeStatusModal();
-                triggerDirectExecutionWhatsApp(rec);
-            }
-        }
-    }
-
-    function triggerDirectExecutionWhatsApp(rec) {
-        const msg = `🚨 *تبليغ موعد الكشف والتسليم - التنفيذ المباشر*\n` +
-                    `🏠 الدار: ${rec.houseNo} (${rec.sectorNo})\n` +
-                    `👤 المستفيد: ${rec.ownerName}\n` +
-                    `🧹 تم إكمال التنظيف بنجاح.\n` +
-                    `🔍 تاريخ الكشف المعتمد: ${rec.inspectionDate || todayStr}\n` +
-                    `⏱️ موعد التسليم النهائـي: ${rec.handoverDate || addDays(rec.arrivalDate, 10)}`;
-        
-        openWhatsappNotifyDialog(msg, rec.phoneNo ? rec.phoneNo : "07840971766");
-    }
-
-    function updateReadyFlag(val) {
+    function updateReadyFlag(isReady) {
         const rec = houseRecords.find(r => r.id === selectedRecordIdForStatus);
         if (!rec) return;
-        if (val === true) {
-            rec.isReady = true; rec.secondHandoverDate = ""; rec.notReadyReason = "";
-            syncRecordFields(rec.id, { isReady: true, secondHandoverDate: "", notReadyReason: "" });
+
+        if (isReady) {
+            rec.isReady = true;
+            rec.secondHandoverDate = null;
+            rec.notReadyReason = null;
+            syncRecord(rec);
+            alert("✨ ممتاز! تم تعيين الدار كـ (جاهز للإنهاء والتسليم).");
             closeStatusModal();
             openSignatureModal(rec.id);
         } else {
-            const secondDate = prompt("أدخل موعد التسليم الثاني الجديد:", addDays(todayStr, 5));
-            if (secondDate) {
-                const reason = prompt("إلزامي: اذكر سبب عدم جهزية الدار بالتفصيل:", "وجود نواقص فنية تتطلب معالجة");
-                if (reason && reason.trim() !== "") {
-                    rec.isReady = false; rec.secondHandoverDate = secondDate; rec.notReadyReason = reason.trim();
-                    syncRecordFields(rec.id, { isReady: false, secondHandoverDate: secondDate, notReadyReason: rec.notReadyReason });
-                    closeStatusModal();
-                    triggerCamera(rec.id);
-                }
-            }
+            const reason = prompt("يرجى كتابة سبب عدم الجاهزية/الملاحظات المتبقية:");
+            if (!reason) return;
+            const daysToAddStr = prompt("كم يوماً يحتاج المقاول/الفريق لإكمال العمل؟ (أدخل عدد الأيام):", "3");
+            const daysToAdd = parseInt(daysToAddStr) || 3;
+            
+            rec.isReady = false;
+            rec.notReadyReason = reason;
+            rec.secondHandoverDate = addDays(todayStr, daysToAdd);
+            syncRecord(rec);
+            
+            alert(`⚠️ تم تسجيل الدار كـ (غير جاهز)، وتحديد موعد التسليم الثاني في: ${rec.secondHandoverDate}`);
+            closeStatusModal();
         }
     }
 
     function closeStatusModal() { document.getElementById('statusCheckModal').style.display = "none"; }
 
     function openAddModal() {
-        populateContractorsDropdown();
         document.getElementById('edit-id').value = "";
         document.getElementById('record-form').reset();
         document.getElementById('modal-title').innerText = "إضافة دار جديد (مع التدقيق الصارم)";
+        populateContractorsDropdown();
         document.getElementById('arrivalDate').value = todayStr;
-        document.getElementById('preCleanedAlertBox').style.display = 'none';
-        onExecutionTypeChange();
+        checkPreCleanedMatch();
         document.getElementById('addRecordModal').style.display = "flex";
     }
 
@@ -1810,81 +1790,88 @@
         e.preventDefault();
         const editId = document.getElementById('edit-id').value;
         const houseNo = document.getElementById('houseNo').value.trim();
-        
-        if (!editId && houseRecords.some(r => r.houseNo.trim().toLowerCase() === houseNo.toLowerCase())) {
-            alert("❌ خطأ تدقيقي: رقم الدار هذا مسجل مسبقاً في النظام ولا يمكن تكراره!");
-            return;
+        const arrivalDate = document.getElementById('arrivalDate').value;
+        const executionType = document.getElementById('executionType').value;
+
+        if (!editId) {
+            const isDuplicate = houseRecords.some(r => r.houseNo.toLowerCase() === houseNo.toLowerCase());
+            if (isDuplicate) { alert("🚨 خطأ: رقم الدار والبلوك مسجل مسبقاً بالنظام! لا يمكن تكراره."); return; }
         }
 
-        const execType = document.getElementById('executionType').value;
-        const arrival = document.getElementById('arrivalDate').value;
-        const isPreCleaned = preCleanedHouses.some(item => item.trim() === houseNo);
-
-        const record = {
+        let recordData = {
             id: editId ? parseInt(editId) : Date.now(),
             houseNo: houseNo,
-            phoneNo: document.getElementById('phoneNo').value.trim() || '07840971766',
-            executionType: execType,
-            contractorName: execType === "تنفيذ مقاولين" ? document.getElementById('contractorName').value : "",
+            phoneNo: document.getElementById('phoneNo').value.trim(),
+            executionType: executionType,
             sectorNo: document.getElementById('sectorNo').value,
             ownerName: document.getElementById('ownerName').value.trim(),
-            arrivalDate: arrival,
-            cleaningStartDate: (execType === "تنفيذ مباشر" && !isPreCleaned) ? document.getElementById('cleaningStartDate').value : "",
-            cleaningEndDate: (execType === "تنفيذ مباشر" && !isPreCleaned) ? document.getElementById('cleaningEndDate').value : "",
-            contractorStartDate: execType === "تنفيذ مقاولين" ? document.getElementById('contractorStartDate').value : "",
-            houseReadyDate: execType === "تنفيذ مقاولين" ? document.getElementById('houseReadyDate').value : addDays(arrival, 10),
-            handoverDate: addDays(arrival, 10),
-            isCleaned: isPreCleaned ? true : false,
-            isReady: false
+            arrivalDate: arrivalDate,
+            // تحديد تاريخ الكشف للتنفيذ المباشر لتسهيل الحفظ المباشر
+            inspectionDate: executionType === "تنفيذ مباشر" ? arrivalDate : (editId ? (houseRecords.find(r=>r.id==editId)?.inspectionDate || '') : ''),
+            isCleaned: editId ? (houseRecords.find(r=>r.id==editId)?.isCleaned || false) : false,
+            isReady: editId ? (houseRecords.find(r=>r.id==editId)?.isReady || false) : false,
+            notifications: editId ? (houseRecords.find(r=>r.id==editId)?.notifications || [null, null, null]) : [null, null, null],
+            secondHandoverDate: editId ? (houseRecords.find(r=>r.id==editId)?.secondHandoverDate || null) : null,
+            notReadyReason: editId ? (houseRecords.find(r=>r.id==editId)?.notReadyReason || null) : null,
+            noteImage: editId ? (houseRecords.find(r=>r.id==editId)?.noteImage || null) : null,
+            signatureImg: editId ? (houseRecords.find(r=>r.id==editId)?.signatureImg || null) : null
         };
 
-        if (editId) {
-            const oldRec = houseRecords.find(r => r.id === parseInt(editId));
-            if (oldRec) {
-                record.isCleaned = oldRec.isCleaned;
-                record.isReady = oldRec.isReady;
-                record.inspectionDate = oldRec.inspectionDate || "";
-                record.secondHandoverDate = oldRec.secondHandoverDate || "";
-                record.notReadyReason = oldRec.notReadyReason || "";
-                record.noteImage = oldRec.noteImage || "";
-                record.signatureImg = oldRec.signatureImg || "";
-                record.notifications = oldRec.notifications || [null, null, null];
-            }
+        if (executionType === "تنفيذ مباشر") {
+            recordData.cleaningStartDate = document.getElementById('cleaningStartDate').value || arrivalDate;
+            recordData.cleaningEndDate = document.getElementById('cleaningEndDate').value || addDays(arrivalDate, 2);
+            recordData.handoverDate = addDays(arrivalDate, 10); // 10 أيام تلقائية
+            recordData.contractorName = "تنفيذ مباشر";
+        } else if (executionType === "تنفيذ مقاولين") {
+            recordData.contractorName = document.getElementById('contractorName').value;
+            recordData.contractorStartDate = document.getElementById('contractorStartDate').value || addDays(arrivalDate, 1);
+            recordData.houseReadyDate = document.getElementById('houseReadyDate').value || addDays(arrivalDate, 10);
+            recordData.handoverDate = recordData.houseReadyDate;
         }
 
-        syncRecord(record);
+        if (editId) {
+            const idx = houseRecords.findIndex(r => r.id == editId);
+            if (idx !== -1) houseRecords[idx] = recordData;
+        } else {
+            houseRecords.push(recordData);
+        }
+
+        syncRecord(recordData);
         closeAddModal();
-        alert("✅ تم حفظ وتدقيق بيانات الدار بنجاح تام!");
     }
 
     function editRecord(id) {
         const rec = houseRecords.find(r => r.id === id);
         if (!rec) return;
-        populateContractorsDropdown();
+
         document.getElementById('edit-id').value = rec.id;
         document.getElementById('houseNo').value = rec.houseNo;
         document.getElementById('phoneNo').value = rec.phoneNo || '';
         document.getElementById('executionType').value = rec.executionType;
-        onExecutionTypeChange();
-        if (rec.executionType === "تنفيذ مقاولين") document.getElementById('contractorName').value = rec.contractorName || "";
+        populateContractorsDropdown();
+        if (rec.contractorName) document.getElementById('contractorName').value = rec.contractorName;
         document.getElementById('sectorNo').value = rec.sectorNo;
         document.getElementById('ownerName').value = rec.ownerName;
         document.getElementById('arrivalDate').value = rec.arrivalDate;
-        
+
+        onExecutionTypeChange();
+
         if (rec.executionType === "تنفيذ مباشر") {
-            document.getElementById('cleaningStartDate').value = rec.cleaningStartDate || "";
-            document.getElementById('cleaningEndDate').value = rec.cleaningEndDate || "";
+            document.getElementById('cleaningStartDate').value = rec.cleaningStartDate || '';
+            document.getElementById('cleaningEndDate').value = rec.cleaningEndDate || '';
         } else if (rec.executionType === "تنفيذ مقاولين") {
-            document.getElementById('contractorStartDate').value = rec.contractorStartDate || "";
-            document.getElementById('houseReadyDate').value = rec.houseReadyDate || "";
+            document.getElementById('contractorStartDate').value = rec.contractorStartDate || '';
+            document.getElementById('houseReadyDate').value = rec.houseReadyDate || '';
         }
 
-        document.getElementById('modal-title').innerText = "تعديل بيانات الدار";
+        document.getElementById('modal-title').innerText = "تعديل بيانات الدار (تدقيق التدفق)";
+        checkPreCleanedMatch();
         document.getElementById('addRecordModal').style.display = "flex";
     }
 
     function deleteRecord(id) {
-        if (confirm("هل أنت أصل ومقتنع بحذف هذا الدار نهائياً من السجل التاريخي؟")) {
+        if (confirm("⚠️ هل أنت تأكد تماماً من حذف هذا السجل بشكل نهائي من القواعد؟")) {
+            houseRecords = houseRecords.filter(r => r.id !== id);
             deleteRecordFromDB(id);
         }
     }
@@ -1894,34 +1881,34 @@
         document.getElementById('cameraFileInput').click();
     }
 
-    function handleImageCapture(event) {
-        const file = event.target.files[0];
-        if (file && activeRecordIdForCamera) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64Img = e.target.result;
-                const rec = houseRecords.find(r => r.id === activeRecordIdForCamera);
-                if (rec) {
-                    rec.noteImage = base64Img;
-                    syncRecordFields(rec.id, { noteImage: base64Img });
-                    alert("📷 تم التقاط صورة الملاحظات واعتمادها بالدار بنجاح!");
-                }
-            };
-            reader.readAsDataURL(file);
-        }
+    function handleImageCapture(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const base64Data = evt.target.result;
+            const rec = houseRecords.find(r => r.id === activeRecordIdForCamera);
+            if (rec) {
+                rec.noteImage = base64Data;
+                syncRecordFields(rec.id, { noteImage: base64Data });
+                alert("📷 تم رفع وحفظ صورة الملاحظات بنجاح في السحابة!");
+            }
+        };
+        reader.readAsDataURL(file);
     }
 
-    function viewImage(imgUrl) {
-        document.getElementById('previewImgElement').src = imgUrl;
+    function viewImage(imgSrc) {
+        document.getElementById('previewImgElement').src = imgSrc;
         document.getElementById('imagePreviewModal').style.display = 'flex';
     }
     function closeImageModal() { document.getElementById('imagePreviewModal').style.display = 'none'; }
 
-    window.onclick = function(event) {
-        if (event.target.classList.contains('modal')) {
-            event.target.style.display = "none";
-        }
+    // التهيئة البدائية عند تحميل الصفحة
+    window.onload = function() {
+        populateContractorsDropdown();
+        saveLocalAndRender();
     };
 </script>
+
 </body>
 </html>
