@@ -654,6 +654,7 @@
             <button class="btn-contractors-score" onclick="openContractorScorecardModal()">📊 أداء المقاولين</button>
             <button class="btn-excel-export" onclick="openExcelOptionsModal()">📊 تصدير Excel مخصص</button>
             <button class="btn-excel-export" onclick="exportOldHousesExcelReport()">📊 تقرير Excel الدور القديمة</button>
+            <button class="btn-excel-export" onclick="exportFullBackup()">💾 نسخة احتياطية كاملة</button>
         </div>
     </div>
 
@@ -1010,6 +1011,19 @@
 
     firebase.initializeApp(firebaseConfig);
     const dbRef = firebase.database().ref('amirat_houses_db_zero');
+
+    // مؤشر الاتصال الحقيقي بالسحابة (يعتمد على مسار Firebase الخاص لحالة الاتصال الفعلية، وليس نصاً ثابتاً)
+    firebase.database().ref('.info/connected').on('value', (snap) => {
+        const el = document.getElementById('sync-status');
+        if (!el) return;
+        if (snap.val() === true) {
+            el.innerHTML = '🟢 متصل بالسحابة (مزامنة فورية)';
+            el.style.color = '';
+        } else {
+            el.innerHTML = '🔴 غير متصل حالياً - البيانات محفوظة محلياً فقط';
+            el.style.color = '#f43f5e';
+        }
+    });
 
     // تنظيف قائمة الفريق: إبقاء الأسماء المحددة فقط وحذف أي أرقام بلا اسم حقيقي (رقم المستفيد يُضاف تلقائياً بشكل مؤقت عند الإرسال فقط ولا يُحفظ ضمن هذه القائمة)
     function ensureTeamList(rawList) {
@@ -1420,6 +1434,14 @@
         const notes = document.getElementById('old-notes').value.trim();
         const reviewDate = document.getElementById('old-reviewDate').value || todayStr;
         const notesEndDate = document.getElementById('old-notesEndDate').value || addDays(todayStr, 5);
+
+        if (!editId) {
+            const existsOld = oldHouseRecords.some(r => r.houseNo.toLowerCase() === houseNo.toLowerCase());
+            if (existsOld) {
+                alert("⚠️ رقم الدار والبلوك هذا مسجل سابقاً ضمن الدور القديمة! يرجى التثبت بدقة.");
+                return;
+            }
+        }
 
         let rec = editId ? oldHouseRecords.find(r => r.id == editId) : { id: Date.now() };
 
@@ -1932,6 +1954,31 @@
         XLSX.utils.book_append_sheet(workbook, buildSheet("الدور التي لم يتم إنجاز ملاحظاتها ضمن الموعد", lateRows), "غير منجزة ضمن الموعد");
 
         XLSX.writeFile(workbook, `AlAmirat_تقرير_الدور_القديمة_${todayStr}.xlsx`);
+    }
+
+    function exportFullBackup() {
+        const backupData = {
+            نوع_الملف: "نسخة احتياطية كاملة - مكتب التسليم الفني - مجمع الأميرات 2",
+            تاريخ_التصدير: todayStr,
+            houseRecords: houseRecords,
+            oldHouseRecords: oldHouseRecords,
+            contractorsList: contractorsList,
+            preCleanedHouses: preCleanedHouses,
+            targetTeam: targetTeam
+        };
+
+        const jsonStr = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `AlAmirat_نسخة_احتياطية_كاملة_${todayStr}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert("✅ تم تحميل النسخة الاحتياطية الكاملة بنجاح! احتفظ بهذا الملف بمكان آمن (يحتوي كل الدور الجديدة والقديمة وقوائم المقاولين والفريق).");
     }
 
     function sendDailySummaryWhatsApp() {
