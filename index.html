@@ -708,11 +708,11 @@
             <button class="btn-excel-export" onclick="exportFullBackup()">💾 نسخة احتياطية كاملة</button>
             <button class="btn-excel-export" onclick="document.getElementById('backupFileInput').click()">♻️ استرجاع نسخة احتياطية</button>
             <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none;" onchange="handleBackupFile(event)">
-            <button class="btn-excel-export" onclick="document.getElementById('handoverDatesFileInput').click()">📥 رفع ملف تواريخ الاستلام</button>
-            <input type="file" id="handoverDatesFileInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleHandoverDatesFile(event)">
-            <button class="btn-excel-export" onclick="openHandoverDatesModal()">📋 عرض تواريخ الاستلام</button>
         </div>
     </div>
+    <!-- زرا رفع/عرض ملف تواريخ الاستلام اليدوي أُلغيا من الواجهة بعد ربط النظام مباشرة بشيت Google Sheets؛
+         الدوال (handleHandoverDatesFile, openHandoverDatesModal, lookupHandoverDate) بقيت بالكود بدون استخدام كخيار احتياطي -->
+
 
     <div class="filter-section">
         <div class="filter-group">
