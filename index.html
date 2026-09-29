@@ -713,6 +713,13 @@
         <button class="btn-add" onclick="openAddModal()">+ إضافة دار جديدة</button>
     </div>
 
+    <div style="margin-bottom:12px;">
+        <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem; color:var(--text-muted);">
+            <input type="checkbox" id="show-extra-cols-toggle" onchange="toggleExtraCols()">
+            👁️ إظهار عمودي القطاع ونوع التنفيذ بالجدول
+        </label>
+    </div>
+
     <div class="table-container">
         <table>
             <thead id="table-head">
@@ -1661,16 +1668,13 @@
         syncOldRecord(rec, baselineOld);
         closeAddModal();
 
-        // إرسال تفاصيل الدار القديمة عبر واتساب بيتا
-        let msgText = `🏛️ *تسجيل دار قديمة جديدة*\n` +
-                      `🏠 رقم الدار والبلوك: *${rec.houseNo}*\n` +
-                      `📍 القطاع: *${rec.sectorNo}*\n` +
-                      `📊 الحالة: *${rec.status}* ${rec.handoverDate ? `(موعد التسليم: ${rec.handoverDate})` : ''}\n` +
-                      `🛠️ نوع التنفيذ: *${rec.executionType}* ${rec.contractorName ? `(${rec.contractorName})` : ''}\n` +
-                      `📝 الملاحظات: ${rec.notes || 'لا يوجد'}\n` +
-                      `📅 تاريخ المراجعة: ${rec.reviewDate}\n` +
-                      `⏳ تاريخ إنهاء الملاحظات: ${rec.notesEndDate}\n\n` +
-                      `_مكتب التسليم الفني - مجمع الأميرات 2_`;
+        // إرسال تفاصيل الدار القديمة عبر واتساب بيتا (رسالة مختصرة: رقم الدار والتواريخ فقط)
+        let msgText = `تسجيل دار قديمة جديدة\n` +
+                      `رقم الدار والبلوك: ${rec.houseNo}\n` +
+                      `تاريخ المراجعة: ${rec.reviewDate}\n` +
+                      `تاريخ إنهاء الملاحظات: ${rec.notesEndDate}` +
+                      (rec.handoverDate ? `\nتاريخ التسليم: ${rec.handoverDate}` : '') +
+                      `\n\nمكتب التسليم الفني - مجمع الأميرات 2`;
 
         setTimeout(() => {
             openWhatsappNotifyDialog(msgText, "07840971766");
@@ -1740,23 +1744,21 @@
 
         if (arrivalDate) {
             let msgText = "";
+            // رسالة مختصرة: رقم الدار والتواريخ الخاصة بها فقط (بدون إيموجي أو اسم مستفيد أو نوع تنفيذ أو قطاع)
             if (executionType === "تنفيذ مقاولين") {
-                msgText = `🚨 *تبليغ جديد - تسجيل موعد حضور مستفيد (تنفيذ مقاولين)*\n` +
-                          `🏠 الدار: *${rec.houseNo}* (${rec.sectorNo})\n` +
-                          `👤 المستفيد: *${rec.ownerName}*\n` +
-                          `👷‍♂️ المقاول: *${rec.contractorName || '-'}*\n` +
-                          `📅 تاريخ الحضور: ${rec.arrivalDate}\n` +
-                          `🛠️ تاريخ بدء عمل المقاول: ${rec.contractorStartDate || '-'}\n` +
-                          `⏱️ موعد جهوزية الدار والتسليم (10 أيام): ${rec.houseReadyDate}\n\n` +
-                          `_مكتب التسليم الفني - مجمع الأميرات 2_`;
+                msgText = `تبليغ جديد - تسجيل موعد حضور مستفيد\n` +
+                          `الدار: ${rec.houseNo}\n` +
+                          `تاريخ الحضور: ${rec.arrivalDate}\n` +
+                          `تاريخ بدء عمل المقاول: ${rec.contractorStartDate || '-'}\n` +
+                          `موعد جهوزية الدار والتسليم (10 أيام): ${rec.houseReadyDate}\n\n` +
+                          `مكتب التسليم الفني - مجمع الأميرات 2`;
             } else {
-                msgText = `📢 *تبليغ جديد - تسجيل موعد حضور مستفيد (تنفيذ مباشر)*\n` +
-                          `🏠 الدار: *${rec.houseNo}* (${rec.sectorNo})\n` +
-                          `👤 المستفيد: *${rec.ownerName}*\n` +
-                          `📅 تاريخ الحضور والتفتيش: ${rec.arrivalDate}\n` +
-                          `🧹 تاريخ انتهاء التنظيف المتوقع: ${rec.cleaningEndDate || 'خلال يومين'}\n` +
-                          `⏱️ موعد التسليم النهائي (10 أيام): ${rec.handoverDate}\n\n` +
-                          `_مكتب التسليم الفني - مجمع الأميرات 2_`;
+                msgText = `تبليغ جديد - تسجيل موعد حضور مستفيد\n` +
+                          `الدار: ${rec.houseNo}\n` +
+                          `تاريخ الحضور والتفتيش: ${rec.arrivalDate}\n` +
+                          `تاريخ انتهاء التنظيف المتوقع: ${rec.cleaningEndDate || 'خلال يومين'}\n` +
+                          `موعد التسليم النهائي (10 أيام): ${rec.handoverDate}\n\n` +
+                          `مكتب التسليم الفني - مجمع الأميرات 2`;
             }
 
             setTimeout(() => {
@@ -2881,6 +2883,18 @@
     window.renderLimit = PAGE_SIZE;
     window.lastViewSig = '';
 
+    // إظهار/إخفاء عمودي القطاع ونوع التنفيذ بالجدول (تبقى محفوظة بالبيانات دائماً، هذا فقط للعرض بالشريط)
+    window.showExtraCols = localStorage.getItem('showExtraCols') === '1';
+    function toggleExtraCols() {
+        window.showExtraCols = document.getElementById('show-extra-cols-toggle').checked;
+        try { localStorage.setItem('showExtraCols', window.showExtraCols ? '1' : '0'); } catch (e) {}
+        renderTable();
+    }
+    (function () {
+        const cb = document.getElementById('show-extra-cols-toggle');
+        if (cb) cb.checked = window.showExtraCols;
+    })();
+
     // الرسم مؤجل ومدموج: عدة تغييرات متتالية = رسم واحد فقط (يخفف اللاك)
     let renderQueued = false;
     function renderTable() {
@@ -2977,25 +2991,18 @@
         }
 
         if (activeTab === 'new') {
-            thead.innerHTML = `
-                <tr>
-                    <th>ت ت</th>
-                    <th>رقم الدار والبلوك</th>
-                    <th>اسم المستفيد</th>
-                    <th>القطاع</th>
-                    <th>نوع التنفيذ والمقاول</th>
-                    <th>الحالة الحالية</th>
-                    <th>تاريخ الحضور</th>
-                    <th>تاريخ العمل/التنظيف</th>
-                    <th>موعد انتهاء التنظيف</th>
-                    <th>تاريخ الكشف</th>
-                    <th>موعد التسليم الـ 10 أيام</th>
-                    <th>موعد التسليم الثاني والسبب</th>
-                    <th>صورة الملاحظات والتوقيع</th>
-                    <th>واتساب والتبليغ (3 مرات)</th>
-                    <th>تعديل</th>
-                </tr>
-            `;
+            const showExtra = !!window.showExtraCols;
+            const headCells = ['<th>ت ت</th>', '<th>رقم الدار والبلوك</th>', '<th>اسم المستفيد</th>'];
+            if (showExtra) headCells.push('<th>القطاع</th>', '<th>نوع التنفيذ والمقاول</th>');
+            headCells.push(
+                '<th>الحالة الحالية</th>',
+                '<th>المواعيد (الحضور / التنظيف / الكشف)</th>',
+                '<th>موعد التسليم</th>',
+                '<th>صورة الملاحظات والتوقيع</th>',
+                '<th>واتساب والتبليغ (3 مرات)</th>',
+                '<th>تعديل</th>'
+            );
+            thead.innerHTML = '<tr>' + headCells.join('') + '</tr>';
 
             let filtered = houseRecords.filter(rec => {
                 const st = getSt(rec);
@@ -3064,33 +3071,49 @@
                     notifHtml += `<input type="checkbox" class="notif-box" ${isChecked} onclick="toggleNotification(${rec.id}, ${i}, event)"> `;
                 }
 
-                tr.innerHTML = `
-                    <td>${idx + 1}</td>
-                    <td><strong>${esc(rec.houseNo || '-')}</strong></td>
-                    <td>${esc(rec.ownerName || '-')}</td>
-                    <td>${esc(rec.sectorNo || '-')}</td>
-                    <td><span class="badge ${rec.executionType === 'تنفيذ مباشر' ? 'badge-direct' : 'badge-contractor'}">${esc(rec.executionType || '-')} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</span></td>
-                    <td><span class="badge ${st.badgeClass}">${st.statusText}</span></td>
-                    <td>${rec.arrivalDate || '-'}</td>
-                    <td>${rec.cleaningStartDate || rec.contractorStartDate || '-'}</td>
-                    <td>${rec.cleaningEndDate || '-'}</td>
-                    <td>${rec.inspectionDate || '-'}</td>
-                    <td>${rec.handoverDate || rec.houseReadyDate || '-'}</td>
-                    <td>${rec.secondHandoverDate ? `${rec.secondHandoverDate} <br><small style="color:#fbbf24;">${esc(rec.notReadyReason || '')}</small>` : '-'}</td>
-                    <td onclick="event.stopPropagation();">
+                // عمود المواعيد المجمّعة (الحضور / التنظيف / الكشف) بشكل مضغوط
+                const datesHtml =
+                    `<div style="font-size:0.82rem; line-height:1.7;">` +
+                    `<div>🗓️ حضور: ${rec.arrivalDate || '-'}</div>` +
+                    `<div>🧹 تنظيف: ${rec.cleaningStartDate || rec.contractorStartDate || '-'} ← ${rec.cleaningEndDate || '-'}</div>` +
+                    `<div>🔍 كشف: ${rec.inspectionDate || '-'}</div>` +
+                    `</div>`;
+
+                // موعد التسليم يبقى واضحاً لوحده، والتسليم الثاني (إن وُجد) يظهر كملاحظة تحته فقط عند تجاوز الموعد وعدم الجهوزية
+                let handoverHtml = `${rec.handoverDate || rec.houseReadyDate || '-'}`;
+                if (rec.secondHandoverDate && st.isHandoverOverdue) {
+                    handoverHtml += `<br><small style="color:#fbbf24;">⏱️ موعد ثاني: ${rec.secondHandoverDate}${rec.notReadyReason ? ' - ' + esc(rec.notReadyReason) : ''}</small>`;
+                }
+
+                const rowCells = [
+                    `<td>${idx + 1}</td>`,
+                    `<td><strong>${esc(rec.houseNo || '-')}</strong></td>`,
+                    `<td>${esc(rec.ownerName || '-')}</td>`
+                ];
+                if (showExtra) {
+                    rowCells.push(`<td>${esc(rec.sectorNo || '-')}</td>`);
+                    rowCells.push(`<td><span class="badge ${rec.executionType === 'تنفيذ مباشر' ? 'badge-direct' : 'badge-contractor'}">${esc(rec.executionType || '-')} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</span></td>`);
+                }
+                rowCells.push(
+                    `<td><span class="badge ${st.badgeClass}">${st.statusText}</span></td>`,
+                    `<td>${datesHtml}</td>`,
+                    `<td>${handoverHtml}</td>`,
+                    `<td onclick="event.stopPropagation();">
                         <button class="camera-icon-btn" onclick="triggerCamera(${rec.id})">📷 صورة</button>
                         ${rec.noteImage ? `<button class="camera-icon-btn" onclick="viewRecordImage(${rec.id}, 'note')">👁️ عرض</button>` : ''}
                         ${rec.signatureImg ? `<button class="camera-icon-btn" onclick="viewRecordImage(${rec.id}, 'sig')">✍️ التوقيع</button>` : ''}
-                    </td>
-                    <td onclick="event.stopPropagation();">
+                    </td>`,
+                    `<td onclick="event.stopPropagation();">
                         <span class="whatsapp-icon" onclick="triggerWhatsAppNotifyById(${rec.id})">💬</span>
                         ${notifHtml}
-                    </td>
-                    <td onclick="event.stopPropagation();">
+                    </td>`,
+                    `<td onclick="event.stopPropagation();">
                         <button class="action-btn" onclick="editRecord(${rec.id})">✏️</button>
                         <button class="action-btn delete" onclick="deleteRecord(${rec.id})">🗑️</button>
-                    </td>
-                `;
+                    </td>`
+                );
+
+                tr.innerHTML = rowCells.join('');
                 tbody.appendChild(tr);
                 }
 
@@ -3105,10 +3128,9 @@
                         </div>
                         <div style="font-size:0.88rem; color:var(--text-muted); line-height:1.8;">
                             <div>👤 المستفيد: ${esc(rec.ownerName)}</div>
-                            <div>📍 القطاع: ${esc(rec.sectorNo)}</div>
-                            <div>🛠️ التنفيذ: ${esc(rec.executionType)} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</div>
+                            ${showExtra ? `<div>📍 القطاع: ${esc(rec.sectorNo)}</div><div>🛠️ التنفيذ: ${esc(rec.executionType)} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</div>` : ''}
                             <div>📅 الحضور: ${rec.arrivalDate || '-'}</div>
-                            <div>⏱️ التسليم: ${rec.handoverDate || rec.houseReadyDate || '-'}</div>
+                            <div>⏱️ التسليم: ${rec.handoverDate || rec.houseReadyDate || '-'}${rec.secondHandoverDate && st.isHandoverOverdue ? ` <span style="color:#fbbf24;">(موعد ثاني: ${rec.secondHandoverDate})</span>` : ''}</div>
                         </div>
                         <div style="margin-top:12px; display:flex; gap:10px;" onclick="event.stopPropagation();">
                             <button class="camera-icon-btn" onclick="triggerCamera(${rec.id})">📷 صورة</button>
@@ -3121,22 +3143,17 @@
             });
         } else {
             // جدول دور التسليم القديمة مع تنقيح قسم دور التنفيذ المباشر ودور المقاولين
-            thead.innerHTML = `
-                <tr>
-                    <th>ت ت</th>
-                    <th>رقم البلوك والدار</th>
-                    <th>الحالة</th>
-                    <th>تاريخ التسليم</th>
-                    <th>نوع التنفيذ والمقاول</th>
-                    <th>القطاع</th>
-                    <th>الملاحظات</th>
-                    <th>تاريخ المراجعة</th>
-                    <th>تاريخ إنهاء الملاحظات</th>
-                    <th>هل تم إكمال الملاحظات؟</th>
-                    <th>إجراءات</th>
-                    <th>تقرير</th>
-                </tr>
-            `;
+            const showExtraOld = !!window.showExtraCols;
+            const oldHeadCells = ['<th>ت ت</th>', '<th>رقم البلوك والدار</th>', '<th>الحالة</th>', '<th>تاريخ التسليم</th>'];
+            if (showExtraOld) oldHeadCells.push('<th>نوع التنفيذ والمقاول</th>', '<th>القطاع</th>');
+            oldHeadCells.push(
+                '<th>الملاحظات</th>',
+                '<th>تاريخ المراجعة</th>',
+                '<th>تاريخ إنهاء الملاحظات</th>',
+                '<th>هل تم إكمال الملاحظات؟</th>',
+                '<th>إجراءات</th>'
+            );
+            thead.innerHTML = '<tr>' + oldHeadCells.join('') + '</tr>';
 
             let filteredOld = oldHouseRecords.filter(rec => {
                 if (execFilter !== 'all') {
@@ -3185,14 +3202,18 @@
                 if (buildTable) {
                 const tr = document.createElement('tr');
 
-                tr.innerHTML = `
-                    <td>${idx + 1}</td>
-                    <td><strong>${esc(rec.houseNo || '-')}</strong></td>
-                    <td><span class="badge ${rec.status === 'مستلم' ? 'badge-ready' : 'badge-warning'}">${esc(rec.status)}</span></td>
-                    <td>${rec.handoverDate || '-'}</td>
-                    <td><span class="badge ${rec.executionType === 'تنفيذ مباشر' ? 'badge-direct' : 'badge-contractor'}">${esc(rec.executionType || '-')} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</span></td>
-                    <td>${esc(rec.sectorNo || '-')}</td>
-                    <td>
+                const oldRowCells = [
+                    `<td>${idx + 1}</td>`,
+                    `<td><strong>${esc(rec.houseNo || '-')}</strong></td>`,
+                    `<td><span class="badge ${rec.status === 'مستلم' ? 'badge-ready' : 'badge-warning'}">${esc(rec.status)}</span></td>`,
+                    `<td>${rec.handoverDate || '-'}</td>`
+                ];
+                if (showExtraOld) {
+                    oldRowCells.push(`<td><span class="badge ${rec.executionType === 'تنفيذ مباشر' ? 'badge-direct' : 'badge-contractor'}">${esc(rec.executionType || '-')} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</span></td>`);
+                    oldRowCells.push(`<td>${esc(rec.sectorNo || '-')}</td>`);
+                }
+                oldRowCells.push(
+                    `<td>
                         <div class="notes-hover-box">
                             الملاحظات
                             <div class="notes-popup">
@@ -3200,21 +3221,21 @@
                                 ${rec.notes ? esc(rec.notes) : 'لا توجد ملاحظات مدونة.'}
                             </div>
                         </div>
-                    </td>
-                    <td>${rec.reviewDate || '-'}</td>
-                    <td>${rec.notesEndDate || '-'}</td>
-                    <td onclick="event.stopPropagation();" style="text-align:center;">
+                    </td>`,
+                    `<td>${rec.reviewDate || '-'}</td>`,
+                    `<td>${rec.notesEndDate || '-'}</td>`,
+                    `<td onclick="event.stopPropagation();" style="text-align:center;">
                         <input type="checkbox" class="notif-box" ${rec.notesCompleted ? 'checked' : ''} onclick="toggleOldNotesCompleted(${rec.id}, event)">
                         ${rec.notesCompleted && rec.notesCompletedDate ? `<br><small style="color:#10b981;">✅ ${rec.notesCompletedDate}</small>` : ''}
-                    </td>
-                    <td>
+                    </td>`,
+                    `<td>
                         <button class="action-btn" onclick="editOldRecord(${rec.id})">✏️</button>
                         <button class="action-btn delete" onclick="deleteOldRecord(${rec.id})">🗑️</button>
-                    </td>
-                    <td>
-                        <button class="camera-icon-btn" onclick="generateOldHouseReport(${rec.id})">📄 تقرير</button>
-                    </td>
-                `;
+                    </td>`
+                );
+                // زر "تقرير" أُخفي من الواجهة بطلب المستخدم؛ الدالة generateOldHouseReport بقيت بالكود بدون استخدام بالواجهة
+
+                tr.innerHTML = oldRowCells.join('');
                 tbody.appendChild(tr);
                 }
 
@@ -3227,8 +3248,7 @@
                             <span class="badge ${rec.status === 'مستلم' ? 'badge-ready' : 'badge-warning'}">${esc(rec.status)}</span>
                         </div>
                         <div style="font-size:0.88rem; color:var(--text-muted); line-height:1.8;">
-                            <div>📍 القطاع: ${esc(rec.sectorNo)}</div>
-                            <div>🛠️ التنفيذ: ${esc(rec.executionType)} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</div>
+                            ${showExtraOld ? `<div>📍 القطاع: ${esc(rec.sectorNo)}</div><div>🛠️ التنفيذ: ${esc(rec.executionType)} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</div>` : ''}
                             <div>📝 الملاحظات: ${esc(rec.notes || 'لا يوجد')}</div>
                             <div>📅 المراجعة: ${rec.reviewDate || '-'}</div>
                             <div>⏳ إنهاء الملاحظات: ${rec.notesEndDate || '-'}</div>
@@ -3241,7 +3261,6 @@
                             </label>
                             <button class="action-btn" onclick="editOldRecord(${rec.id})">✏️ تعديل</button>
                             <button class="action-btn delete" onclick="deleteOldRecord(${rec.id})">🗑️ حذف</button>
-                            <button class="camera-icon-btn" onclick="generateOldHouseReport(${rec.id})">📄 تقرير</button>
                         </div>
                     `;
                     mobileContainer.appendChild(card);
