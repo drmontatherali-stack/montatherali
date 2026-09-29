@@ -704,6 +704,7 @@
             <button class="btn-precleaned-manage" onclick="openPreCleanedModal()">🏠 المنظفة مسبقاً</button>
             <button class="btn-contractors-score" onclick="openContractorScorecardModal()">📊 أداء المقاولين</button>
             <button class="btn-excel-export" onclick="openExcelOptionsModal()">📊 تصدير Excel مخصص</button>
+            <button class="btn-excel-export" onclick="exportNewHousesExcelReport()">📊 تقرير Excel الدور الجديدة</button>
             <button class="btn-excel-export" onclick="exportOldHousesExcelReport()">📊 تقرير Excel الدور القديمة</button>
             <button class="btn-excel-export" onclick="exportFullBackup()">💾 نسخة احتياطية كاملة</button>
             <button class="btn-excel-export" onclick="document.getElementById('backupFileInput').click()">♻️ استرجاع نسخة احتياطية</button>
@@ -1836,23 +1837,18 @@
             if (!r.notesEndDate || r.notesCompleted) return;
             const diff = daysBetween(todayStr, r.notesEndDate);
             if (diff === 2) {
-                items.push({ houseNo: r.houseNo, sectorNo: r.sectorNo, contractorName: r.contractorName, executionType: r.executionType, sev: 'warning', icon: '📌', label: 'ملاحظات تنتهي خلال يومين' });
+                items.push({ houseNo: r.houseNo, sectorNo: r.sectorNo, contractorName: r.contractorName, executionType: r.executionType, sev: 'warning', icon: '📌', label: 'باقي يومين على انتهاء الملاحظات' });
             } else if (diff < 0) {
-                items.push({ houseNo: r.houseNo, sectorNo: r.sectorNo, contractorName: r.contractorName, executionType: r.executionType, sev: 'overdue', icon: '⚠️', label: 'ملاحظات متأخرة' });
+                items.push({ houseNo: r.houseNo, sectorNo: r.sectorNo, contractorName: r.contractorName, executionType: r.executionType, sev: 'overdue', icon: '⚠️', label: 'عبرت 5 أيام على الملاحظات' });
             }
         });
 
         houseRecords.forEach(rec => {
             const st = calculateRecordStatus(rec);
-            if (st.isCleaningOverdue) {
-                items.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'overdue', icon: '🧹', label: 'تجاوزت موعد التنظيف' });
-            } else if (st.is2DayCleaningNeeded) {
-                items.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'warning', icon: '🧹', label: 'يجب تنظيفها خلال يومين' });
-            }
             if (st.isHandoverOverdue) {
-                items.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'overdue', icon: '🚨', label: 'تجاوزت موعد التسليم' });
+                items.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'overdue', icon: '🚨', label: 'عبرت 10 أيام على التسليم' });
             } else if (st.is3DaysRemaining) {
-                items.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'warning', icon: '⏳', label: 'متبقي 3 أيام على التسليم' });
+                items.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'warning', icon: '⏳', label: 'باقي 3 أيام على التسليم' });
             }
         });
 
@@ -2242,12 +2238,11 @@
             }));
         }
 
-        // منجزة ضمن الموعد = تم تأشيرها كمكتملة، وتاريخ الإكمال كان في أو قبل تاريخ انتهاء الملاحظات المقرر
-        const isCompletedOnTime = rec => !!(rec.notesCompleted && rec.notesCompletedDate && rec.notesEndDate && rec.notesCompletedDate <= rec.notesEndDate);
+        // الدور التي عبرت موعد إنهاء ملاحظاتها ولم تُكمل لحد الآن (نفس تعريف "متأخرة" المستخدم بباقي النظام)
+        const isNotesOverdue = rec => !!(rec.notesEndDate && !rec.notesCompleted && rec.notesEndDate < todayStr);
 
         const allRows = buildRows(oldHouseRecords);
-        const onTimeRows = buildRows(oldHouseRecords.filter(isCompletedOnTime));
-        const lateRows = buildRows(oldHouseRecords.filter(rec => !isCompletedOnTime(rec)));
+        const overdueRows = buildRows(oldHouseRecords.filter(isNotesOverdue));
 
         const colWidths = [
             { wch: 6 }, { wch: 20 }, { wch: 14 }, { wch: 14 }, { wch: 16 },
@@ -2263,11 +2258,66 @@
         }
 
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, buildSheet("كل الدور", allRows), "كل الدور");
-        XLSX.utils.book_append_sheet(workbook, buildSheet("الدور التي تم إنجاز ملاحظاتها ضمن الموعد", onTimeRows), "منجزة ضمن الموعد");
-        XLSX.utils.book_append_sheet(workbook, buildSheet("الدور التي لم يتم إنجاز ملاحظاتها ضمن الموعد", lateRows), "غير منجزة ضمن الموعد");
+        XLSX.utils.book_append_sheet(workbook, buildSheet("كل الدور التي بها ملاحظات", allRows), "كل الدور");
+        XLSX.utils.book_append_sheet(workbook, buildSheet("الدور التي عبرت موعد ملاحظاتها", overdueRows), "عبرت موعد الملاحظات");
 
         XLSX.writeFile(workbook, `AlAmirat_تقرير_الدور_القديمة_${todayStr}.xlsx`);
+    }
+
+    function exportNewHousesExcelReport() {
+        if (houseRecords.length === 0) {
+            alert("⚠️ لا توجد دور جديدة مسجلة لتصديرها إلى Excel!");
+            return;
+        }
+
+        function buildNewRows(list) {
+            return list.map((rec, idx) => {
+                const logic = calculateRecordStatus(rec);
+                return {
+                    "ت": idx + 1,
+                    "رقم الدار والبلوك": rec.houseNo || '-',
+                    "اسم المستفيد": rec.ownerName || '-',
+                    "رقم الهاتف": rec.phoneNo || '-',
+                    "القطاع": rec.sectorNo || '-',
+                    "نوع التنفيذ": rec.executionType || '-',
+                    "المقاول": rec.contractorName || '-',
+                    "الحالة الحالية": logic.statusText,
+                    "تاريخ الحضور": rec.arrivalDate || '-',
+                    "موعد التسليم الـ 10 أيام": rec.handoverDate || rec.houseReadyDate || '-',
+                    "هل تم الإكمال؟": rec.isReady ? 'تم' : 'لم يتم',
+                    "موعد التسليم الثاني": rec.secondHandoverDate || '-',
+                    "سبب تأخير التسليم الثاني": rec.notReadyReason || '-'
+                };
+            });
+        }
+
+        // لم يتم الإكمال + تجاوزت الموعد الفعلي (10 أيام أو الموعد الثاني) = معناها متجاوزة فعلاً
+        const isOverdueNotReady = rec => calculateRecordStatus(rec).isHandoverOverdue;
+        const is3DaysLeft = rec => calculateRecordStatus(rec).is3DaysRemaining;
+
+        const allRows = buildNewRows(houseRecords);
+        const threeDaysRows = buildNewRows(houseRecords.filter(is3DaysLeft));
+        const overdueRows = buildNewRows(houseRecords.filter(isOverdueNotReady));
+
+        const colWidthsNew = [
+            { wch: 6 }, { wch: 20 }, { wch: 22 }, { wch: 16 }, { wch: 16 },
+            { wch: 16 }, { wch: 18 }, { wch: 26 }, { wch: 15 }, { wch: 20 },
+            { wch: 16 }, { wch: 20 }, { wch: 30 }
+        ];
+
+        function buildNewSheet(titleText, rows) {
+            const ws = XLSX.utils.aoa_to_sheet([[titleText]]);
+            XLSX.utils.sheet_add_json(ws, rows.length ? rows : [{ "ملاحظة": "لا توجد دور ضمن هذا التصنيف حالياً" }], { origin: 'A3' });
+            ws['!cols'] = colWidthsNew;
+            return ws;
+        }
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, buildNewSheet("كل الدور", allRows), "كل الدور");
+        XLSX.utils.book_append_sheet(workbook, buildNewSheet("الدور المتبقي لموعدها 3 أيام", threeDaysRows), "متبقي 3 أيام");
+        XLSX.utils.book_append_sheet(workbook, buildNewSheet("الدور التي تجاوزت 10 أيام ولم تكتمل بعد", overdueRows), "تجاوزت 10 أيام");
+
+        XLSX.writeFile(workbook, `AlAmirat_تقرير_الدور_الجديدة_${todayStr}.xlsx`);
     }
 
     function buildBackupObject() {
