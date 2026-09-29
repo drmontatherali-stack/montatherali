@@ -217,6 +217,27 @@
             letter-spacing: 0.2px;
         }
 
+        /* قسم "تفاصيل الدور الجديدة/القديمة": عمودين جنب بعض، دائماً ظاهرين، بمستطيلات إحصائية صغيرة بحجم أزرار الأدوات اليومية */
+        .type-details-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .type-details-col { background: var(--glass-card); border: 1px solid var(--glass-border); border-radius: 20px; padding: 16px 18px; }
+        .type-details-title { font-size: 0.95rem; font-weight: 900; color: var(--text-main); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--glass-border); }
+        .mini-stat-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .mini-stat {
+            display: flex; align-items: center; gap: 6px;
+            padding: 12px 18px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 800;
+        }
+        .mini-stat:hover { border-color: var(--primary-blue); background: rgba(56, 189, 248, 0.08); }
+        .mini-stat .ic { font-size: 0.95rem; line-height: 1; }
+        .mini-stat .val { font-size: 1rem; font-weight: 900; }
+        .mini-stat .lbl { font-size: 0.76rem; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
+        @media (max-width: 900px) { .type-details-columns { grid-template-columns: 1fr; } }
+
         .tools-toolbar {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -399,12 +420,12 @@
 
         table { width: 100%; border-collapse: collapse; text-align: right; white-space: nowrap; }
         thead { background: rgba(5, 11, 20, 0.85); border-bottom: 2px solid var(--glass-border); }
-        th { padding: 20px 18px; font-size: 0.85rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.3px; }
+        th { padding: 10px 14px; font-size: 0.82rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.3px; }
         tbody tr { border-bottom: 1px solid var(--glass-border); transition: all 0.2s ease; cursor: pointer; }
         tbody tr:hover { background: rgba(56, 189, 248, 0.08); }
         tbody tr.row-overdue-alert { background: rgba(244, 63, 94, 0.12) !important; border-right: 4px solid var(--status-overdue) !important; }
         tbody tr.row-warning-3days { background: rgba(249, 115, 22, 0.12) !important; border-right: 4px solid var(--status-warning) !important; }
-        td { padding: 16px 18px; font-size: 0.88rem; vertical-align: middle; }
+        td { padding: 8px 14px; font-size: 0.85rem; vertical-align: middle; }
 
         .badge { display: inline-block; padding: 7px 16px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.3px; backdrop-filter: blur(6px); }
         .badge-waiting { background-color: rgba(251, 191, 36, 0.15); color: var(--status-waiting); border: 1px solid rgba(251, 191, 36, 0.35); }
@@ -629,86 +650,6 @@
         </div>
     </header>
 
-    <div class="alerts-panel" id="alerts-panel">
-        <div class="alerts-panel-title">🔔 التنبيهات (مفروزة حسب المقاول والقطاع)</div>
-        <div id="alerts-panel-body"></div>
-    </div>
-
-    <div id="new-stats-section">
-    <div class="stats-section-title">📊 إحصائيات الدور الجديدة</div>
-    <div class="metrics-grid">
-        <div class="metric-card" onclick="setFilterStatus('all')">
-            <div class="icon">🏠</div>
-            <div class="title" style="color: #38bdf8;">كل الدور المسجلة</div>
-            <div class="value" style="color: #38bdf8;" id="total-all-count">0</div>
-        </div>
-        <div class="metric-card warning-card" onclick="setFilterStatus('2day_cleaning_needed')">
-            <div class="icon">🧹</div>
-            <div class="title" style="color: #f97316;">يجب تنظيفها خلال يومين</div>
-            <div class="value" style="color: #f97316;" id="clean-2day-needed-count">0</div>
-        </div>
-        <div class="metric-card warning-card" onclick="setFilterStatus('3days_remaining')">
-            <div class="icon">⏳</div>
-            <div class="title" style="color: #fbbf24;">متبقي لموعدها 3 أيام</div>
-            <div class="value" style="color: #fbbf24;" id="three-days-remaining-count">0</div>
-        </div>
-        <div class="metric-card alert-card" onclick="setFilterStatus('uncompleted_cleaning')">
-            <div class="icon">⚠️</div>
-            <div class="title" style="color: #f43f5e;">تجاوزت موعد التنظيف</div>
-            <div class="value" style="color: #f43f5e;" id="clean-uncompleted-count">0</div>
-        </div>
-        <div class="metric-card alert-card" onclick="setFilterStatus('not_ready_overdue')">
-            <div class="icon">🚨</div>
-            <div class="title" style="color: #f43f5e;">تجاوزت موعد التسليم</div>
-            <div class="value" style="color: #f43f5e;" id="not-ready-overdue-count">0</div>
-        </div>
-        <div class="metric-card" onclick="setFilterStatus('ready_all')">
-            <div class="icon">🏁</div>
-            <div class="title" style="color: #10b981;">جاهزة للإنهاء (الكل)</div>
-            <div class="value" style="color: #10b981;" id="ready-all-count">0</div>
-        </div>
-    </div>
-    </div>
-
-    <!-- التنقل بين الدور الجديدة والدور القديمة -->
-    <div class="nav-tabs">
-        <button id="tab-new-houses" class="nav-tab-btn active" onclick="switchMainTab('new')">🏠 الدور الجديدة</button>
-        <button id="tab-old-houses" class="nav-tab-btn" onclick="switchMainTab('old')">🏛️ دور التسليم القديمة</button>
-    </div>
-
-    <div id="old-stats-section" style="display:none;">
-    <div class="stats-section-title">📊 إحصائيات الدور القديمة</div>
-    <div class="metrics-grid">
-        <div class="metric-card" onclick="setOldFilterStatus('all')">
-            <div class="icon">🏛️</div>
-            <div class="title" style="color: #38bdf8;">كل الدور القديمة</div>
-            <div class="value" style="color: #38bdf8;" id="old-total-count">0</div>
-        </div>
-        <div class="metric-card warning-card" onclick="setOldFilterStatus('notes_due_2days')">
-            <div class="icon">📌</div>
-            <div class="title" style="color: #f97316;">يجب إنهاء ملاحظاتها خلال يومين</div>
-            <div class="value" style="color: #f97316;" id="old-notes-due-2days-count">0</div>
-        </div>
-        <div class="metric-card alert-card" onclick="setOldFilterStatus('notes_overdue')">
-            <div class="icon">⚠️</div>
-            <div class="title" style="color: #f43f5e;">متأخرة عن إنهاء الملاحظات</div>
-            <div class="value" style="color: #f43f5e;" id="old-notes-overdue-count">0</div>
-        </div>
-        <div class="metric-card" onclick="setOldFilterStatus('completed')">
-            <div class="icon">✅</div>
-            <div class="title" style="color: #10b981;">دور مستلمة (مكتملة)</div>
-            <div class="value" style="color: #10b981;" id="old-completed-count">0</div>
-        </div>
-        <div class="metric-card" onclick="setOldFilterStatus('notes_completed')">
-            <div class="icon">📝</div>
-            <div class="title" style="color: #10b981;">دور تم إكمال ملاحظاتها</div>
-            <div class="value" style="color: #10b981;" id="old-notes-completed-count">0</div>
-        </div>
-    </div>
-    </div>
-
-
-
     <div class="tools-toolbar">
         <div class="tools-toolbar-group">
             <button class="tools-group-toggle" onclick="toggleToolsGroup('daily-tools-group')">🗓️ أدوات يومية ▾</button>
@@ -733,6 +674,64 @@
     </div>
     <!-- زرا رفع/عرض ملف تواريخ الاستلام اليدوي أُلغيا من الواجهة بعد ربط النظام مباشرة بشيت Google Sheets؛
          الدوال (handleHandoverDatesFile, openHandoverDatesModal, lookupHandoverDate) بقيت بالكود بدون استخدام كخيار احتياطي -->
+
+    <div class="alerts-panel" id="alerts-panel">
+        <div class="alerts-panel-title">🔔 التنبيهات (مفروزة حسب المقاول والقطاع)</div>
+        <div id="alerts-panel-body"></div>
+    </div>
+
+    <!-- تفاصيل نوعي الدور: قسمان ثابتان جنب بعض، ظاهرين دائماً بغض النظر عن التبويب المفعّل بالجدول تحتهما -->
+    <div class="type-details-columns">
+        <div class="type-details-col">
+            <div class="type-details-title">🏠 تفاصيل الدور الجديدة</div>
+            <div class="mini-stat-grid">
+                <div class="mini-stat" onclick="setFilterStatus('all'); switchMainTab('new');">
+                    <span class="ic">🏠</span><span class="val" style="color:#38bdf8;" id="total-all-count">0</span><span class="lbl">كل الدور</span>
+                </div>
+                <div class="mini-stat" onclick="setFilterStatus('2day_cleaning_needed'); switchMainTab('new');">
+                    <span class="ic">🧹</span><span class="val" style="color:#f97316;" id="clean-2day-needed-count">0</span><span class="lbl">تنظيف خلال يومين</span>
+                </div>
+                <div class="mini-stat" onclick="setFilterStatus('3days_remaining'); switchMainTab('new');">
+                    <span class="ic">⏳</span><span class="val" style="color:#fbbf24;" id="three-days-remaining-count">0</span><span class="lbl">باقي 3 أيام للتسليم</span>
+                </div>
+                <div class="mini-stat" onclick="setFilterStatus('uncompleted_cleaning'); switchMainTab('new');">
+                    <span class="ic">⚠️</span><span class="val" style="color:#f43f5e;" id="clean-uncompleted-count">0</span><span class="lbl">تجاوزت التنظيف</span>
+                </div>
+                <div class="mini-stat" onclick="setFilterStatus('not_ready_overdue'); switchMainTab('new');">
+                    <span class="ic">🚨</span><span class="val" style="color:#f43f5e;" id="not-ready-overdue-count">0</span><span class="lbl">تجاوزت التسليم</span>
+                </div>
+                <div class="mini-stat" onclick="setFilterStatus('ready_all'); switchMainTab('new');">
+                    <span class="ic">🏁</span><span class="val" style="color:#10b981;" id="ready-all-count">0</span><span class="lbl">جاهزة (الكل)</span>
+                </div>
+            </div>
+        </div>
+        <div class="type-details-col">
+            <div class="type-details-title">🏛️ تفاصيل الدور القديمة</div>
+            <div class="mini-stat-grid">
+                <div class="mini-stat" onclick="setOldFilterStatus('all'); switchMainTab('old');">
+                    <span class="ic">🏛️</span><span class="val" style="color:#38bdf8;" id="old-total-count">0</span><span class="lbl">كل الدور</span>
+                </div>
+                <div class="mini-stat" onclick="setOldFilterStatus('notes_due_2days'); switchMainTab('old');">
+                    <span class="ic">📌</span><span class="val" style="color:#f97316;" id="old-notes-due-2days-count">0</span><span class="lbl">باقي يومان للملاحظات</span>
+                </div>
+                <div class="mini-stat" onclick="setOldFilterStatus('notes_overdue'); switchMainTab('old');">
+                    <span class="ic">⚠️</span><span class="val" style="color:#f43f5e;" id="old-notes-overdue-count">0</span><span class="lbl">تجاوزت الملاحظات</span>
+                </div>
+                <div class="mini-stat" onclick="setOldFilterStatus('completed'); switchMainTab('old');">
+                    <span class="ic">✅</span><span class="val" style="color:#10b981;" id="old-completed-count">0</span><span class="lbl">مستلمة (مكتملة)</span>
+                </div>
+                <div class="mini-stat" onclick="setOldFilterStatus('notes_completed'); switchMainTab('old');">
+                    <span class="ic">📝</span><span class="val" style="color:#10b981;" id="old-notes-completed-count">0</span><span class="lbl">أُكملت ملاحظاتها</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- التنقل بين الدور الجديدة والدور القديمة -->
+    <div class="nav-tabs">
+        <button id="tab-new-houses" class="nav-tab-btn active" onclick="switchMainTab('new')">🏠 الدور الجديدة</button>
+        <button id="tab-old-houses" class="nav-tab-btn" onclick="switchMainTab('old')">🏛️ دور التسليم القديمة</button>
+    </div>
 
 
     <div class="filter-section">
@@ -1523,8 +1522,6 @@
         document.getElementById('old-sort-select').style.display = (tab === 'old') ? 'inline-block' : 'none';
         document.getElementById('new-status-filter-select').style.display = (tab === 'new') ? 'inline-block' : 'none';
         document.getElementById('old-status-filter-select').style.display = (tab === 'old') ? 'inline-block' : 'none';
-        document.getElementById('new-stats-section').style.display = (tab === 'new') ? 'block' : 'none';
-        document.getElementById('old-stats-section').style.display = (tab === 'old') ? 'block' : 'none';
         renderTable();
     }
 
