@@ -198,6 +198,17 @@
         .metric-card.alert-card:hover::before { background: var(--status-overdue); box-shadow: 0 0 15px var(--status-overdue); }
         .metric-card.warning-card { border-color: rgba(249, 115, 22, 0.3); background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(249, 115, 22, 0.15) 100%); }
         .metric-card.warning-card:hover { border-color: var(--status-warning); box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(249, 115, 22, 0.3); }
+        .metric-card .icon { font-size: 1.6rem; margin-bottom: 8px; opacity: 0.9; line-height: 1; }
+
+        .stats-section-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            margin: 4px 2px 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--glass-border);
+            letter-spacing: 0.2px;
+        }
 
         .tools-toolbar {
             background: var(--glass-bg);
@@ -572,46 +583,45 @@
         </div>
     </header>
 
-    <div class="analytics-grid">
-        <div class="chart-box">
-            <h3>📊 توزيع الإنجاز حسب القطاعات</h3>
-            <div style="height: 190px; position:relative;"><canvas id="sectorsChart"></canvas></div>
-        </div>
-        <div class="chart-box">
-            <h3>👷‍♂️ مقارنة أداء المقاولين (المنجزة مقابل المتأخرة)</h3>
-            <div style="height: 190px; position:relative;"><canvas id="contractorsChart"></canvas></div>
-        </div>
-    </div>
-
+    <div id="new-stats-section">
+    <div class="stats-section-title">📊 إحصائيات الدور الجديدة</div>
     <div class="metrics-grid">
         <div class="metric-card" onclick="setFilterStatus('all')">
+            <div class="icon">🏠</div>
             <div class="title" style="color: #38bdf8;">كل الدور المسجلة</div>
             <div class="value" style="color: #38bdf8;" id="total-all-count">0</div>
         </div>
         <div class="metric-card warning-card" onclick="setFilterStatus('2day_cleaning_needed')">
-            <div class="title" style="color: #f97316;">🧹 يجب تنظيفها خلال يومين</div>
+            <div class="icon">🧹</div>
+            <div class="title" style="color: #f97316;">يجب تنظيفها خلال يومين</div>
             <div class="value" style="color: #f97316;" id="clean-2day-needed-count">0</div>
         </div>
         <div class="metric-card warning-card" onclick="setFilterStatus('3days_remaining')">
-            <div class="title" style="color: #fbbf24;">🚨 متبقي لموعدها 3 أيام (موقف)</div>
+            <div class="icon">⏳</div>
+            <div class="title" style="color: #fbbf24;">متبقي لموعدها 3 أيام</div>
             <div class="value" style="color: #fbbf24;" id="three-days-remaining-count">0</div>
         </div>
         <div class="metric-card alert-card" onclick="setFilterStatus('uncompleted_cleaning')">
-            <div class="title" style="color: #f43f5e;">⚠️ تجاوزت موعد التنظيف</div>
+            <div class="icon">⚠️</div>
+            <div class="title" style="color: #f43f5e;">تجاوزت موعد التنظيف</div>
             <div class="value" style="color: #f43f5e;" id="clean-uncompleted-count">0</div>
         </div>
         <div class="metric-card alert-card" onclick="setFilterStatus('not_ready_overdue')">
-            <div class="title" style="color: #f43f5e;">⚠️ تجاوزت موعد التسليم (10 أيام)</div>
+            <div class="icon">🚨</div>
+            <div class="title" style="color: #f43f5e;">تجاوزت موعد التسليم</div>
             <div class="value" style="color: #f43f5e;" id="not-ready-overdue-count">0</div>
         </div>
         <div class="metric-card" onclick="setFilterStatus('completed_cleaning')">
-            <div class="title" style="color: #10b981;">دور تم إكمال تنظيفها</div>
+            <div class="icon">✅</div>
+            <div class="title" style="color: #10b981;">تم إكمال تنظيفها</div>
             <div class="value" style="color: #10b981;" id="clean-completed-count">0</div>
         </div>
         <div class="metric-card" onclick="setFilterStatus('ready_all')">
-            <div class="title" style="color: #10b981;">دور جاهزة للإنهاء (الكل)</div>
+            <div class="icon">🏁</div>
+            <div class="title" style="color: #10b981;">جاهزة للإنهاء (الكل)</div>
             <div class="value" style="color: #10b981;" id="ready-all-count">0</div>
         </div>
+    </div>
     </div>
 
     <!-- التنقل بين الدور الجديدة والدور القديمة -->
@@ -620,25 +630,32 @@
         <button id="tab-old-houses" class="nav-tab-btn" onclick="switchMainTab('old')">🏛️ دور التسليم القديمة</button>
     </div>
 
-    <!-- مستطيلات ملخص الدور القديمة (على غرار باقي مستطيلات النظام: كل الدور، المستحقة، المتأخرة، المكتملة) -->
-    <div class="metrics-grid" style="margin-bottom: 20px;">
+    <div id="old-stats-section" style="display:none;">
+    <div class="stats-section-title">📊 إحصائيات الدور القديمة</div>
+    <div class="metrics-grid">
         <div class="metric-card" onclick="setOldFilterStatus('all')">
-            <div class="title" style="color: #38bdf8;">🏛️ كل الدور القديمة</div>
+            <div class="icon">🏛️</div>
+            <div class="title" style="color: #38bdf8;">كل الدور القديمة</div>
             <div class="value" style="color: #38bdf8;" id="old-total-count">0</div>
         </div>
         <div class="metric-card warning-card" onclick="setOldFilterStatus('notes_due_2days')">
-            <div class="title" style="color: #f97316;">📌 يجب إنهاء ملاحظاتها خلال يومين</div>
+            <div class="icon">📌</div>
+            <div class="title" style="color: #f97316;">يجب إنهاء ملاحظاتها خلال يومين</div>
             <div class="value" style="color: #f97316;" id="old-notes-due-2days-count">0</div>
         </div>
         <div class="metric-card alert-card" onclick="setOldFilterStatus('notes_overdue')">
-            <div class="title" style="color: #f43f5e;">⚠️ متأخرة عن إنهاء الملاحظات</div>
+            <div class="icon">⚠️</div>
+            <div class="title" style="color: #f43f5e;">متأخرة عن إنهاء الملاحظات</div>
             <div class="value" style="color: #f43f5e;" id="old-notes-overdue-count">0</div>
         </div>
         <div class="metric-card" onclick="setOldFilterStatus('completed')">
-            <div class="title" style="color: #10b981;">✅ دور مستلمة (مكتملة)</div>
+            <div class="icon">✅</div>
+            <div class="title" style="color: #10b981;">دور مستلمة (مكتملة)</div>
             <div class="value" style="color: #10b981;" id="old-completed-count">0</div>
         </div>
     </div>
+    </div>
+
 
     <!-- مستطيل علوي خاص بالدور القديمة التي موعد انتهاء ملاحظاتها بعد يومين -->
     <div id="old-houses-alert-banner" class="old-houses-alert-banner" style="display: none;">
@@ -707,6 +724,23 @@
                 <option value="notes_end_asc">📌 الأقرب انتهاء ملاحظات أولاً</option>
                 <option value="overdue_first">⚠️ الأكثر تأخراً أولاً</option>
                 <option value="incomplete_first">📝 غير المكتملة أولاً</option>
+            </select>
+
+            <label>تصفية حسب الحالة:</label>
+            <select id="new-status-filter-select" onchange="setFilterStatus(this.value)">
+                <option value="all">الكل</option>
+                <option value="2day_cleaning_needed">🧹 يجب تنظيفها خلال يومين</option>
+                <option value="3days_remaining">🚨 متبقي لموعدها 3 أيام</option>
+                <option value="uncompleted_cleaning">⚠️ تجاوزت موعد التنظيف</option>
+                <option value="not_ready_overdue">⚠️ تجاوزت موعد التسليم</option>
+                <option value="completed_cleaning">دور تم إكمال تنظيفها</option>
+                <option value="ready_all">دور جاهزة للإنهاء</option>
+            </select>
+            <select id="old-status-filter-select" onchange="setOldFilterStatus(this.value)" style="display:none;">
+                <option value="all">الكل</option>
+                <option value="notes_due_2days">📌 يجب إنهاء ملاحظاتها خلال يومين</option>
+                <option value="notes_overdue">⚠️ متأخرة عن إنهاء الملاحظات</option>
+                <option value="completed">✅ دور مستلمة (مكتملة)</option>
             </select>
         </div>
 
@@ -1461,6 +1495,10 @@
         document.getElementById('tab-old-houses').classList.toggle('active', tab === 'old');
         document.getElementById('new-sort-select').style.display = (tab === 'new') ? 'inline-block' : 'none';
         document.getElementById('old-sort-select').style.display = (tab === 'old') ? 'inline-block' : 'none';
+        document.getElementById('new-status-filter-select').style.display = (tab === 'new') ? 'inline-block' : 'none';
+        document.getElementById('old-status-filter-select').style.display = (tab === 'old') ? 'inline-block' : 'none';
+        document.getElementById('new-stats-section').style.display = (tab === 'new') ? 'block' : 'none';
+        document.getElementById('old-stats-section').style.display = (tab === 'old') ? 'block' : 'none';
         renderTable();
     }
 
@@ -1668,12 +1706,12 @@
         syncOldRecord(rec, baselineOld);
         closeAddModal();
 
-        // إرسال تفاصيل الدار القديمة عبر واتساب بيتا (رسالة مختصرة: رقم الدار والتواريخ فقط)
+        // إرسال تفاصيل الدار القديمة عبر واتساب بيتا (رسالة مختصرة: رقم الدار، تاريخ المجيء، تاريخ إكمال الملاحظات، والملاحظات فقط)
         let msgText = `تسجيل دار قديمة جديدة\n` +
                       `رقم الدار والبلوك: ${rec.houseNo}\n` +
-                      `تاريخ المراجعة: ${rec.reviewDate}\n` +
-                      `تاريخ إنهاء الملاحظات: ${rec.notesEndDate}` +
-                      (rec.handoverDate ? `\nتاريخ التسليم: ${rec.handoverDate}` : '') +
+                      `تاريخ مجيء المستفيد: ${rec.reviewDate}\n` +
+                      `تاريخ إكمال الملاحظات: ${rec.notesEndDate}\n` +
+                      `الملاحظات: ${rec.notes || 'لا يوجد'}` +
                       `\n\nمكتب التسليم الفني - مجمع الأميرات 2`;
 
         setTimeout(() => {
@@ -1743,23 +1781,13 @@
         closeAddModal();
 
         if (arrivalDate) {
-            let msgText = "";
-            // رسالة مختصرة: رقم الدار والتواريخ الخاصة بها فقط (بدون إيموجي أو اسم مستفيد أو نوع تنفيذ أو قطاع)
-            if (executionType === "تنفيذ مقاولين") {
-                msgText = `تبليغ جديد - تسجيل موعد حضور مستفيد\n` +
-                          `الدار: ${rec.houseNo}\n` +
-                          `تاريخ الحضور: ${rec.arrivalDate}\n` +
-                          `تاريخ بدء عمل المقاول: ${rec.contractorStartDate || '-'}\n` +
-                          `موعد جهوزية الدار والتسليم (10 أيام): ${rec.houseReadyDate}\n\n` +
-                          `مكتب التسليم الفني - مجمع الأميرات 2`;
-            } else {
-                msgText = `تبليغ جديد - تسجيل موعد حضور مستفيد\n` +
-                          `الدار: ${rec.houseNo}\n` +
-                          `تاريخ الحضور والتفتيش: ${rec.arrivalDate}\n` +
-                          `تاريخ انتهاء التنظيف المتوقع: ${rec.cleaningEndDate || 'خلال يومين'}\n` +
-                          `موعد التسليم النهائي (10 أيام): ${rec.handoverDate}\n\n` +
-                          `مكتب التسليم الفني - مجمع الأميرات 2`;
-            }
+            // رسالة مختصرة: رقم الدار والبلوك، تاريخ مجيء المستفيد، وتاريخ الإكمال (بعد 10 أيام) فقط
+            const completionDate = executionType === "تنفيذ مقاولين" ? rec.houseReadyDate : rec.handoverDate;
+            let msgText = `تبليغ جديد - تسجيل موعد حضور مستفيد\n` +
+                      `الدار: ${rec.houseNo}\n` +
+                      `تاريخ مجيء المستفيد: ${rec.arrivalDate}\n` +
+                      `تاريخ الإكمال (10 أيام): ${completionDate}\n\n` +
+                      `مكتب التسليم الفني - مجمع الأميرات 2`;
 
             setTimeout(() => {
                 // هذا التبليغ موجه لفريق العمل عند تسجيل الدار لأول مرة، لذا لا داعي لإدراج رقم المستفيد هنا تلقائياً
@@ -2620,6 +2648,9 @@
 
     let lastChartSig = '';
     function renderCharts() {
+        // الرسوم البيانية أُلغيت من الواجهة بطلب المستخدم (استُبدلت بمستطيلات الإحصائيات)؛
+        // الدالة بقيت بالكود بدون استخدام تحسباً لإعادة تفعيلها مستقبلاً
+        if (!document.getElementById('sectorsChart') || !document.getElementById('contractorsChart')) return;
         const sectorsCount = { "القطاع الأول": 0, "القطاع الثاني": 0, "القطاع الثالث": 0, "القطاع الرابع": 0, "القطاع الخامس": 0, "القطاع السادس": 0 };
         const contractorsStats = {};
 
@@ -2959,15 +2990,17 @@
             if (rec.isReady) readyAll++;
         });
 
-        document.getElementById('total-all-count').innerText = totalAll;
-        document.getElementById('clean-2day-needed-count').innerText = clean2DayNeeded;
-        document.getElementById('three-days-remaining-count').innerText = threeDaysRemaining;
-        document.getElementById('clean-uncompleted-count').innerText = cleanUncompleted;
-        document.getElementById('not-ready-overdue-count').innerText = notReadyOverdue;
-        document.getElementById('clean-completed-count').innerText = cleanCompleted;
-        document.getElementById('ready-all-count').innerText = readyAll;
+        // مستطيلات الإحصائيات الرقمية أُلغيت من الواجهة (استُبدلت برسمي القطاعات/المقاولين أعلى الصفحة)؛
+        // القيم المحسوبة أعلاه تبقى تُستخدم داخلياً (الفرز، الفلترة)، لذا الكتابة للعناصر محمية بالتحقق من وجودها فقط
+        if (document.getElementById('total-all-count')) document.getElementById('total-all-count').innerText = totalAll;
+        if (document.getElementById('clean-2day-needed-count')) document.getElementById('clean-2day-needed-count').innerText = clean2DayNeeded;
+        if (document.getElementById('three-days-remaining-count')) document.getElementById('three-days-remaining-count').innerText = threeDaysRemaining;
+        if (document.getElementById('clean-uncompleted-count')) document.getElementById('clean-uncompleted-count').innerText = cleanUncompleted;
+        if (document.getElementById('not-ready-overdue-count')) document.getElementById('not-ready-overdue-count').innerText = notReadyOverdue;
+        if (document.getElementById('clean-completed-count')) document.getElementById('clean-completed-count').innerText = cleanCompleted;
+        if (document.getElementById('ready-all-count')) document.getElementById('ready-all-count').innerText = readyAll;
 
-        // مستطيلات ملخص الدور القديمة (على غرار باقي مستطيلات الإحصائيات في النظام)
+        // مستطيلات ملخص الدور القديمة أُلغيت أيضاً من الواجهة؛ نفس المبدأ أعلاه
         const oldStatusFilter = window.currentOldStatusFilter || 'all';
         let oldTotal = oldHouseRecords.length;
         let oldNotesDue2Days = 0;
@@ -2993,12 +3026,10 @@
         if (activeTab === 'new') {
             const showExtra = !!window.showExtraCols;
             const headCells = ['<th>ت ت</th>', '<th>رقم الدار والبلوك</th>', '<th>اسم المستفيد</th>'];
-            if (showExtra) headCells.push('<th>القطاع</th>', '<th>نوع التنفيذ والمقاول</th>');
+            if (showExtra) headCells.push('<th>القطاع</th>', '<th>نوع التنفيذ والمقاول</th>', '<th>الحالة الحالية</th>');
             headCells.push(
-                '<th>الحالة الحالية</th>',
                 '<th>المواعيد (الحضور / التنظيف / الكشف)</th>',
                 '<th>موعد التسليم</th>',
-                '<th>صورة الملاحظات والتوقيع</th>',
                 '<th>واتساب والتبليغ (3 مرات)</th>',
                 '<th>تعديل</th>'
             );
@@ -3093,16 +3124,12 @@
                 if (showExtra) {
                     rowCells.push(`<td>${esc(rec.sectorNo || '-')}</td>`);
                     rowCells.push(`<td><span class="badge ${rec.executionType === 'تنفيذ مباشر' ? 'badge-direct' : 'badge-contractor'}">${esc(rec.executionType || '-')} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</span></td>`);
+                    rowCells.push(`<td><span class="badge ${st.badgeClass}">${st.statusText}</span></td>`);
                 }
+                // عمود "صورة الملاحظات والتوقيع" أُلغي من الجدول بطلب المستخدم؛ الدالتان triggerCamera وviewRecordImage بقيتا بالكود بدون استخدام هنا
                 rowCells.push(
-                    `<td><span class="badge ${st.badgeClass}">${st.statusText}</span></td>`,
                     `<td>${datesHtml}</td>`,
                     `<td>${handoverHtml}</td>`,
-                    `<td onclick="event.stopPropagation();">
-                        <button class="camera-icon-btn" onclick="triggerCamera(${rec.id})">📷 صورة</button>
-                        ${rec.noteImage ? `<button class="camera-icon-btn" onclick="viewRecordImage(${rec.id}, 'note')">👁️ عرض</button>` : ''}
-                        ${rec.signatureImg ? `<button class="camera-icon-btn" onclick="viewRecordImage(${rec.id}, 'sig')">✍️ التوقيع</button>` : ''}
-                    </td>`,
                     `<td onclick="event.stopPropagation();">
                         <span class="whatsapp-icon" onclick="triggerWhatsAppNotifyById(${rec.id})">💬</span>
                         ${notifHtml}
@@ -3133,7 +3160,6 @@
                             <div>⏱️ التسليم: ${rec.handoverDate || rec.houseReadyDate || '-'}${rec.secondHandoverDate && st.isHandoverOverdue ? ` <span style="color:#fbbf24;">(موعد ثاني: ${rec.secondHandoverDate})</span>` : ''}</div>
                         </div>
                         <div style="margin-top:12px; display:flex; gap:10px;" onclick="event.stopPropagation();">
-                            <button class="camera-icon-btn" onclick="triggerCamera(${rec.id})">📷 صورة</button>
                             <button class="action-btn" onclick="editRecord(${rec.id})">✏️ تعديل</button>
                             <button class="action-btn delete" onclick="deleteRecord(${rec.id})">🗑️ حذف</button>
                         </div>
