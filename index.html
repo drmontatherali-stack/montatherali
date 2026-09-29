@@ -3664,24 +3664,26 @@
     // ---------- 4) مستطيل "📅 الجرد السنوي": تجميع عدد الدور المسلَّمة شهرياً/سنوياً حسب الفئة (أول حرف من رقم الدار) ----------
     // حساب مجموعات الجرد السنوي (شهر/سنة × فئة) — دالة مشتركة بين العرض والتصدير لملف اكسل
     function computeAnnualGroups() {
-        // الجرد السنوي: من كل صف بذاته بالشيت (التسلسل)، بدون دمج برقم الدار — حسب طلب المستخدم
-        var items = sheetAllRows.filter(function (x) { return isIsoDate(x.date); });
-        var groups = {}; // "yyyy-mm" -> { cats: {A:n,B:n}, total:n }
+        // نفس آلية مستطيل "الدور المسلمة" بالضبط: كل صف من الشيت كما هو، بلا أي استثناء أو فلترة، حتى لو تكرر رقم الدار
+        var items = sheetAllRows;
+        var groups = {}; // "yyyy-mm" -> { cats: {A:n,B:n}, total:n } ، ومجموعة خاصة لأي تاريخ لا يمكن تصنيفه لشهر/سنة (مثل "خاص")
         var allCats = {};
+        var UNKNOWN_KEY = '9999-99';
         items.forEach(function (x) {
             var ym = yearMonthOf(x.date);
-            if (!ym) return;
-            var key = ym.y + '-' + ym.m;
+            var key = ym ? (ym.y + '-' + ym.m) : UNKNOWN_KEY;
             var cat = categoryOf(x.houseNo);
             allCats[cat] = true;
-            if (!groups[key]) groups[key] = { y: ym.y, m: ym.m, cats: {}, total: 0 };
+            if (!groups[key]) groups[key] = { y: ym ? ym.y : '', m: ym ? ym.m : '', unknown: !ym, cats: {}, total: 0 };
             groups[key].cats[cat] = (groups[key].cats[cat] || 0) + 1;
             groups[key].total++;
         });
-        var keys = Object.keys(groups).sort(); // تصاعدياً من أقدم تاريخ بالشيت
+        var keys = Object.keys(groups).sort(); // تصاعدياً من أقدم تاريخ بالشيت، وتاريخ غير محدد يظهر بالنهاية
+        if (keys.indexOf(UNKNOWN_KEY) >= 0) { keys.splice(keys.indexOf(UNKNOWN_KEY), 1); keys.push(UNKNOWN_KEY); }
         var cats = Object.keys(allCats).sort();
         return { items: items, groups: groups, keys: keys, cats: cats };
     }
+    function annualRowLabel(g) { return g.unknown ? 'تاريخ غير محدد بالشيت' : ((AR_MONTHS[parseInt(g.m, 10)] || g.m) + ' ' + g.y); }
 
     function renderAnnualInventory() {
         var box = document.getElementById('annual-inventory-body');
@@ -3698,7 +3700,7 @@
         keys.forEach(function (key) {
             var g = groups[key];
             grandTotal += g.total;
-            html += '<tr style="border-top:1px solid var(--glass-border);"><td style="padding:6px;"><strong>' + (AR_MONTHS[parseInt(g.m, 10)] || g.m) + ' ' + g.y + '</strong></td>' +
+            html += '<tr style="border-top:1px solid var(--glass-border);"><td style="padding:6px;"><strong>' + esc(annualRowLabel(g)) + '</strong></td>' +
                 cats.map(function (c) { grandByCat[c] = (grandByCat[c] || 0) + (g.cats[c] || 0); return '<td style="padding:6px;">' + (g.cats[c] || 0) + '</td>'; }).join('') +
                 '<td style="padding:6px; font-weight:800;">' + g.total + '</td></tr>';
         });
@@ -3720,7 +3722,7 @@
             keys.forEach(function (key) {
                 var g = groups[key];
                 grandTotal += g.total;
-                var row = [AR_MONTHS[parseInt(g.m, 10)] || g.m, g.y];
+                var row = g.unknown ? ['تاريخ غير محدد بالشيت', ''] : [AR_MONTHS[parseInt(g.m, 10)] || g.m, g.y];
                 cats.forEach(function (c) { grandByCat[c] = (grandByCat[c] || 0) + (g.cats[c] || 0); row.push(g.cats[c] || 0); });
                 row.push(g.total);
                 aoa.push(row);
