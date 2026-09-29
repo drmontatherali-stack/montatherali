@@ -25,24 +25,24 @@
 
     <style>
         :root {
-            --bg-primary: #0f172a;
-            --glass-bg: rgba(15, 23, 42, 0.65);
-            --glass-bg-hover: rgba(30, 41, 59, 0.85);
-            --glass-card: rgba(15, 23, 42, 0.5);
-            --glass-border: rgba(56, 189, 248, 0.15);
-            --glass-border-glow: rgba(56, 189, 248, 0.6);
-            
-            --primary-blue: #38bdf8;
-            --primary-indigo: #818cf8;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            
-            --status-waiting: #fbbf24;
-            --status-overdue: #f43f5e;
-            --status-ready: #10b981;
-            --status-direct: #06b6d4;
-            --status-contractor: #a855f7;
-            --status-warning: #f97316;
+            --bg-primary: #eef2f7;
+            --glass-bg: rgba(255, 255, 255, 0.82);
+            --glass-bg-hover: rgba(255, 255, 255, 0.96);
+            --glass-card: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(2, 132, 199, 0.18);
+            --glass-border-glow: rgba(2, 132, 199, 0.45);
+
+            --primary-blue: #0284c7;
+            --primary-indigo: #6366f1;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+
+            --status-waiting: #d97706;
+            --status-overdue: #e11d48;
+            --status-ready: #059669;
+            --status-direct: #0891b2;
+            --status-contractor: #9333ea;
+            --status-warning: #ea580c;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
@@ -88,7 +88,7 @@
             box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
         }
 
-        header h1 { font-size: 1.75rem; font-weight: 900; color: #ffffff; letter-spacing: -0.5px; }
+        header h1 { font-size: 1.75rem; font-weight: 900; color: var(--text-main); letter-spacing: -0.5px; }
         header h1 span { color: var(--primary-blue); text-shadow: 0 0 30px rgba(56, 189, 248, 0.7); }
         header small { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; margin-top: 4px; display: block; }
 
@@ -98,7 +98,7 @@
             font-family: 'Outfit', 'Cairo', sans-serif;
             font-size: 1.15rem;
             font-weight: 900;
-            color: #38bdf8;
+            color: var(--primary-blue);
             background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(129, 140, 248, 0.15));
             border: 1px solid rgba(56, 189, 248, 0.4);
             padding: 9px 20px;
@@ -110,7 +110,7 @@
             direction: ltr;
             box-shadow: inset 0 1px 4px rgba(56, 189, 248, 0.3), 0 0 20px rgba(56, 189, 248, 0.2);
         }
-        .designer-title-large strong { color: #ffffff; font-weight: 900; }
+        .designer-title-large strong { color: var(--text-main); font-weight: 900; }
 
         .date-badge {
             background: var(--glass-card);
@@ -122,14 +122,14 @@
             color: var(--text-main);
             font-weight: 700;
         }
-        .date-badge span { color: #38bdf8; font-weight: 800; }
+        .date-badge span { color: var(--primary-blue); font-weight: 800; }
 
         .sync-indicator {
             font-size: 0.85rem;
             padding: 10px 18px;
             border-radius: 16px;
             background: rgba(16, 185, 129, 0.12);
-            color: #34d399;
+            color: #047857;
             border: 1px solid rgba(16, 185, 129, 0.4);
             display: flex;
             align-items: center;
@@ -200,10 +200,10 @@
         .metric-card:hover::before { background: var(--primary-blue); box-shadow: 0 0 15px var(--primary-blue); }
         .metric-card .title { font-size: 0.8rem; color: var(--text-muted); margin: 2px 0 6px; font-weight: 700; line-height: 1.3; }
         .metric-card .value { font-size: 1.9rem; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 2px 15px rgba(0,0,0,0.6); }
-        .metric-card.alert-card { border-color: rgba(244, 63, 94, 0.3); background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(225, 29, 72, 0.15) 100%); }
+        .metric-card.alert-card { border-color: rgba(244, 63, 94, 0.3); background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(225, 29, 72, 0.15) 100%); }
         .metric-card.alert-card:hover { border-color: var(--status-overdue); box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(244, 63, 94, 0.3); }
         .metric-card.alert-card:hover::before { background: var(--status-overdue); box-shadow: 0 0 15px var(--status-overdue); }
-        .metric-card.warning-card { border-color: rgba(249, 115, 22, 0.3); background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(249, 115, 22, 0.15) 100%); }
+        .metric-card.warning-card { border-color: rgba(249, 115, 22, 0.3); background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(249, 115, 22, 0.15) 100%); }
         .metric-card.warning-card:hover { border-color: var(--status-warning); box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(249, 115, 22, 0.3); }
         .metric-card .icon { font-size: 1.2rem; opacity: 0.9; line-height: 1; }
 
@@ -217,26 +217,22 @@
             letter-spacing: 0.2px;
         }
 
-        /* قسم "تفاصيل الدور الجديدة/القديمة": عمودين جنب بعض، دائماً ظاهرين، بمستطيلات إحصائية صغيرة بحجم أزرار الأدوات اليومية */
-        .type-details-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-        .type-details-col { background: var(--glass-card); border: 1px solid var(--glass-border); border-radius: 20px; padding: 16px 18px; }
-        .type-details-title { font-size: 0.95rem; font-weight: 900; color: var(--text-main); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--glass-border); }
+        /* مستطيلات الإحصائيات الصغيرة داخل قوائم "التنبيهات" و"تفاصيل الدور" القابلة للطي بشريط الأدوات */
         .mini-stat-grid { display: flex; flex-wrap: wrap; gap: 8px; }
         .mini-stat {
             display: flex; align-items: center; gap: 6px;
             padding: 12px 18px;
             border-radius: 16px;
-            background: rgba(255,255,255,0.03);
+            background: rgba(2, 132, 199, 0.04);
             border: 1px solid var(--glass-border);
             cursor: pointer;
             transition: all 0.2s;
             font-weight: 800;
         }
-        .mini-stat:hover { border-color: var(--primary-blue); background: rgba(56, 189, 248, 0.08); }
+        .mini-stat:hover { border-color: var(--primary-blue); background: rgba(56, 189, 248, 0.1); }
         .mini-stat .ic { font-size: 0.95rem; line-height: 1; }
         .mini-stat .val { font-size: 1rem; font-weight: 900; }
         .mini-stat .lbl { font-size: 0.76rem; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
-        @media (max-width: 900px) { .type-details-columns { grid-template-columns: 1fr; } }
 
         .tools-toolbar {
             background: var(--glass-bg);
@@ -277,7 +273,7 @@
         .filter-group label { font-weight: 700; color: var(--text-muted); font-size: 0.88rem; }
 
         select, input[type="text"], input[type="date"], input[type="number"] {
-            background: rgba(5, 11, 20, 0.7);
+            background: rgba(226, 232, 240, 0.7);
             border: 1px solid var(--glass-border);
             color: var(--text-main);
             padding: 11px 18px;
@@ -294,7 +290,7 @@
         .btn-daily-checklist, .btn-precleaned-manage, .btn-contractors-score, .btn-calendar-view, .btn-whatsapp-daily, .btn-excel-export, .tools-group-toggle {
             background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(129, 140, 248, 0.22));
             backdrop-filter: blur(12px);
-            color: #fff;
+            color: #075985;
             border: 1px solid rgba(56, 189, 248, 0.35);
             padding: 12px 18px;
             border-radius: 16px;
@@ -391,7 +387,7 @@
             position: absolute;
             bottom: 125%;
             right: 0;
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(255, 255, 255, 0.95);
             border: 1px solid var(--primary-blue);
             border-radius: 12px;
             padding: 12px 16px;
@@ -400,7 +396,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.8);
             z-index: 1000;
             white-space: normal;
-            color: #fff;
+            color: var(--text-main);
             font-size: 0.85rem;
             line-height: 1.5;
         }
@@ -417,9 +413,18 @@
             overflow-x: auto;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), inset 0 1px 2px rgba(255, 255, 255, 0.08);
         }
+        .table-columns-wrap { display: flex; align-items: flex-start; gap: 0; }
+        .table-columns-wrap table { flex: 1 1 50%; min-width: 0; }
+        .table-columns-wrap .table-col-1 { border-left: 1px solid var(--glass-border); }
+        .table-columns-wrap .table-col-2.table-col-hidden { display: none; }
+        @media (max-width: 1300px) {
+            .table-columns-wrap { flex-direction: column; }
+            .table-columns-wrap table { flex: 1 1 auto; width: 100%; }
+            .table-columns-wrap .table-col-1 { border-left: none; border-bottom: 1px solid var(--glass-border); }
+        }
 
         table { width: 100%; border-collapse: collapse; text-align: right; white-space: nowrap; }
-        thead { background: rgba(5, 11, 20, 0.85); border-bottom: 2px solid var(--glass-border); }
+        thead { background: rgba(226, 232, 240, 0.85); border-bottom: 2px solid var(--glass-border); }
         th { padding: 10px 14px; font-size: 0.82rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.3px; }
         tbody tr { border-bottom: 1px solid var(--glass-border); transition: all 0.2s ease; cursor: pointer; }
         tbody tr:hover { background: rgba(56, 189, 248, 0.08); }
@@ -459,7 +464,7 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .modal-content {
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
             border: 1px solid var(--glass-border-glow);
@@ -473,11 +478,11 @@
             box-shadow: 0 35px 80px rgba(0,0,0,0.85), inset 0 1px 3px rgba(255, 255, 255, 0.2);
         }
         .close-btn { position: absolute; top: 22px; left: 26px; font-size: 1.7rem; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
-        .close-btn:hover { color: #fff; text-shadow: 0 0 12px #fff; }
+        .close-btn:hover { color: var(--primary-blue); text-shadow: none; }
 
         .form-group { margin-bottom: 20px; text-align: right; }
         .form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.88rem; font-weight: 700; }
-        .form-control { width: 100%; background: rgba(5, 11, 20, 0.7); border: 1px solid var(--glass-border); color: #fff; padding: 13px 18px; border-radius: 16px; font-size: 0.9rem; outline: none; backdrop-filter: blur(12px); transition: all 0.25s; }
+        .form-control { width: 100%; background: rgba(226, 232, 240, 0.7); border: 1px solid var(--glass-border); color: var(--text-main); padding: 13px 18px; border-radius: 16px; font-size: 0.9rem; outline: none; backdrop-filter: blur(12px); transition: all 0.25s; }
         .form-control:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), 0 0 20px rgba(56, 189, 248, 0.25); }
         
         .btn-primary { width: 100%; background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: 1px solid rgba(255,255,255,0.25); padding: 14px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 25px rgba(56, 189, 248, 0.45); }
@@ -495,9 +500,9 @@
         .btn-action-danger:hover { filter: brightness(1.2); box-shadow: 0 0 25px rgba(244, 63, 94, 0.6); }
 
         .excel-option-btn {
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(255, 255, 255, 0.7);
             border: 1px solid var(--glass-border);
-            color: #fff;
+            color: var(--text-main);
             padding: 16px 20px;
             border-radius: 18px;
             font-size: 0.95rem;
@@ -553,10 +558,10 @@
             .modal { background: rgba(5, 11, 20, 0.94) !important; }
         }
 
-        .signature-pad { border: 2px dashed var(--glass-border-glow); background: rgba(5, 11, 20, 0.7); width: 100%; height: 160px; border-radius: 16px; cursor: crosshair; backdrop-filter: blur(12px); }
+        .signature-pad { border: 2px dashed var(--glass-border-glow); background: rgba(226, 232, 240, 0.7); width: 100%; height: 160px; border-radius: 16px; cursor: crosshair; backdrop-filter: blur(12px); }
         
         .calendar-day-box {
-            background: rgba(5, 11, 20, 0.5);
+            background: rgba(226, 232, 240, 0.5);
             border: 1px solid var(--glass-border);
             padding: 10px;
             border-radius: 14px;
@@ -574,7 +579,7 @@
         .calendar-nav-btn {
             background: rgba(56, 189, 248, 0.15);
             border: 1px solid var(--primary-blue);
-            color: #fff;
+            color: #075985;
             padding: 8px 16px;
             border-radius: 12px;
             cursor: pointer;
@@ -591,7 +596,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(5, 11, 20, 0.6);
+            background: rgba(226, 232, 240, 0.6);
             border: 1px solid var(--glass-border);
             padding: 10px 16px;
             border-radius: 14px;
@@ -612,8 +617,8 @@
             padding: 14px;
             border-radius: 16px;
             border: 1px solid var(--glass-border);
-            background: rgba(5, 11, 20, 0.7);
-            color: #fff;
+            background: rgba(226, 232, 240, 0.7);
+            color: var(--text-main);
             font-weight: 800;
             cursor: pointer;
             transition: all 0.25s;
@@ -671,64 +676,89 @@
                 <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none;" onchange="handleBackupFile(event)">
             </div>
         </div>
+        <div class="tools-toolbar-group">
+            <button class="tools-group-toggle" onclick="toggleToolsGroup('alerts-panel-group')">🔔 التنبيهات ▾</button>
+            <div class="tools-toolbar-buttons" id="alerts-panel-group" style="display:none; width:100%;">
+                <div class="alerts-panel" id="alerts-panel" style="margin:0;">
+                    <div class="alerts-panel-title">🔔 التنبيهات (مفروزة حسب المقاول والقطاع)</div>
+                    <div id="alerts-panel-body"></div>
+                </div>
+            </div>
+        </div>
+        <div class="tools-toolbar-group">
+            <button class="tools-group-toggle" onclick="toggleToolsGroup('new-details-group')">🏠 تفاصيل الدور الجديدة ▾</button>
+            <div class="tools-toolbar-buttons" id="new-details-group" style="display:none; width:100%;">
+                <div class="mini-stat-grid">
+                    <div class="mini-stat" onclick="setFilterStatus('all'); switchMainTab('new');">
+                        <span class="ic">🏠</span><span class="val" style="color:var(--primary-blue);" id="total-all-count">0</span><span class="lbl">كل الدور</span>
+                    </div>
+                    <div class="mini-stat" onclick="setFilterStatus('2day_cleaning_needed'); switchMainTab('new');">
+                        <span class="ic">🧹</span><span class="val" style="color:#f97316;" id="clean-2day-needed-count">0</span><span class="lbl">تنظيف خلال يومين</span>
+                    </div>
+                    <div class="mini-stat" onclick="setFilterStatus('3days_remaining'); switchMainTab('new');">
+                        <span class="ic">⏳</span><span class="val" style="color:#d97706;" id="three-days-remaining-count">0</span><span class="lbl">باقي 3 أيام للتسليم</span>
+                    </div>
+                    <div class="mini-stat" onclick="setFilterStatus('uncompleted_cleaning'); switchMainTab('new');">
+                        <span class="ic">⚠️</span><span class="val" style="color:#e11d48;" id="clean-uncompleted-count">0</span><span class="lbl">تجاوزت التنظيف</span>
+                    </div>
+                    <div class="mini-stat" onclick="setFilterStatus('not_ready_overdue'); switchMainTab('new');">
+                        <span class="ic">🚨</span><span class="val" style="color:#e11d48;" id="not-ready-overdue-count">0</span><span class="lbl">تجاوزت التسليم</span>
+                    </div>
+                    <div class="mini-stat" onclick="setFilterStatus('ready_all'); switchMainTab('new');">
+                        <span class="ic">🏁</span><span class="val" style="color:#059669;" id="ready-all-count">0</span><span class="lbl">جاهزة (الكل)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tools-toolbar-group">
+            <button class="tools-group-toggle" onclick="toggleToolsGroup('old-details-group')">🏛️ تفاصيل الدور القديمة ▾</button>
+            <div class="tools-toolbar-buttons" id="old-details-group" style="display:none; width:100%;">
+                <div class="mini-stat-grid">
+                    <div class="mini-stat" onclick="setOldFilterStatus('all'); switchMainTab('old');">
+                        <span class="ic">🏛️</span><span class="val" style="color:var(--primary-blue);" id="old-total-count">0</span><span class="lbl">كل الدور</span>
+                    </div>
+                    <div class="mini-stat" onclick="setOldFilterStatus('notes_due_2days'); switchMainTab('old');">
+                        <span class="ic">📌</span><span class="val" style="color:#f97316;" id="old-notes-due-2days-count">0</span><span class="lbl">باقي يومان للملاحظات</span>
+                    </div>
+                    <div class="mini-stat" onclick="setOldFilterStatus('notes_overdue'); switchMainTab('old');">
+                        <span class="ic">⚠️</span><span class="val" style="color:#e11d48;" id="old-notes-overdue-count">0</span><span class="lbl">تجاوزت الملاحظات</span>
+                    </div>
+                    <div class="mini-stat" onclick="setOldFilterStatus('notes_completed'); switchMainTab('old');">
+                        <span class="ic">📝</span><span class="val" style="color:#059669;" id="old-notes-completed-count">0</span><span class="lbl">أُكملت ملاحظاتها</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tools-toolbar-group">
+            <button class="tools-group-toggle" onclick="toggleToolsGroup('delivered-houses-group')">🏠 الدور المسلمة ▾</button>
+            <div class="tools-toolbar-buttons" id="delivered-houses-group" style="display:none; width:100%;">
+                <div id="delivered-houses-body" style="font-size:0.85rem; color:var(--text-muted);">لا توجد بيانات بعد — بانتظار مزامنة الشيت.</div>
+            </div>
+        </div>
+        <div class="tools-toolbar-group">
+            <button class="tools-group-toggle" onclick="toggleToolsGroup('annual-inventory-group')">📅 الجرد السنوي ▾</button>
+            <div class="tools-toolbar-buttons" id="annual-inventory-group" style="display:none; width:100%;">
+                <div id="annual-inventory-body" style="font-size:0.85rem; color:var(--text-muted);">لا توجد بيانات بعد — بانتظار مزامنة الشيت.</div>
+            </div>
+        </div>
+        <div class="tools-toolbar-group">
+            <button class="tools-group-toggle" onclick="toggleToolsGroup('contractors-weekly-group')">📊 موقف المقاولين الأسبوعي ▾</button>
+            <div class="tools-toolbar-buttons" id="contractors-weekly-group" style="display:none; width:100%;">
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; font-size:0.85rem; color:var(--text-muted);">
+                    <span id="cwStatus">🔗 لم يتم ربط ملف موقف المقاولين الأسبوعي بعد</span>
+                    <button onclick="window.__cwAskUrl && window.__cwAskUrl()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;">🔗 ربط/تغيير رابط الشيت</button>
+                    <button onclick="window.__cwSync && window.__cwSync(true)" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(16,185,129,.5);background:rgba(16,185,129,.12);color:#059669;cursor:pointer;font-weight:700;">🔄 تحديث</button>
+                </div>
+                <div id="contractors-weekly-body" style="font-size:0.85rem; color:var(--text-muted);">لا توجد بيانات بعد — اربط ملف الموقف الأسبوعي أولاً.</div>
+            </div>
+        </div>
     </div>
     <!-- زرا رفع/عرض ملف تواريخ الاستلام اليدوي أُلغيا من الواجهة بعد ربط النظام مباشرة بشيت Google Sheets؛
          الدوال (handleHandoverDatesFile, openHandoverDatesModal, lookupHandoverDate) بقيت بالكود بدون استخدام كخيار احتياطي -->
 
-    <div class="alerts-panel" id="alerts-panel">
-        <div class="alerts-panel-title">🔔 التنبيهات (مفروزة حسب المقاول والقطاع)</div>
-        <div id="alerts-panel-body"></div>
-    </div>
-
-    <!-- تفاصيل نوعي الدور: قسمان ثابتان جنب بعض، ظاهرين دائماً بغض النظر عن التبويب المفعّل بالجدول تحتهما -->
-    <div class="type-details-columns">
-        <div class="type-details-col">
-            <div class="type-details-title">🏠 تفاصيل الدور الجديدة</div>
-            <div class="mini-stat-grid">
-                <div class="mini-stat" onclick="setFilterStatus('all'); switchMainTab('new');">
-                    <span class="ic">🏠</span><span class="val" style="color:#38bdf8;" id="total-all-count">0</span><span class="lbl">كل الدور</span>
-                </div>
-                <div class="mini-stat" onclick="setFilterStatus('2day_cleaning_needed'); switchMainTab('new');">
-                    <span class="ic">🧹</span><span class="val" style="color:#f97316;" id="clean-2day-needed-count">0</span><span class="lbl">تنظيف خلال يومين</span>
-                </div>
-                <div class="mini-stat" onclick="setFilterStatus('3days_remaining'); switchMainTab('new');">
-                    <span class="ic">⏳</span><span class="val" style="color:#fbbf24;" id="three-days-remaining-count">0</span><span class="lbl">باقي 3 أيام للتسليم</span>
-                </div>
-                <div class="mini-stat" onclick="setFilterStatus('uncompleted_cleaning'); switchMainTab('new');">
-                    <span class="ic">⚠️</span><span class="val" style="color:#f43f5e;" id="clean-uncompleted-count">0</span><span class="lbl">تجاوزت التنظيف</span>
-                </div>
-                <div class="mini-stat" onclick="setFilterStatus('not_ready_overdue'); switchMainTab('new');">
-                    <span class="ic">🚨</span><span class="val" style="color:#f43f5e;" id="not-ready-overdue-count">0</span><span class="lbl">تجاوزت التسليم</span>
-                </div>
-                <div class="mini-stat" onclick="setFilterStatus('ready_all'); switchMainTab('new');">
-                    <span class="ic">🏁</span><span class="val" style="color:#10b981;" id="ready-all-count">0</span><span class="lbl">جاهزة (الكل)</span>
-                </div>
-            </div>
-        </div>
-        <div class="type-details-col">
-            <div class="type-details-title">🏛️ تفاصيل الدور القديمة</div>
-            <div class="mini-stat-grid">
-                <div class="mini-stat" onclick="setOldFilterStatus('all'); switchMainTab('old');">
-                    <span class="ic">🏛️</span><span class="val" style="color:#38bdf8;" id="old-total-count">0</span><span class="lbl">كل الدور</span>
-                </div>
-                <div class="mini-stat" onclick="setOldFilterStatus('notes_due_2days'); switchMainTab('old');">
-                    <span class="ic">📌</span><span class="val" style="color:#f97316;" id="old-notes-due-2days-count">0</span><span class="lbl">باقي يومان للملاحظات</span>
-                </div>
-                <div class="mini-stat" onclick="setOldFilterStatus('notes_overdue'); switchMainTab('old');">
-                    <span class="ic">⚠️</span><span class="val" style="color:#f43f5e;" id="old-notes-overdue-count">0</span><span class="lbl">تجاوزت الملاحظات</span>
-                </div>
-                <div class="mini-stat" onclick="setOldFilterStatus('completed'); switchMainTab('old');">
-                    <span class="ic">✅</span><span class="val" style="color:#10b981;" id="old-completed-count">0</span><span class="lbl">مستلمة (مكتملة)</span>
-                </div>
-                <div class="mini-stat" onclick="setOldFilterStatus('notes_completed'); switchMainTab('old');">
-                    <span class="ic">📝</span><span class="val" style="color:#10b981;" id="old-notes-completed-count">0</span><span class="lbl">أُكملت ملاحظاتها</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- التنقل بين الدور الجديدة والدور القديمة -->
+    <!-- ثلاثة أزرار جنب بعض: إضافة دار جديدة + التنقل بين نوعي الدور -->
     <div class="nav-tabs">
+        <button class="btn-add" style="padding:12px 24px; border-radius:16px;" onclick="openAddModal()">+ إضافة دار جديدة</button>
         <button id="tab-new-houses" class="nav-tab-btn active" onclick="switchMainTab('new')">🏠 الدور الجديدة</button>
         <button id="tab-old-houses" class="nav-tab-btn" onclick="switchMainTab('old')">🏛️ دور التسليم القديمة</button>
     </div>
@@ -755,6 +785,12 @@
                 <option value="القطاع الرابع">القطاع الرابع</option>
                 <option value="القطاع الخامس">القطاع الخامس</option>
                 <option value="القطاع السادس">القطاع السادس</option>
+            </select>
+
+            <label>المقاول:</label>
+            <select id="contractor-filter" onchange="renderTable()">
+                <option value="all">جميع المقاولين</option>
+                <option value="DIRECT">تنفيذ مباشر (بدون مقاول)</option>
             </select>
 
             <label>ترتيب حسب:</label>
@@ -789,8 +825,6 @@
                 <option value="notes_completed">📝 دور تم إكمال ملاحظاتها</option>
             </select>
         </div>
-
-        <button class="btn-add" onclick="openAddModal()">+ إضافة دار جديدة</button>
     </div>
 
     <div style="margin-bottom:12px;">
@@ -800,12 +834,19 @@
         </label>
     </div>
 
-    <div class="table-container">
-        <table>
+    <div class="table-container table-columns-wrap">
+        <table class="table-col-1">
             <thead id="table-head">
                 <!-- سيتم توليده ديناميكياً بناءً على الواجهة المختارة -->
             </thead>
             <tbody id="table-body">
+            </tbody>
+        </table>
+        <table class="table-col-2">
+            <thead id="table-head-2">
+                <!-- نسخة من نفس رؤوس الأعمدة للعمود الثاني -->
+            </thead>
+            <tbody id="table-body-2">
             </tbody>
         </table>
     </div>
@@ -821,7 +862,7 @@
         <h3 style="margin-bottom: 8px; color: #38bdf8; font-weight: 900;">📋 تواريخ الاستلام المرفوعة</h3>
         <p id="handover-dates-meta" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;"></p>
         <input type="text" id="handover-dates-search" class="form-control" placeholder="ابحث برقم الدار..." oninput="onHandoverDatesSearch()" style="margin-bottom: 14px;">
-        <div id="handover-dates-list" style="max-height: 360px; overflow-y: auto; background: rgba(5, 11, 20, 0.7); border-radius: 14px; border: 1px solid var(--glass-border);"></div>
+        <div id="handover-dates-list" style="max-height: 360px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); border-radius: 14px; border: 1px solid var(--glass-border);"></div>
     </div>
 </div>
 
@@ -860,10 +901,10 @@
 <div id="calendarModal" class="modal">
     <div class="modal-content" style="max-width: 950px;">
         <span class="close-btn" onclick="closeCalendarModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #fff;">📅 التقويم الهندسي التفاعلي الشامل</h3>
+        <h3 style="margin-bottom: 15px; color: var(--text-main);">📅 التقويم الهندسي التفاعلي الشامل</h3>
         <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">يمكنك التنقل بين الأنماط والأشهر والسنوات بمرونة متكاملة لمتابعة كافة مواعيد الدور المستمرة والعابرة للأشهر والسنوات.</p>
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(5, 11, 20, 0.6); padding: 12px 18px; border-radius: 16px; border: 1px solid var(--glass-border); flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(226, 232, 240, 0.6); padding: 12px 18px; border-radius: 16px; border: 1px solid var(--glass-border); flex-wrap: wrap; gap: 10px;">
             <button class="calendar-nav-btn" onclick="changeCalendarMonth(-1)">◀ الشهر السابق</button>
             <div style="display: flex; gap: 10px; align-items: center;">
                 <select id="calendar-month-select" onchange="onCalendarPickerChange()" style="padding: 6px 12px;"></select>
@@ -892,7 +933,7 @@
 <div id="contractorScorecardModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeContractorScorecardModal()">&times;</span>
-        <h3 style="margin-bottom: 20px; color: #fff;">📊 تقييم أداء المقاولين</h3>
+        <h3 style="margin-bottom: 20px; color: var(--text-main);">📊 تقييم أداء المقاولين</h3>
         <div id="contractor-scorecard-list" style="max-height: 350px; overflow-y: auto;"></div>
     </div>
 </div>
@@ -908,18 +949,18 @@
 <div id="dailyChecklistModal" class="modal">
     <div class="modal-content" style="max-width: 800px;">
         <span class="close-btn" onclick="closeDailyChecklistModal()">&times;</span>
-        <h3 style="margin-bottom: 20px; color: #fff; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">📋 مواعيد اليوم: <span id="modal-today-date" style="color:#38bdf8;"></span></h3>
+        <h3 style="margin-bottom: 20px; color: var(--text-main); border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">📋 مواعيد اليوم: <span id="modal-today-date" style="color:#38bdf8;"></span></h3>
         <div style="margin-bottom: 25px;">
             <h4 style="color: #38bdf8; margin-bottom: 10px;">🧹 دور موعد تنظيفها اليوم:</h4>
-            <div id="cleaning-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(5, 11, 20, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
+            <div id="cleaning-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
         </div>
         <div>
             <h4 style="color: #a855f7; margin-bottom: 10px;">🏠 دور موعد تسليمها اليوم:</h4>
-            <div id="readiness-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(5, 11, 20, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
+            <div id="readiness-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
         </div>
         <div style="margin-top: 25px;">
             <h4 style="color: #f97316; margin-bottom: 10px;">🏛️ دور قديمة موعد إنهاء ملاحظاتها اليوم:</h4>
-            <div id="old-notes-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(5, 11, 20, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
+            <div id="old-notes-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
         </div>
     </div>
 </div>
@@ -927,19 +968,19 @@
 <div id="preCleanedModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closePreCleanedModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #fff;">إدارة الدور المنظفة مسبقاً</h3>
+        <h3 style="margin-bottom: 15px; color: var(--text-main);">إدارة الدور المنظفة مسبقاً</h3>
         <div class="form-group">
             <textarea id="bulkPreCleanedInput" class="form-control" rows="4" placeholder="أدخل الدور (كل دار بسطر)..."></textarea>
         </div>
         <button class="btn-primary" style="margin-bottom: 20px;" onclick="addBulkPreCleanedHouses()">إضافة للسجل</button>
-        <div id="preCleanedListContainer" style="max-height: 250px; overflow-y: auto; background: rgba(5, 11, 20, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
+        <div id="preCleanedListContainer" style="max-height: 250px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
     </div>
 </div>
 
 <div id="addRecordModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeAddModal()">&times;</span>
-        <h3 id="modal-title" style="margin-bottom: 20px; color: #fff;">إضافة دار جديد</h3>
+        <h3 id="modal-title" style="margin-bottom: 20px; color: var(--text-main);">إضافة دار جديد</h3>
 
         <!-- اختيار نوع الدار (جديد أو قديم) -->
         <div class="house-type-selector" id="house-type-selector-box">
@@ -1064,7 +1105,7 @@
 <div id="signatureModal" class="modal">
     <div class="modal-content" style="max-width: 500px; text-align:center;">
         <span class="close-btn" onclick="closeSignatureModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #fff;">✍️ التوقيع الإلكتروني الإلزامي للاستلام</h3>
+        <h3 style="margin-bottom: 15px; color: var(--text-main);">✍️ التوقيع الإلكتروني الإلزامي للاستلام</h3>
         <canvas id="sigCanvas" class="signature-pad"></canvas>
         <div style="margin-top: 18px; display:flex; gap:12px;">
             <button class="btn-action-danger" style="flex:1;" onclick="clearSignature()">مسح التوقيع</button>
@@ -1092,7 +1133,7 @@
 <div id="statusCheckModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeStatusModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #fff;">تحديث موقف الدار (نظام التدقيق)</h3>
+        <h3 style="margin-bottom: 15px; color: var(--text-main);">تحديث موقف الدار (نظام التدقيق)</h3>
         <div id="status-modal-details" style="line-height: 1.8; margin-bottom: 20px; color: var(--text-muted);"></div>
         <div id="status-interactive-questions"></div>
     </div>
@@ -1101,7 +1142,7 @@
 <div id="imagePreviewModal" class="modal">
     <div class="modal-content" style="text-align:center;">
         <span class="close-btn" onclick="closeImageModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #fff;">المرفقات المعتمدة (صور وتوقيع)</h3>
+        <h3 style="margin-bottom: 15px; color: var(--text-main);">المرفقات المعتمدة (صور وتوقيع)</h3>
         <img id="previewImgElement" src="" alt="صورة الملاحظات" style="max-width: 100%; max-height: 70vh; border-radius: 16px; margin-bottom:15px; border:1px solid var(--glass-border);">
         <br>
         <button class="btn-primary" onclick="openSignatureModalForCurrent()">✍️ تعديل التوقيع الرقمي</button>
@@ -1485,7 +1526,7 @@
     function populateContractorsDropdown() {
         const select = document.getElementById('contractorName');
         const oldSelect = document.getElementById('old-contractorName');
-        
+
         if (select) {
             const currentVal = select.value;
             select.innerHTML = "";
@@ -1499,6 +1540,14 @@
             oldSelect.innerHTML = "";
             contractorsList.forEach(c => { oldSelect.innerHTML += `<option value="${esc(c)}">${esc(c)}</option>`; });
             if (currentValOld && contractorsList.includes(currentValOld)) oldSelect.value = currentValOld;
+        }
+
+        const filterSelect = document.getElementById('contractor-filter');
+        if (filterSelect) {
+            const currentFilterVal = filterSelect.value;
+            filterSelect.innerHTML = `<option value="all">جميع المقاولين</option><option value="DIRECT">تنفيذ مباشر (بدون مقاول)</option>`;
+            contractorsList.forEach(c => { filterSelect.innerHTML += `<option value="${esc(c)}">${esc(c)}</option>`; });
+            if (currentFilterVal && (currentFilterVal === 'all' || currentFilterVal === 'DIRECT' || contractorsList.includes(currentFilterVal))) filterSelect.value = currentFilterVal;
         }
     }
 
@@ -2048,7 +2097,7 @@
             content.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد أي مواعيد أو أحداث هندسية مسجلة لهذا اليوم.</p>`;
         } else {
             events.forEach(e => {
-                content.innerHTML += `<div style="background:rgba(5, 11, 20, 0.6); padding:12px; border-radius:14px; margin-bottom:10px; border:1px solid var(--glass-border); color:#fff;">${e}</div>`;
+                content.innerHTML += `<div style="background:rgba(226, 232, 240, 0.6); padding:12px; border-radius:14px; margin-bottom:10px; border:1px solid var(--glass-border); color:var(--text-main);">${e}</div>`;
             });
         }
         document.getElementById('dayEventsModal').style.display = 'flex';
@@ -2180,7 +2229,7 @@
                 }
             });
             container.innerHTML += `
-                <div style="background:rgba(5, 11, 20, 0.5); backdrop-filter:blur(12px); border:1px solid var(--glass-border); padding:16px; border-radius:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="background:rgba(226, 232, 240, 0.5); backdrop-filter:blur(12px); border:1px solid var(--glass-border); padding:16px; border-radius:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
                     <div>
                         <strong style="color:#38bdf8; font-size:1.05rem;">👷‍♂️ ${esc(contractor)}</strong>
                         <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">إجمالي الدور المسجلة (جديدة + قديمة): ${total}</div>
@@ -3007,18 +3056,23 @@
     function renderTableCore() {
         const tbody = document.getElementById('table-body');
         const thead = document.getElementById('table-head');
+        const tbody2 = document.getElementById('table-body-2');
+        const thead2 = document.getElementById('table-head-2');
         const mobileContainer = document.getElementById('mobile-cards-container');
-        
+
         tbody.innerHTML = "";
+        if (tbody2) tbody2.innerHTML = "";
         if (mobileContainer) mobileContainer.innerHTML = "";
 
         const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
         const execFilter = document.getElementById('execution-filter').value;
         const sectorFilter = document.getElementById('sector-filter').value;
+        const contractorFilterEl = document.getElementById('contractor-filter');
+        const contractorFilter = contractorFilterEl ? contractorFilterEl.value : 'all';
         const statusFilter = window.currentStatusFilter || 'all';
 
         // عند تغيير التبويب/الفلتر/الفرز نبدأ من أول صفحة
-        const viewSig = [activeTab, searchVal, execFilter, sectorFilter, statusFilter, window.currentOldStatusFilter || 'all',
+        const viewSig = [activeTab, searchVal, execFilter, sectorFilter, contractorFilter, statusFilter, window.currentOldStatusFilter || 'all',
             (document.getElementById('new-sort-select') || {}).value, (document.getElementById('old-sort-select') || {}).value].join('|');
         if (viewSig !== window.lastViewSig) { window.lastViewSig = viewSig; window.renderLimit = PAGE_SIZE; }
 
@@ -3078,7 +3132,7 @@
             document.getElementById('old-total-count').innerText = oldTotal;
             document.getElementById('old-notes-due-2days-count').innerText = oldNotesDue2Days;
             document.getElementById('old-notes-overdue-count').innerText = oldNotesOverdue;
-            document.getElementById('old-completed-count').innerText = oldCompleted;
+            if (document.getElementById('old-completed-count')) document.getElementById('old-completed-count').innerText = oldCompleted;
             if (document.getElementById('old-notes-completed-count')) document.getElementById('old-notes-completed-count').innerText = oldNotesCompleted;
         }
 
@@ -3094,6 +3148,7 @@
                 '<th>تعديل</th>'
             );
             thead.innerHTML = '<tr>' + headCells.join('') + '</tr>';
+            if (thead2) thead2.innerHTML = thead.innerHTML;
 
             let filtered = houseRecords.filter(rec => {
                 const st = getSt(rec);
@@ -3104,6 +3159,10 @@
                 }
 
                 if (sectorFilter !== 'all' && rec.sectorNo !== sectorFilter) return false;
+                if (contractorFilter !== 'all') {
+                    if (contractorFilter === 'DIRECT') { if (rec.contractorName) return false; }
+                    else if (rec.contractorName !== contractorFilter) return false;
+                }
 
                 if (statusFilter === '2day_cleaning_needed' && !st.is2DayCleaningNeeded) return false;
                 if (statusFilter === '3days_remaining' && !st.is3DaysRemaining) return false;
@@ -3146,7 +3205,9 @@
             }
 
             listTotal = filtered.length;
-            filtered.slice(0, window.renderLimit).forEach((rec, idx) => {
+            const sliceArrNew = filtered.slice(0, window.renderLimit);
+            const halfNew = tbody2 ? Math.ceil(sliceArrNew.length / 2) : sliceArrNew.length;
+            sliceArrNew.forEach((rec, idx) => {
                 const st = getSt(rec);
                 if (buildTable) {
                 const tr = document.createElement('tr');
@@ -3168,6 +3229,10 @@
                 let handoverHtml = `${rec.handoverDate || rec.houseReadyDate || '-'}`;
                 if (rec.secondHandoverDate && st.isHandoverOverdue) {
                     handoverHtml += `<br><small style="color:#fbbf24;">⏱️ موعد ثاني: ${rec.secondHandoverDate}${rec.notReadyReason ? ' - ' + esc(rec.notReadyReason) : ''}</small>`;
+                }
+                // علامة "مسلّمة حسب الشيت" (مستقلة عن مربع "✔ هل تم الإكمال؟") تظهر عند تأكيد ورودها بشيت تواريخ الاستلام
+                if (rec.sheetDelivered) {
+                    handoverHtml += `<br><small style="color:#059669;">📦 مسلّمة (حسب الشيت) - ${esc(rec.sheetDeliveredDate || '')}</small>`;
                 }
 
                 const rowCells = [
@@ -3198,7 +3263,7 @@
                 );
 
                 tr.innerHTML = rowCells.join('');
-                tbody.appendChild(tr);
+                (idx < halfNew ? tbody : tbody2).appendChild(tr);
                 }
 
                 if (mobileContainer && buildCards) {
@@ -3215,6 +3280,7 @@
                             ${showExtra ? `<div>📍 القطاع: ${esc(rec.sectorNo)}</div><div>🛠️ التنفيذ: ${esc(rec.executionType)} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</div>` : ''}
                             <div>📅 الحضور: ${rec.arrivalDate || '-'}</div>
                             <div>⏱️ التسليم: ${rec.handoverDate || rec.houseReadyDate || '-'}${rec.secondHandoverDate && st.isHandoverOverdue ? ` <span style="color:#fbbf24;">(موعد ثاني: ${rec.secondHandoverDate})</span>` : ''}</div>
+                            ${rec.sheetDelivered ? `<div style="color:#059669;">📦 مسلّمة (حسب الشيت) - ${esc(rec.sheetDeliveredDate || '')}</div>` : ''}
                             <div onclick="event.stopPropagation();"><label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" class="ready-check" ${rec.isReady ? 'checked' : ''} onclick="toggleReadyQuick(${rec.id}, event)"> ✔ هل تم الإكمال؟</label></div>
                         </div>
                         <div style="margin-top:12px; display:flex; gap:10px;" onclick="event.stopPropagation();">
@@ -3238,6 +3304,7 @@
                 '<th>إجراءات</th>'
             );
             thead.innerHTML = '<tr>' + oldHeadCells.join('') + '</tr>';
+            if (thead2) thead2.innerHTML = thead.innerHTML;
 
             let filteredOld = oldHouseRecords.filter(rec => {
                 if (execFilter !== 'all') {
@@ -3246,6 +3313,10 @@
                 }
 
                 if (sectorFilter !== 'all' && rec.sectorNo !== sectorFilter) return false;
+                if (contractorFilter !== 'all') {
+                    if (contractorFilter === 'DIRECT') { if (rec.contractorName) return false; }
+                    else if (rec.contractorName !== contractorFilter) return false;
+                }
 
                 const recIsCompleted = rec.status === 'مستلم';
                 const recNotesDiff = rec.notesEndDate ? daysBetween(todayStr, rec.notesEndDate) : null;
@@ -3283,7 +3354,9 @@
             }
 
             listTotal = filteredOld.length;
-            filteredOld.slice(0, window.renderLimit).forEach((rec, idx) => {
+            const sliceArrOld = filteredOld.slice(0, window.renderLimit);
+            const halfOld = tbody2 ? Math.ceil(sliceArrOld.length / 2) : sliceArrOld.length;
+            sliceArrOld.forEach((rec, idx) => {
                 if (buildTable) {
                 const tr = document.createElement('tr');
 
@@ -3321,7 +3394,7 @@
                 // زر "تقرير" أُخفي من الواجهة بطلب المستخدم؛ الدالة generateOldHouseReport بقيت بالكود بدون استخدام بالواجهة
 
                 tr.innerHTML = oldRowCells.join('');
-                tbody.appendChild(tr);
+                (idx < halfOld ? tbody : tbody2).appendChild(tr);
                 }
 
                 if (mobileContainer && buildCards) {
@@ -3373,11 +3446,13 @@
 
     var DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSVw7EKmEyUmNWOtdBsrLOYtoY1sf8RZ7ZixgtDWMIONtFjEdV9psIetOotsObPeInKuuLXPtgtbS9d/pub?gid=466257668&single=true&output=csv';
     var sheetUrl = localStorage.getItem('datesSheetUrl') || DEFAULT_SHEET_URL;
-    var sheetDates = {};          // مفتاح الدار -> أحدث تاريخ استلام (yyyy-mm-dd)
+    var sheetDates = {};          // مفتاح الدار -> أحدث تاريخ استلام (yyyy-mm-dd) — يبقى للتوافق مع الكود القديم
+    var sheetRecords = {};        // مفتاح الدار -> {houseNo, name, sector, date} (كل تفاصيل الدار المسلَّمة حسب الشيت)
     var lastSync = localStorage.getItem('sheetLastSync') || '';
     var lastError = '';
     var running = false;
     try { sheetDates = JSON.parse(localStorage.getItem('sheetDatesCache') || '{}'); } catch (e) { sheetDates = {}; }
+    try { sheetRecords = JSON.parse(localStorage.getItem('sheetRecordsCache') || '{}'); } catch (e) { sheetRecords = {}; }
 
     // ---------- أدوات ----------
     function norm(v) { return String(v == null ? '' : v).replace(/\s+/g, '').toLowerCase(); }
@@ -3405,6 +3480,18 @@
     window.getSheetDate = function (houseNo) {
         return sheetDates[norm(houseNo)] || null;
     };
+
+    // الفئة = أول حرف من رقم الدار/البلوك (مثلاً B73.4 => B)
+    function categoryOf(houseNo) {
+        var s = String(houseNo == null ? '' : houseNo).trim();
+        var m = s.match(/[A-Za-zأ-ي]/);
+        return m ? m[0].toUpperCase() : 'غير محدد';
+    }
+    function yearMonthOf(iso) {
+        var m = String(iso || '').match(/^(\d{4})-(\d{2})/);
+        return m ? { y: m[1], m: m[2] } : null;
+    }
+    var AR_MONTHS = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 
     // ---------- الشريط والتنبيه فوق الجدول ----------
     var anchor = document.querySelector('.table-container');
@@ -3440,7 +3527,7 @@
     }
     function decorateOld() {
         if (typeof activeTab === 'undefined' || activeTab !== 'old') return;
-        var rows = document.querySelectorAll('#table-body tr');
+        var rows = document.querySelectorAll('#table-body tr, #table-body-2 tr');
         rows.forEach(function (tr) {
             var c = tr.cells;
             if (!c || c.length < 3) return;
@@ -3463,32 +3550,134 @@
         });
     }
 
-    // ---------- 2) الدور الجديدة: إيعاز إذا صارت بالمسلَّمة ----------
-    function decorateAlert() {
+    // ---------- 2) الدور القديمة (قيد التسليم) + الدور الجديدة: إشعار أعلى الصفحة يحتاج تأكيد "موافق" لكل دار ----------
+    function buildPendingList() {
         var list = [];
-        if (typeof houseRecords !== 'undefined' && Object.keys(sheetDates).length) {
-            var doneOld = {};
-            if (typeof oldHouseRecords !== 'undefined') {
-                oldHouseRecords.forEach(function (o) { if (o.status === 'مستلم') doneOld[norm(o.houseNo)] = true; });
-            }
+        if (!Object.keys(sheetRecords).length) return list;
+        if (typeof houseRecords !== 'undefined') {
             houseRecords.forEach(function (r) {
                 var k = norm(r.houseNo);
-                if (sheetDates[k] && !doneOld[k]) list.push({ houseNo: r.houseNo, owner: r.ownerName, date: sheetDates[k] });
+                var sr = sheetRecords[k];
+                if (sr && !r.sheetDelivered) {
+                    list.push({ type: 'new', id: r.id, houseNo: r.houseNo, owner: sr.name || r.ownerName || '-', sector: sr.sector || r.sectorNo || '-', date: sr.date });
+                }
             });
         }
+        if (typeof oldHouseRecords !== 'undefined') {
+            oldHouseRecords.forEach(function (r) {
+                var k = norm(r.houseNo);
+                var sr = sheetRecords[k];
+                if (sr && r.status !== 'مستلم') {
+                    list.push({ type: 'old', id: r.id, houseNo: r.houseNo, owner: sr.name || '-', sector: sr.sector || r.sectorNo || '-', date: sr.date });
+                }
+            });
+        }
+        return list;
+    }
+
+    function renderPendingAlert() {
         if (!alertBox) return;
+        var list = buildPendingList();
         if (!list.length) { alertBox.innerHTML = ''; return; }
         alertBox.innerHTML =
             '<div style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.6);border-radius:14px;padding:14px 16px;margin-bottom:14px;line-height:1.9;">' +
-            '<div style="font-weight:900;color:#fbbf24;margin-bottom:6px;">🔔 ' + list.length + ' دار أُضيفت لقائمة المسلَّمة بالشيت وما زالت بالدور الجديدة — سجّل عليها "مستلم":</div>' +
+            '<div style="font-weight:900;color:#b45309;margin-bottom:8px;">🔔 ' + list.length + ' دار ظهرت بشيت تواريخ الاستلام — تحتاج تأكيدك:</div>' +
             list.map(function (x) {
-                return '<div style="font-size:.9rem;">🏠 <strong>' + esc(x.houseNo) + '</strong> — ' + esc(x.owner || '-') + ' — 📅 ' + esc(x.date) + '</div>';
+                return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 0;border-top:1px dashed rgba(180,83,9,.3);">' +
+                    '<span style="font-size:.9rem;">🏠 <strong>' + esc(x.houseNo) + '</strong> — ' + esc(x.owner) + ' — القطاع: ' + esc(x.sector) + ' — 📅 ' + esc(x.date) +
+                    (x.type === 'old' ? ' <span style="color:#b45309;">(دار قديمة قيد التسليم ← ستتحول إلى "مستلم")</span>' : ' <span style="color:#b45309;">(دار جديدة ← ستُعلّم "مسلّمة")</span>') +
+                    '</span>' +
+                    '<button onclick="window.__slConfirm(\'' + x.type + '\',' + JSON.stringify(String(x.id)) + ')" style="padding:6px 16px;border-radius:12px;border:1px solid rgba(5,150,105,.5);background:rgba(5,150,105,.15);color:#047857;cursor:pointer;font-weight:800;">✅ موافق - تأكيد الاستلام</button>' +
+                    '</div>';
             }).join('') + '</div>';
+    }
+
+    // زر "موافق" بالإشعار: يحوّل الدار القديمة إلى مستلم (بتاريخ الشيت) أو يعلّم الدار الجديدة "مسلّمة حسب الشيت" (مستقل عن ✔ هل تم الإكمال)
+    window.__slConfirm = function (type, id) {
+        try {
+            var list = buildPendingList();
+            var item = list.filter(function (x) { return x.type === type && String(x.id) === String(id); })[0];
+            if (!item) return;
+            if (type === 'old' && typeof oldHouseRecords !== 'undefined') {
+                var recO = oldHouseRecords.filter(function (r) { return String(r.id) === String(id); })[0];
+                if (recO) {
+                    recO.status = 'مستلم';
+                    recO.handoverDate = item.date;
+                    if (typeof syncOldRecordFields === 'function') syncOldRecordFields(recO.id, { status: 'مستلم', handoverDate: item.date });
+                }
+            } else if (type === 'new' && typeof houseRecords !== 'undefined') {
+                var recN = houseRecords.filter(function (r) { return String(r.id) === String(id); })[0];
+                if (recN) {
+                    recN.sheetDelivered = true;
+                    recN.sheetDeliveredDate = item.date;
+                    if (typeof syncRecordFields === 'function') syncRecordFields(recN.id, { sheetDelivered: true, sheetDeliveredDate: item.date });
+                }
+            }
+            if (typeof window.renderTable === 'function') window.renderTable(); else decorate();
+        } catch (e) { console.error('slConfirm failed', e); }
+    };
+
+    // ---------- 3) مستطيل "🏠 الدور المسلمة": يعكس كامل قائمة الشيت الحالية (القديم يروح والجديد بالشيت ينضاف) ----------
+    function renderDeliveredTile() {
+        var box = document.getElementById('delivered-houses-body');
+        if (!box) return;
+        var items = Object.keys(sheetRecords).map(function (k) { return sheetRecords[k]; });
+        if (!items.length) { box.innerHTML = 'لا توجد بيانات بعد — بانتظار مزامنة الشيت.'; return; }
+        items.sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
+        box.innerHTML =
+            '<div style="max-height:360px; overflow-y:auto;">' +
+            '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
+            '<thead><tr style="text-align:right;"><th style="padding:6px;">رقم البلوك والدار</th><th style="padding:6px;">اسم المستفيد</th><th style="padding:6px;">القطاع</th><th style="padding:6px;">تاريخ الاستلام</th></tr></thead>' +
+            '<tbody>' + items.map(function (x) {
+                return '<tr style="border-top:1px solid var(--glass-border);"><td style="padding:6px;"><strong>' + esc(x.houseNo) + '</strong></td><td style="padding:6px;">' + esc(x.name || '-') + '</td><td style="padding:6px;">' + esc(x.sector || '-') + '</td><td style="padding:6px;">' + esc(x.date) + '</td></tr>';
+            }).join('') + '</tbody></table></div>' +
+            '<div style="margin-top:8px; color:var(--text-muted);">الإجمالي: ' + items.length + ' دار مسلَّمة (حسب الشيت حالياً)</div>';
+    }
+
+    // ---------- 4) مستطيل "📅 الجرد السنوي": تجميع عدد الدور المسلَّمة شهرياً/سنوياً حسب الفئة (أول حرف من رقم الدار) ----------
+    function renderAnnualInventory() {
+        var box = document.getElementById('annual-inventory-body');
+        if (!box) return;
+        var items = Object.keys(sheetRecords).map(function (k) { return sheetRecords[k]; }).filter(function (x) { return !!x.date; });
+        if (!items.length) { box.innerHTML = 'لا توجد بيانات بعد — بانتظار مزامنة الشيت.'; return; }
+        var groups = {}; // "yyyy-mm" -> { cats: {A:n,B:n}, total:n }
+        var allCats = {};
+        items.forEach(function (x) {
+            var ym = yearMonthOf(x.date);
+            if (!ym) return;
+            var key = ym.y + '-' + ym.m;
+            var cat = categoryOf(x.houseNo);
+            allCats[cat] = true;
+            if (!groups[key]) groups[key] = { y: ym.y, m: ym.m, cats: {}, total: 0 };
+            groups[key].cats[cat] = (groups[key].cats[cat] || 0) + 1;
+            groups[key].total++;
+        });
+        var keys = Object.keys(groups).sort(); // تصاعدياً من أقدم تاريخ بالشيت
+        var cats = Object.keys(allCats).sort();
+        var html = '<div style="max-height:380px; overflow-y:auto;"><table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
+            '<thead><tr style="text-align:right;"><th style="padding:6px;">الشهر/السنة</th>' +
+            cats.map(function (c) { return '<th style="padding:6px;">فئة ' + esc(c) + '</th>'; }).join('') +
+            '<th style="padding:6px;">الإجمالي</th></tr></thead><tbody>';
+        var grandTotal = 0, grandByCat = {};
+        keys.forEach(function (key) {
+            var g = groups[key];
+            grandTotal += g.total;
+            html += '<tr style="border-top:1px solid var(--glass-border);"><td style="padding:6px;"><strong>' + (AR_MONTHS[parseInt(g.m, 10)] || g.m) + ' ' + g.y + '</strong></td>' +
+                cats.map(function (c) { grandByCat[c] = (grandByCat[c] || 0) + (g.cats[c] || 0); return '<td style="padding:6px;">' + (g.cats[c] || 0) + '</td>'; }).join('') +
+                '<td style="padding:6px; font-weight:800;">' + g.total + '</td></tr>';
+        });
+        html += '<tr style="border-top:2px solid var(--primary-blue); font-weight:900;"><td style="padding:6px;">الإجمالي الكلي</td>' +
+            cats.map(function (c) { return '<td style="padding:6px;">' + (grandByCat[c] || 0) + '</td>'; }).join('') +
+            '<td style="padding:6px;">' + grandTotal + '</td></tr>';
+        html += '</tbody></table></div>';
+        box.innerHTML = html;
     }
 
     function decorate() {
         try { decorateOld(); } catch (e) { console.error('sheet-link old', e); }
-        try { decorateAlert(); } catch (e) { console.error('sheet-link alert', e); }
+        try { renderPendingAlert(); } catch (e) { console.error('sheet-link pending', e); }
+        try { renderDeliveredTile(); } catch (e) { console.error('sheet-link delivered-tile', e); }
+        try { renderAnnualInventory(); } catch (e) { console.error('sheet-link annual-inventory', e); }
         status();
     }
 
@@ -3514,27 +3703,42 @@
             if (!res.ok) throw new Error('HTTP ' + res.status);
             var wb = XLSX.read(await res.text(), { type: 'string', raw: true });
             var rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true, defval: null });
-            var hdr = -1, cD = -1, cH = -1;
+            var hdr = -1, cD = -1, cH = -1, cN = -1, cS = -1;
             for (var i = 0; i < Math.min(rows.length, 10) && hdr < 0; i++) {
                 var d = rows[i].findIndex(function (c) { return typeof c === 'string' && c.indexOf('تاريخ الاستلام') >= 0; });
                 var h = rows[i].findIndex(function (c) { return typeof c === 'string' && c.indexOf('رقم البلوك') >= 0; });
-                if (d >= 0 && h >= 0) { hdr = i; cD = d; cH = h; }
+                if (d >= 0 && h >= 0) {
+                    hdr = i; cD = d; cH = h;
+                    // أعمدة إضافية (اختيارية): اسم المستفيد والقطاع — بحث مرن بالاسم لعدم معرفة العناوين الحقيقية بدقة
+                    cN = rows[i].findIndex(function (c) { return typeof c === 'string' && (c.indexOf('اسم المستفيد') >= 0 || c.indexOf('المستفيد') >= 0); });
+                    cS = rows[i].findIndex(function (c) { return typeof c === 'string' && c.indexOf('القطاع') >= 0; });
+                }
             }
             if (hdr < 0) throw new Error('ما لكيت عمودي "تاريخ الاستلام" و"رقم البلوك والدار" — تأكد أن المنشور ورقة الموقف الكلي');
-            var map = {}, bad = 0;
+            var map = {}, recMap = {}, bad = 0;
             for (var j = hdr + 1; j < rows.length; j++) {
                 var key = norm(rows[j][cH]);
                 var raw = rows[j][cD];
                 if (!key || raw == null || String(raw).trim() === '') continue;
                 var iso = parseDate(raw);
                 if (!iso) { bad++; continue; }
-                if (!map[key] || iso > map[key]) map[key] = iso;
+                if (!map[key] || iso > map[key]) {
+                    map[key] = iso;
+                    recMap[key] = {
+                        houseNo: rows[j][cH],
+                        date: iso,
+                        name: cN >= 0 ? (rows[j][cN] == null ? '' : String(rows[j][cN]).trim()) : '',
+                        sector: cS >= 0 ? (rows[j][cS] == null ? '' : String(rows[j][cS]).trim()) : ''
+                    };
+                }
             }
             if (!Object.keys(map).length && bad) throw new Error('صيغة التاريخ غير مفهومة (لازم yyyy/mm/dd أو yyyy-mm-dd أو mm/dd/yyyy)');
             sheetDates = map;
+            sheetRecords = recMap;
             lastError = '';
             lastSync = new Date().toLocaleTimeString('ar-IQ');
             localStorage.setItem('sheetDatesCache', JSON.stringify(map));
+            localStorage.setItem('sheetRecordsCache', JSON.stringify(recMap));
             localStorage.setItem('sheetLastSync', lastSync);
         } catch (err) {
             console.error('sheet-link sync failed', err);
@@ -3584,6 +3788,148 @@
     document.addEventListener('visibilitychange', function () {
         if (!document.hidden) sync(false);
     });
+})();
+</script>
+<script>
+/* ===== مستطيل "📊 موقف المقاولين الأسبوعي" — يزامن ملف اكسل أسبوعي منشور كـ Google Sheet (منفصل عن شيت تواريخ الاستلام) =====
+   ملاحظة: لا يوجد رابط افتراضي بعد — يبقى "غير مربوط" حتى ينشر المستخدم ملفه ويلصق الرابط عبر زر "ربط/تغيير رابط الشيت" */
+(function () {
+    'use strict';
+
+    var cwUrl = localStorage.getItem('contractorsSheetUrl') || '';
+    var cwRows = [];
+    var cwLastSync = localStorage.getItem('contractorsSheetLastSync') || '';
+    var cwError = '';
+    var cwRunning = false;
+    try { cwRows = JSON.parse(localStorage.getItem('contractorsSheetCache') || '[]'); } catch (e) { cwRows = []; }
+
+    function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+
+    function cwStatusText() {
+        var el = document.getElementById('cwStatus');
+        if (!el) return;
+        if (!cwUrl) { el.textContent = '🔗 لم يتم ربط ملف موقف المقاولين الأسبوعي بعد'; return; }
+        el.innerHTML = cwError ? '❌ ' + esc(cwError)
+            : '✅ آخر تحديث: ' + esc(cwLastSync || 'لم يتم بعد') + ' — ' + cwRows.length + ' صف';
+    }
+
+    function cwRender() {
+        var box = document.getElementById('contractors-weekly-body');
+        if (!box) return;
+        if (!cwUrl) { box.innerHTML = 'لم يتم ربط الشيت بعد — اضغط "ربط/تغيير رابط الشيت" بعد نشر ملف الاكسل الأسبوعي كـ Google Sheet.'; return; }
+        if (!cwRows.length) { box.innerHTML = 'لا توجد بيانات بعد — بانتظار أول مزامنة.'; return; }
+        var byContractor = {};
+        cwRows.forEach(function (r) {
+            var key = r.contractor || 'غير محدد';
+            if (!byContractor[key]) byContractor[key] = [];
+            byContractor[key].push(r);
+        });
+        var html = '<div style="max-height:400px; overflow-y:auto;">';
+        Object.keys(byContractor).forEach(function (name) {
+            html += '<div style="margin-bottom:14px;">' +
+                '<div style="font-weight:900; color:var(--primary-indigo); margin-bottom:4px;">🛠️ ' + esc(name) + '</div>' +
+                '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
+                '<thead><tr style="text-align:right;"><th style="padding:6px;">القطاع</th><th style="padding:6px;">الكلي</th><th style="padding:6px;">مسلّمة</th><th style="padding:6px;">قيد التسليم</th><th style="padding:6px;">متبقية</th></tr></thead><tbody>' +
+                byContractor[name].map(function (r) {
+                    return '<tr style="border-top:1px solid var(--glass-border);"><td style="padding:6px;">' + esc(r.sector) + '</td><td style="padding:6px;">' + esc(r.total) + '</td><td style="padding:6px; color:#059669;">' + esc(r.delivered) + '</td><td style="padding:6px; color:#d97706;">' + esc(r.inProgress) + '</td><td style="padding:6px; color:#e11d48;">' + esc(r.remaining) + '</td></tr>';
+                }).join('') + '</tbody></table></div>';
+        });
+        html += '</div>';
+        box.innerHTML = html;
+    }
+
+    function cwDecorate() { try { cwRender(); } catch (e) { console.error('contractors-weekly render', e); } cwStatusText(); }
+
+    async function cwSync(manual) {
+        if (cwRunning) return;
+        if (!cwUrl) { if (manual) window.__cwAskUrl(); return; }
+        cwRunning = true;
+        if (manual && document.getElementById('cwStatus')) document.getElementById('cwStatus').textContent = '⏳ جاري الجلب...';
+        try {
+            var url = cwUrl + (cwUrl.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+            var res = await fetch(url, { cache: 'no-store' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            var wb = XLSX.read(await res.text(), { type: 'string', raw: true });
+            var rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true, defval: null });
+            var hdr = -1, cC = -1, cSec = -1, cTot = -1, cDel = -1, cProg = -1, cRem = -1;
+            for (var i = 0; i < Math.min(rows.length, 10) && hdr < 0; i++) {
+                var cc = rows[i].findIndex(function (c) { return typeof c === 'string' && c.indexOf('المقاول') >= 0; });
+                var csec = rows[i].findIndex(function (c) { return typeof c === 'string' && c.indexOf('القطاع') >= 0; });
+                if (cc >= 0 && csec >= 0) {
+                    hdr = i; cC = cc; cSec = csec;
+                    cTot = rows[i].findIndex(function (c) { return typeof c === 'string' && c.indexOf('الكلي') >= 0; });
+                    cDel = rows[i].findIndex(function (c) { return typeof c === 'string' && c.indexOf('المسلمة') >= 0; });
+                    cProg = rows[i].findIndex(function (c) { return typeof c === 'string' && c.indexOf('قيد التسليم') >= 0; });
+                    cRem = rows[i].findIndex(function (c) { return typeof c === 'string' && c.indexOf('المتبقية') >= 0; });
+                }
+            }
+            if (hdr < 0) throw new Error('ما لكيت عمودي "اسم المقاول" و"رقم القطاع" — تأكد من رابط النشر');
+            var out = [];
+            for (var j = hdr + 1; j < rows.length; j++) {
+                var row = rows[j];
+                if (!row) continue;
+                var contractor = cC >= 0 && row[cC] != null ? String(row[cC]).trim() : '';
+                var sector = cSec >= 0 && row[cSec] != null ? String(row[cSec]).trim() : '';
+                if (!contractor && !sector) continue;
+                out.push({
+                    contractor: contractor,
+                    sector: sector,
+                    total: cTot >= 0 && row[cTot] != null ? row[cTot] : '-',
+                    delivered: cDel >= 0 && row[cDel] != null ? row[cDel] : '-',
+                    inProgress: cProg >= 0 && row[cProg] != null ? row[cProg] : '-',
+                    remaining: cRem >= 0 && row[cRem] != null ? row[cRem] : '-'
+                });
+            }
+            cwRows = out;
+            cwError = '';
+            cwLastSync = new Date().toLocaleTimeString('ar-IQ');
+            localStorage.setItem('contractorsSheetCache', JSON.stringify(out));
+            localStorage.setItem('contractorsSheetLastSync', cwLastSync);
+        } catch (err) {
+            console.error('contractors-weekly sync failed', err);
+            cwError = 'فشل التحديث: ' + err.message;
+        } finally {
+            cwRunning = false;
+            cwDecorate();
+        }
+    }
+
+    window.__cwAskUrl = function () {
+        var u = prompt('الصق رابط النشر (CSV) لملف موقف المقاولين الأسبوعي من Google Sheets:', cwUrl);
+        if (u === null) return;
+        u = u.trim();
+        if (u && !/^https:\/\/docs\.google\.com\/spreadsheets\//.test(u)) {
+            alert('⚠️ الرابط لازم يبدأ بـ https://docs.google.com/spreadsheets/');
+            return;
+        }
+        cwUrl = u;
+        localStorage.setItem('contractorsSheetUrl', u);
+        if (typeof dbRef !== 'undefined') dbRef.child('contractorsSheetUrl').set(u);
+        cwSync(true);
+    };
+    window.__cwSync = function (manual) { cwSync(manual); };
+
+    // الرابط يتشارك بين الأجهزة عبر فايربيس (تماماً كرابط شيت تواريخ الاستلام)
+    if (typeof dbRef !== 'undefined') {
+        dbRef.child('contractorsSheetUrl').on('value', function (snap) {
+            var v = snap.val();
+            if (v && v !== cwUrl) {
+                cwUrl = v;
+                localStorage.setItem('contractorsSheetUrl', v);
+                cwSync(false);
+            }
+        });
+    }
+
+    // مزامنة تلقائية إذا كان الرابط مربوطاً فعلاً؛ إن لم يُربط بعد يبقى المستطيل بحالة "غير مربوط" بانتظار المستخدم
+    cwDecorate();
+    if (cwUrl) {
+        setTimeout(function () { cwSync(false); }, 3500);
+        setInterval(function () { cwSync(false); }, 10 * 60 * 1000);
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) cwSync(false);
+        });
+    }
 })();
 </script>
 
