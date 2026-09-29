@@ -3458,7 +3458,6 @@
         if (v == null) return '';
         var s = String(v).trim();
         if (!s) return '';
-        if (s === 'خاص') return 'خاص'; // حالة خاصة: تُعتبر الدار مستلمة بدون تاريخ محدد (بطلب المستخدم)
         // صيغة yyyy-mm-dd أو yyyy/mm/dd
         var m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
         if (m) return m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0');
@@ -3471,8 +3470,11 @@
             else { mm = a; dd = b; }                           // m/d/yyyy (الافتراضي، نفس تصدير Excel)
             return y + '-' + String(mm).padStart(2, '0') + '-' + String(dd).padStart(2, '0');
         }
-        return '';
+        // أي قيمة أخرى غير فارغة (مثل "خاص" أو أي نص آخر) — بطلب المستخدم: تُعتبر الدار مستلمة بنفس النص المكتوب، بدون تاريخ موحّد الصيغة
+        return s;
     }
+    // تاريخ فعلي بصيغة yyyy-mm-dd (وليس نص عائم مثل "خاص")
+    function isIsoDate(s) { return /^\d{4}-\d{2}-\d{2}$/.test(String(s || '')); }
 
     // تُستخدم من نموذج إضافة/تعديل الدار القديمة (وظيفة tryAutoFillHandoverDate) للبحث الفوري أثناء كتابة رقم الدار
     window.getSheetDate = function (houseNo) {
@@ -3658,7 +3660,7 @@
     // ---------- 4) مستطيل "📅 الجرد السنوي": تجميع عدد الدور المسلَّمة شهرياً/سنوياً حسب الفئة (أول حرف من رقم الدار) ----------
     // حساب مجموعات الجرد السنوي (شهر/سنة × فئة) — دالة مشتركة بين العرض والتصدير لملف اكسل
     function computeAnnualGroups() {
-        var items = Object.keys(sheetRecords).map(function (k) { return sheetRecords[k]; }).filter(function (x) { return !!x.date && x.date !== 'خاص'; });
+        var items = Object.keys(sheetRecords).map(function (k) { return sheetRecords[k]; }).filter(function (x) { return isIsoDate(x.date); });
         var groups = {}; // "yyyy-mm" -> { cats: {A:n,B:n}, total:n }
         var allCats = {};
         items.forEach(function (x) {
@@ -3768,15 +3770,15 @@
                 }
             }
             if (hdr < 0) throw new Error('ما لكيت عمودي "تاريخ الاستلام" و"رقم البلوك والدار" — تأكد أن المنشور ورقة الموقف الكلي');
-            var map = {}, recMap = {}, bad = 0;
+            var map = {}, recMap = {};
             for (var j = hdr + 1; j < rows.length; j++) {
                 var key = norm(rows[j][cH]);
                 var raw = rows[j][cD];
+                // أي قيمة مكتوبة بخلية "تاريخ الاستلام" (أي نص كان) تعني أن الدار مستلمة — بطلب المستخدم، بلا استثناء
                 if (!key || raw == null || String(raw).trim() === '') continue;
-                var iso = parseDate(raw);
-                if (!iso) { bad++; continue; }
-                // "خاص" تُعتبر مستلمة بلا تاريخ محدد؛ لو توفر تاريخ حقيقي لنفس الدار نُفضّله عليها
-                var isBetter = !map[key] || (map[key] === 'خاص' && iso !== 'خاص') || (iso !== 'خاص' && map[key] !== 'خاص' && iso > map[key]);
+                var iso = parseDate(raw); // نص دائماً غير فارغ الآن (تاريخ منسّق أو النص كما هو لو ماكانت الصيغة معروفة)
+                // نُفضّل تاريخاً حقيقياً (yyyy-mm-dd) على أي نص آخر لنفس الدار، وبين تاريخين حقيقيين نأخذ الأحدث
+                var isBetter = !map[key] || (!isIsoDate(map[key]) && isIsoDate(iso)) || (isIsoDate(iso) && isIsoDate(map[key]) && iso > map[key]);
                 if (isBetter) {
                     map[key] = iso;
                     recMap[key] = {
@@ -3787,7 +3789,6 @@
                     };
                 }
             }
-            if (!Object.keys(map).length && bad) throw new Error('صيغة التاريخ غير مفهومة (لازم yyyy/mm/dd أو yyyy-mm-dd أو mm/dd/yyyy)');
             sheetDates = map;
             sheetRecords = recMap;
             lastError = '';
