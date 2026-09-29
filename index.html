@@ -9,7 +9,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icon-192.png" type="image/png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <meta name="theme-color" content="#050b14">
+    <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -25,7 +25,7 @@
 
     <style>
         :root {
-            --bg-primary: #050b14;
+            --bg-primary: #0f172a;
             --glass-bg: rgba(15, 23, 42, 0.65);
             --glass-bg-hover: rgba(30, 41, 59, 0.85);
             --glass-card: rgba(15, 23, 42, 0.5);
@@ -85,7 +85,7 @@
             position: absolute;
             top: 0; right: 0; width: 6px; height: 100%;
             background: linear-gradient(to bottom, var(--primary-blue), var(--primary-indigo));
-            box-shadow: 0 0 20px var(--primary-blue);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
         }
 
         header h1 { font-size: 1.75rem; font-weight: 900; color: #ffffff; letter-spacing: -0.5px; }
@@ -233,6 +233,8 @@
         }
         .tools-toolbar-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .tools-toolbar-label { font-weight: 800; color: var(--text-muted); font-size: 0.82rem; white-space: nowrap; }
+        .tools-toolbar-buttons { display: flex; }
+        .custom-report-option { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text-main); padding: 8px 4px; cursor: pointer; }
 
         .filter-section {
             background: var(--glass-bg);
@@ -268,13 +270,22 @@
 
         .btn-action-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         
-        .btn-daily-checklist { background: linear-gradient(135deg, rgba(244, 63, 94, 0.9), rgba(225, 29, 72, 0.9)); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(251, 113, 133, 0.4); padding: 12px 18px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(244, 63, 94, 0.35); }
-        .btn-precleaned-manage { background: linear-gradient(135deg, rgba(168, 85, 247, 0.9), rgba(124, 58, 237, 0.9)); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(192, 132, 252, 0.4); padding: 12px 18px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(168, 85, 247, 0.35); }
-        .btn-contractors-score { background: linear-gradient(135deg, rgba(6, 182, 212, 0.9), rgba(8, 145, 178, 0.9)); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(34, 211, 238, 0.4); padding: 12px 18px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(6, 182, 212, 0.35); }
-        .btn-calendar-view { background: linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(217, 119, 6, 0.9)); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(251, 191, 36, 0.4); padding: 12px 18px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35); }
-        .btn-whatsapp-daily { background: rgba(16, 185, 129, 0.9); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(52, 211, 153, 0.4); padding: 12px 18px; border-radius: 16px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.25s; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35); }
-        .btn-excel-export { background: rgba(16, 185, 129, 0.9); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(52, 211, 153, 0.4); padding: 12px 18px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35); }
-        .btn-add { background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: 1px solid rgba(255, 255, 255, 0.25); padding: 13px 28px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 8px 25px rgba(56, 189, 248, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.35); }
+        .btn-daily-checklist, .btn-precleaned-manage, .btn-contractors-score, .btn-calendar-view, .btn-whatsapp-daily, .btn-excel-export, .tools-group-toggle {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(129, 140, 248, 0.22));
+            backdrop-filter: blur(12px);
+            color: #fff;
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            padding: 12px 18px;
+            border-radius: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.25s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+        .btn-add { background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: 1px solid rgba(255, 255, 255, 0.25); padding: 13px 28px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.35); }
 
         .btn-daily-checklist:hover, .btn-precleaned-manage:hover, .btn-contractors-score:hover, .btn-calendar-view:hover, .btn-whatsapp-daily:hover, .btn-excel-export:hover, .btn-add:hover {
             transform: translateY(-3px);
@@ -645,11 +656,6 @@
             <div class="title" style="color: #f43f5e;">تجاوزت موعد التسليم</div>
             <div class="value" style="color: #f43f5e;" id="not-ready-overdue-count">0</div>
         </div>
-        <div class="metric-card" onclick="setFilterStatus('completed_cleaning')">
-            <div class="icon">✅</div>
-            <div class="title" style="color: #10b981;">تم إكمال تنظيفها</div>
-            <div class="value" style="color: #10b981;" id="clean-completed-count">0</div>
-        </div>
         <div class="metric-card" onclick="setFilterStatus('ready_all')">
             <div class="icon">🏁</div>
             <div class="title" style="color: #10b981;">جاهزة للإنهاء (الكل)</div>
@@ -687,6 +693,11 @@
             <div class="title" style="color: #10b981;">دور مستلمة (مكتملة)</div>
             <div class="value" style="color: #10b981;" id="old-completed-count">0</div>
         </div>
+        <div class="metric-card" onclick="setOldFilterStatus('notes_completed')">
+            <div class="icon">📝</div>
+            <div class="title" style="color: #10b981;">دور تم إكمال ملاحظاتها</div>
+            <div class="value" style="color: #10b981;" id="old-notes-completed-count">0</div>
+        </div>
     </div>
     </div>
 
@@ -694,21 +705,24 @@
 
     <div class="tools-toolbar">
         <div class="tools-toolbar-group">
-            <span class="tools-toolbar-label">🗓️ أدوات يومية:</span>
-            <button class="btn-daily-checklist" onclick="openDailyChecklistModal()">📋 مواعيد اليوم</button>
-            <button class="btn-calendar-view" onclick="openCalendarModal()">📅 التقويم الهندسي</button>
-            <button class="btn-whatsapp-daily" onclick="sendDailySummaryWhatsApp()">💬 تقرير اليوم الشامل</button>
+            <button class="tools-group-toggle" onclick="toggleToolsGroup('daily-tools-group')">🗓️ أدوات يومية ▾</button>
+            <div class="tools-toolbar-buttons" id="daily-tools-group" style="display:none; gap:10px; flex-wrap:wrap;">
+                <button class="btn-daily-checklist" onclick="openDailyChecklistModal()">📋 مواعيد اليوم</button>
+                <button class="btn-calendar-view" onclick="openCalendarModal()">📅 التقويم الهندسي</button>
+                <button class="btn-whatsapp-daily" onclick="sendDailySummaryWhatsApp()">💬 تقرير اليوم الشامل</button>
+            </div>
         </div>
         <div class="tools-toolbar-group">
-            <span class="tools-toolbar-label">📁 إدارة وتقارير:</span>
-            <button class="btn-precleaned-manage" onclick="openPreCleanedModal()">🏠 المنظفة مسبقاً</button>
-            <button class="btn-contractors-score" onclick="openContractorScorecardModal()">📊 أداء المقاولين</button>
-            <button class="btn-excel-export" onclick="openExcelOptionsModal()">📊 تصدير Excel مخصص</button>
-            <button class="btn-excel-export" onclick="exportNewHousesExcelReport()">📊 تقرير Excel الدور الجديدة</button>
-            <button class="btn-excel-export" onclick="exportOldHousesExcelReport()">📊 تقرير Excel الدور القديمة</button>
-            <button class="btn-excel-export" onclick="exportFullBackup()">💾 نسخة احتياطية كاملة</button>
-            <button class="btn-excel-export" onclick="document.getElementById('backupFileInput').click()">♻️ استرجاع نسخة احتياطية</button>
-            <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none;" onchange="handleBackupFile(event)">
+            <button class="tools-group-toggle" onclick="toggleToolsGroup('admin-reports-group')">📁 إدارة وتقارير ▾</button>
+            <div class="tools-toolbar-buttons" id="admin-reports-group" style="display:none; gap:10px; flex-wrap:wrap;">
+                <button class="btn-precleaned-manage" onclick="openPreCleanedModal()">🏠 المنظفة مسبقاً</button>
+                <button class="btn-contractors-score" onclick="openContractorScorecardModal()">📊 أداء المقاولين</button>
+                <button class="btn-excel-export" onclick="openCustomReportModal('new')">📊 تقرير Excel الدور الجديدة</button>
+                <button class="btn-excel-export" onclick="openCustomReportModal('old')">📊 تقرير Excel الدور القديمة</button>
+                <button class="btn-excel-export" onclick="exportFullBackup()">💾 نسخة احتياطية كاملة</button>
+                <button class="btn-excel-export" onclick="document.getElementById('backupFileInput').click()">♻️ استرجاع نسخة احتياطية</button>
+                <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none;" onchange="handleBackupFile(event)">
+            </div>
         </div>
     </div>
     <!-- زرا رفع/عرض ملف تواريخ الاستلام اليدوي أُلغيا من الواجهة بعد ربط النظام مباشرة بشيت Google Sheets؛
@@ -760,7 +774,6 @@
                 <option value="3days_remaining">🚨 متبقي لموعدها 3 أيام</option>
                 <option value="uncompleted_cleaning">⚠️ تجاوزت موعد التنظيف</option>
                 <option value="not_ready_overdue">⚠️ تجاوزت موعد التسليم</option>
-                <option value="completed_cleaning">دور تم إكمال تنظيفها</option>
                 <option value="ready_all">دور جاهزة للإنهاء</option>
             </select>
             <select id="old-status-filter-select" onchange="setOldFilterStatus(this.value)" style="display:none;">
@@ -768,6 +781,7 @@
                 <option value="notes_due_2days">📌 يجب إنهاء ملاحظاتها خلال يومين</option>
                 <option value="notes_overdue">⚠️ متأخرة عن إنهاء الملاحظات</option>
                 <option value="completed">✅ دور مستلمة (مكتملة)</option>
+                <option value="notes_completed">📝 دور تم إكمال ملاحظاتها</option>
             </select>
         </div>
 
@@ -828,34 +842,13 @@
     </div>
 </div>
 
-<div id="excelOptionsModal" class="modal">
-    <div class="modal-content" style="max-width: 550px;">
-        <span class="close-btn" onclick="closeExcelOptionsModal()">&times;</span>
-        <h3 style="margin-bottom: 12px; color: #10b981; font-weight: 900;">📊 اختر نوع تقرير Excel المخصص</h3>
-        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 22px; line-height: 1.6;">حدد نوع البيانات التي تريد تصديرها، وسيقوم النظام بتوليد ملف محدد يحتوي على التفاصيل الكاملة مع حساب العدد الكلي تلقائياً:</p>
-        
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            <button class="excel-option-btn" onclick="exportToExcelFiltered('all')">
-                <span>📁 كل الدور المسجلة في النظام</span>
-                <span style="color: #38bdf8;">📊</span>
-            </button>
-            <button class="excel-option-btn" onclick="exportToExcelFiltered('overdue_handover')">
-                <span>🚨 الدور التي تجاوزت موعد التسليم (وغير جاهزة)</span>
-                <span style="color: #f43f5e;">⚠️</span>
-            </button>
-            <button class="excel-option-btn" onclick="exportToExcelFiltered('overdue_cleaning')">
-                <span>🧹 الدور التي تجاوزت موعد التنظيف (وغير نظيفة)</span>
-                <span style="color: #fbbf24;">⚠️</span>
-            </button>
-            <button class="excel-option-btn" onclick="exportToExcelFiltered('ready_houses')">
-                <span>✅ الدور الجاهزة للإنهاء والتسليم</span>
-                <span style="color: #10b981;">✨</span>
-            </button>
-            <button class="excel-option-btn" onclick="exportToExcelFiltered('cleaned_houses')">
-                <span>🏠 الدور التي تم إكمال تنظيفها بالكامل</span>
-                <span style="color: #06b6d4;">🧼</span>
-            </button>
-        </div>
+<div id="customReportModal" class="modal">
+    <div class="modal-content" style="max-width: 480px;">
+        <span class="close-btn" onclick="closeCustomReportModal()">&times;</span>
+        <h3 id="customReportTitle" style="margin-bottom: 12px; color: #38bdf8; font-weight: 900;">📊 تقرير مخصص</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">اختر الأقسام التي تريد تضمينها بملف الإكسل:</p>
+        <div id="customReportOptions" style="display: flex; flex-direction: column; gap: 4px;"></div>
+        <button class="btn-primary" style="margin-top: 18px;" onclick="runCustomReportExport()">📥 تصدير الملف</button>
     </div>
 </div>
 
@@ -2215,11 +2208,12 @@
         openWhatsappNotifyDialog(msgText, "07840971766");
     }
 
-    function exportOldHousesExcelReport() {
+    function exportOldHousesExcelReport(selectedKeys) {
         if (oldHouseRecords.length === 0) {
             alert("⚠️ لا توجد دور قديمة مسجلة لتصديرها إلى Excel!");
             return;
         }
+        const keys = selectedKeys && selectedKeys.length ? selectedKeys : ['all', 'overdue'];
 
         function buildRows(list) {
             return list.map((rec, idx) => ({
@@ -2258,17 +2252,19 @@
         }
 
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, buildSheet("كل الدور التي بها ملاحظات", allRows), "كل الدور");
-        XLSX.utils.book_append_sheet(workbook, buildSheet("الدور التي عبرت موعد ملاحظاتها", overdueRows), "عبرت موعد الملاحظات");
+        if (keys.includes('all')) XLSX.utils.book_append_sheet(workbook, buildSheet("كل الدور التي بها ملاحظات", allRows), "كل الدور");
+        if (keys.includes('overdue')) XLSX.utils.book_append_sheet(workbook, buildSheet("الدور التي عبرت موعد ملاحظاتها", overdueRows), "عبرت موعد الملاحظات");
 
+        if (!workbook.SheetNames.length) { alert("⚠️ اختر قسم واحد على الأقل للتصدير."); return; }
         XLSX.writeFile(workbook, `AlAmirat_تقرير_الدور_القديمة_${todayStr}.xlsx`);
     }
 
-    function exportNewHousesExcelReport() {
+    function exportNewHousesExcelReport(selectedKeys) {
         if (houseRecords.length === 0) {
             alert("⚠️ لا توجد دور جديدة مسجلة لتصديرها إلى Excel!");
             return;
         }
+        const keys = selectedKeys && selectedKeys.length ? selectedKeys : ['all', '3days', 'overdue'];
 
         function buildNewRows(list) {
             return list.map((rec, idx) => {
@@ -2313,11 +2309,42 @@
         }
 
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, buildNewSheet("كل الدور", allRows), "كل الدور");
-        XLSX.utils.book_append_sheet(workbook, buildNewSheet("الدور المتبقي لموعدها 3 أيام", threeDaysRows), "متبقي 3 أيام");
-        XLSX.utils.book_append_sheet(workbook, buildNewSheet("الدور التي تجاوزت 10 أيام ولم تكتمل بعد", overdueRows), "تجاوزت 10 أيام");
+        if (keys.includes('all')) XLSX.utils.book_append_sheet(workbook, buildNewSheet("كل الدور", allRows), "كل الدور");
+        if (keys.includes('3days')) XLSX.utils.book_append_sheet(workbook, buildNewSheet("الدور المتبقي لموعدها 3 أيام", threeDaysRows), "متبقي 3 أيام");
+        if (keys.includes('overdue')) XLSX.utils.book_append_sheet(workbook, buildNewSheet("الدور التي تجاوزت 10 أيام ولم تكتمل بعد", overdueRows), "تجاوزت 10 أيام");
 
+        if (!workbook.SheetNames.length) { alert("⚠️ اختر قسم واحد على الأقل للتصدير."); return; }
         XLSX.writeFile(workbook, `AlAmirat_تقرير_الدور_الجديدة_${todayStr}.xlsx`);
+    }
+
+    // نافذة اختيار أقسام التقرير المخصص (دور جديدة/قديمة) قبل تصدير الإكسل
+    function openCustomReportModal(type) {
+        window.customReportType = type;
+        const title = document.getElementById('customReportTitle');
+        const body = document.getElementById('customReportOptions');
+        if (type === 'new') {
+            title.textContent = '📊 تقرير مخصص - الدور الجديدة (اختر الأقسام)';
+            body.innerHTML =
+                '<label class="custom-report-option"><input type="checkbox" value="all" checked> كل الدور</label>' +
+                '<label class="custom-report-option"><input type="checkbox" value="3days" checked> متبقي 3 أيام</label>' +
+                '<label class="custom-report-option"><input type="checkbox" value="overdue" checked> تجاوزت 10 أيام</label>';
+        } else {
+            title.textContent = '📊 تقرير مخصص - الدور القديمة (اختر الأقسام)';
+            body.innerHTML =
+                '<label class="custom-report-option"><input type="checkbox" value="all" checked> كل الدور</label>' +
+                '<label class="custom-report-option"><input type="checkbox" value="overdue" checked> عبرت موعد الملاحظات</label>';
+        }
+        document.getElementById('customReportModal').style.display = 'flex';
+    }
+    function closeCustomReportModal() {
+        document.getElementById('customReportModal').style.display = 'none';
+    }
+    function runCustomReportExport() {
+        const checked = Array.from(document.querySelectorAll('#customReportOptions input:checked')).map(cb => cb.value);
+        if (!checked.length) { alert("⚠️ اختر قسم واحد على الأقل للتصدير."); return; }
+        if (window.customReportType === 'new') exportNewHousesExcelReport(checked);
+        else exportOldHousesExcelReport(checked);
+        closeCustomReportModal();
     }
 
     function buildBackupObject() {
@@ -2520,183 +2547,45 @@
     }
 
     function sendDailySummaryWhatsApp() {
-        let allHouses = [];
-        let cleanedHouses = [];
-        let uncleanedHouses = [];
-        let readyHouses = [];
-        let notReadyHouses = [];
+        function fmtList(list) {
+            if (!list.length) return 'لا يوجد';
+            return list.map(rec => `🏠 ${rec.houseNo || '-'} (${rec.sectorNo || 'غير محدد'} - ${rec.contractorName || (rec.executionType === 'تنفيذ مباشر' ? 'تنفيذ مباشر' : 'غير محدد')})`).join('\n');
+        }
 
-        houseRecords.forEach(rec => {
-            const houseNum = rec.houseNo || '-';
-            allHouses.push(houseNum);
+        // الدور الجديدة
+        const newAll = houseRecords;
+        const new3Days = houseRecords.filter(rec => calculateRecordStatus(rec).is3DaysRemaining);
+        const new10DaysOverdue = houseRecords.filter(rec => calculateRecordStatus(rec).isHandoverOverdue);
 
-            const isPreCleaned = preCleanedHouses.some(item => item.trim() === houseNum.trim());
-            const isClean = rec.isCleaned || isPreCleaned;
-
-            if (isClean) {
-                cleanedHouses.push(houseNum);
-            } else {
-                uncleanedHouses.push(houseNum);
-            }
-
-            if (rec.isReady) {
-                readyHouses.push(houseNum);
-            } else {
-                notReadyHouses.push(houseNum);
-            }
-        });
-
-        let oldAllHouses = [];
-        let oldCompletedHouses = [];
-        let oldNotesDueTodayOr2Days = [];
-        let oldNotesOverdueHouses = [];
-
-        oldHouseRecords.forEach(rec => {
-            const houseNum = rec.houseNo || '-';
-            oldAllHouses.push(houseNum);
-
-            if (rec.status === 'مستلم') oldCompletedHouses.push(houseNum);
-            if (rec.notesEndDate && !rec.notesCompleted) {
-                const diff = daysBetween(todayStr, rec.notesEndDate);
-                if (diff <= 2 && diff >= 0) oldNotesDueTodayOr2Days.push(houseNum);
-                if (diff < 0) oldNotesOverdueHouses.push(houseNum);
-            }
-        });
+        // الدور القديمة
+        const oldAll = oldHouseRecords;
+        const old2Days = oldHouseRecords.filter(rec => rec.notesEndDate && !rec.notesCompleted && daysBetween(todayStr, rec.notesEndDate) === 2);
+        const old5DaysOverdue = oldHouseRecords.filter(rec => rec.notesEndDate && !rec.notesCompleted && daysBetween(todayStr, rec.notesEndDate) < 0);
 
         let msgText = `📊 *التقرير اليومي الشامل - مجمع الأميرات 2*\n` +
                       `📅 التاريخ: ${todayStr}\n\n` +
-                      `🏠 *إجمالي الدور الجديدة المسجلة:* (${allHouses.length})\n` +
-                      `📌 أرقام الدور: ${allHouses.length > 0 ? allHouses.join('، ') : 'لا يوجد'}\n\n` +
+                      `🏠 *الدور الجديدة*\n\n` +
 
-                      `🧹 *الدور المنظفة:* (${cleanedHouses.length})\n` +
-                      `📌 أرقام الدور: ${cleanedHouses.length > 0 ? cleanedHouses.join('، ') : 'لا يوجد'}\n\n` +
-
-                      `🧼 *الدور الغير نظيفة:* (${uncleanedHouses.length})\n` +
-                      `📌 أرقام الدور: ${uncleanedHouses.length > 0 ? uncleanedHouses.join('، ') : 'لا يوجد'}\n\n` +
-
-                      `✅ *الدور الجاهزة:* (${readyHouses.length})\n` +
-                      `📌 أرقام الدور: ${readyHouses.length > 0 ? readyHouses.join('، ') : 'لا يوجد'}\n\n` +
-
-                      `⚠️ *الدور الغير جاهزة:* (${notReadyHouses.length})\n` +
-                      `📌 أرقام الدور: ${notReadyHouses.length > 0 ? notReadyHouses.join('، ') : 'لا يوجد'}\n\n` +
+                      `📌 العدد الكلي: (${newAll.length})\n${fmtList(newAll)}\n\n` +
+                      `⏳ باقي 3 أيام على التسليم: (${new3Days.length})\n${fmtList(new3Days)}\n\n` +
+                      `🚨 تجاوزت 10 أيام: (${new10DaysOverdue.length})\n${fmtList(new10DaysOverdue)}\n\n` +
 
                       `-------------------------------\n` +
-                      `🏛️ *إجمالي الدور القديمة:* (${oldAllHouses.length})\n\n` +
+                      `🏛️ *الدور القديمة*\n\n` +
 
-                      `✅ *دور قديمة مستلمة (مكتملة):* (${oldCompletedHouses.length})\n` +
-                      `📌 أرقام الدور: ${oldCompletedHouses.length > 0 ? oldCompletedHouses.join('، ') : 'لا يوجد'}\n\n` +
-
-                      `📌 *دور قديمة يجب إنهاء ملاحظاتها خلال يومين:* (${oldNotesDueTodayOr2Days.length})\n` +
-                      `📌 أرقام الدور: ${oldNotesDueTodayOr2Days.length > 0 ? oldNotesDueTodayOr2Days.join('، ') : 'لا يوجد'}\n\n` +
-
-                      `⚠️ *دور قديمة متأخرة عن إنهاء الملاحظات:* (${oldNotesOverdueHouses.length})\n` +
-                      `📌 أرقام الدور: ${oldNotesOverdueHouses.length > 0 ? oldNotesOverdueHouses.join('، ') : 'لا يوجد'}\n\n` +
+                      `📌 عدد الدور الكلي: (${oldAll.length})\n${fmtList(oldAll)}\n\n` +
+                      `📌 باقي يومين عن الملاحظات: (${old2Days.length})\n${fmtList(old2Days)}\n\n` +
+                      `⚠️ تجاوزت 5 أيام: (${old5DaysOverdue.length})\n${fmtList(old5DaysOverdue)}\n\n` +
 
                       `_صادر عن مكتب التسليم الفني_`;
 
         openWhatsappNotifyDialog(msgText, '07840971766');
     }
 
-    function openExcelOptionsModal() {
-        document.getElementById('excelOptionsModal').style.display = 'flex';
-    }
-    function closeExcelOptionsModal() {
-        document.getElementById('excelOptionsModal').style.display = 'none';
-    }
-
-    function exportToExcelFiltered(filterType) {
-        if (houseRecords.length === 0) {
-            alert("⚠️ لا توجد بيانات مسجلة لتصديرها إلى Excel!");
-            return;
-        }
-
-        let filteredRecords = [];
-        let reportTitleName = "كل_الدور";
-
-        if (filterType === 'all') {
-            filteredRecords = [...houseRecords];
-            reportTitleName = "التقرير_الشامل_لكل_الدور";
-        } else if (filterType === 'overdue_handover') {
-            filteredRecords = houseRecords.filter(rec => {
-                const logic = calculateRecordStatus(rec);
-                return logic.isHandoverOverdue;
-            });
-            reportTitleName = "تقرير_الدور_المتأخرة_عن_موعد_التسليم";
-        } else if (filterType === 'overdue_cleaning') {
-            filteredRecords = houseRecords.filter(rec => {
-                const logic = calculateRecordStatus(rec);
-                return logic.isCleaningOverdue;
-            });
-            reportTitleName = "تقرير_الدور_المتأخرة_عن_موعد_التنظيف";
-        } else if (filterType === 'ready_houses') {
-            filteredRecords = houseRecords.filter(rec => rec.isReady);
-            reportTitleName = "تقرير_الدور_الجاهزة_للإنهاء";
-        } else if (filterType === 'cleaned_houses') {
-            filteredRecords = houseRecords.filter(rec => {
-                const isPreCleaned = preCleanedHouses.some(item => item.trim() === (rec.houseNo || '').trim());
-                return rec.isCleaned || isPreCleaned;
-            });
-            reportTitleName = "تقرير_الدور_المنظفة_بالكامل";
-        }
-
-        if (filteredRecords.length === 0) {
-            alert("⚠️ لا توجد دور تندرج تحت هذا الخيار المختار في الوقت الحالي!");
-            return;
-        }
-
-        const dataForExcel = filteredRecords.map((rec, idx) => {
-            const logic = calculateRecordStatus(rec);
-            
-            return {
-                "ت": idx + 1,
-                "رقم الدار والبلوك": rec.houseNo || '-',
-                "اسم المستفيد": rec.ownerName || '-',
-                "رقم الهاتف": rec.phoneNo || '-',
-                "القطاع": rec.sectorNo || '-',
-                "نوع التنفيذ": rec.executionType || '-',
-                "المقاول": rec.contractorName || '-',
-                "الحالة الحالية": logic.statusText,
-                "تاريخ الحضور": rec.arrivalDate || '-',
-                "تاريخ بدء العمل/التنظيف": rec.cleaningStartDate || rec.contractorStartDate || '-',
-                "موعد انتهاء التنظيف": rec.cleaningEndDate || '-',
-                "تاريخ الكشف": rec.inspectionDate || '-',
-                "موعد التسليم الـ 10 أيام": rec.handoverDate || rec.houseReadyDate || '-',
-                "موعد التسليم الثاني": rec.secondHandoverDate || '-',
-                "سبب تأخير التسليم الثاني": rec.notReadyReason || '-'
-            };
-        });
-
-        dataForExcel.push({
-            "ت": "الإجمالي",
-            "رقم الدار والبلوك": `العدد الكلي: ${filteredRecords.length} دار`,
-            "اسم المستفيد": "",
-            "رقم الهاتف": "",
-            "القطاع": "",
-            "نوع التنفيذ": "",
-            "المقاول": "",
-            "الحالة الحالية": "",
-            "تاريخ الحضور": "",
-            "تاريخ بدء العمل/التنظيف": "",
-            "موعد انتهاء التنظيف": "",
-            "تاريخ الكشف": "",
-            "موعد التسليم الـ 10 أيام": "",
-            "موعد التسليم الثاني": "",
-            "سبب تأخير التسليم الثاني": ""
-        });
-
-        const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "تقرير الدور المخصص");
-
-        const colWidths = [
-            { wch: 10 }, { wch: 22 }, { wch: 24 }, { wch: 18 }, { wch: 16 },
-            { wch: 16 }, { wch: 20 }, { wch: 26 }, { wch: 15 }, { wch: 22 },
-            { wch: 20 }, { wch: 15 }, { wch: 22 }, { wch: 20 }, { wch: 32 }
-        ];
-        worksheet['!cols'] = colWidths;
-
-        XLSX.writeFile(workbook, `AlAmirat_${reportTitleName}_${todayStr}.xlsx`);
-        closeExcelOptionsModal();
+    function toggleToolsGroup(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.display = (el.style.display === 'none' || !el.style.display) ? 'flex' : 'none';
     }
 
     function onExecutionTypeChange() {
@@ -3107,7 +2996,6 @@
         let threeDaysRemaining = 0;
         let cleanUncompleted = 0;
         let notReadyOverdue = 0;
-        let cleanCompleted = 0;
         let readyAll = 0;
 
         houseRecords.forEach(rec => {
@@ -3116,7 +3004,6 @@
             if (st.is3DaysRemaining) threeDaysRemaining++;
             if (st.isCleaningOverdue) cleanUncompleted++;
             if (st.isHandoverOverdue) notReadyOverdue++;
-            if (rec.isCleaned || isPre(rec)) cleanCompleted++;
             if (rec.isReady) readyAll++;
         });
 
@@ -3127,7 +3014,6 @@
         if (document.getElementById('three-days-remaining-count')) document.getElementById('three-days-remaining-count').innerText = threeDaysRemaining;
         if (document.getElementById('clean-uncompleted-count')) document.getElementById('clean-uncompleted-count').innerText = cleanUncompleted;
         if (document.getElementById('not-ready-overdue-count')) document.getElementById('not-ready-overdue-count').innerText = notReadyOverdue;
-        if (document.getElementById('clean-completed-count')) document.getElementById('clean-completed-count').innerText = cleanCompleted;
         if (document.getElementById('ready-all-count')) document.getElementById('ready-all-count').innerText = readyAll;
 
         // مستطيلات ملخص الدور القديمة أُلغيت أيضاً من الواجهة؛ نفس المبدأ أعلاه
@@ -3136,9 +3022,11 @@
         let oldNotesDue2Days = 0;
         let oldNotesOverdue = 0;
         let oldCompleted = 0;
+        let oldNotesCompleted = 0;
 
         oldHouseRecords.forEach(r => {
             if (r.status === 'مستلم') oldCompleted++;
+            if (r.notesCompleted) oldNotesCompleted++;
             if (r.notesEndDate && !r.notesCompleted) {
                 const diff = daysBetween(todayStr, r.notesEndDate);
                 if (diff === 2) oldNotesDue2Days++;
@@ -3151,6 +3039,7 @@
             document.getElementById('old-notes-due-2days-count').innerText = oldNotesDue2Days;
             document.getElementById('old-notes-overdue-count').innerText = oldNotesOverdue;
             document.getElementById('old-completed-count').innerText = oldCompleted;
+            if (document.getElementById('old-notes-completed-count')) document.getElementById('old-notes-completed-count').innerText = oldNotesCompleted;
         }
 
         if (activeTab === 'new') {
@@ -3179,7 +3068,6 @@
                 if (statusFilter === '3days_remaining' && !st.is3DaysRemaining) return false;
                 if (statusFilter === 'uncompleted_cleaning' && !st.isCleaningOverdue) return false;
                 if (statusFilter === 'not_ready_overdue' && !st.isHandoverOverdue) return false;
-                if (statusFilter === 'completed_cleaning' && !(rec.isCleaned || isPre(rec))) return false;
                 if (statusFilter === 'ready_all' && !rec.isReady) return false;
 
                 if (searchVal) {
@@ -3319,6 +3207,7 @@
                 if (oldStatusFilter === 'notes_due_2days' && !(recNotesDiff === 2 && !rec.notesCompleted)) return false;
                 if (oldStatusFilter === 'notes_overdue' && !(recNotesDiff !== null && recNotesDiff < 0 && !rec.notesCompleted)) return false;
                 if (oldStatusFilter === 'completed' && !recIsCompleted) return false;
+                if (oldStatusFilter === 'notes_completed' && !rec.notesCompleted) return false;
 
                 if (searchVal) {
                     const str = `${esc(rec.houseNo)} ${esc(rec.sectorNo)} ${esc(rec.contractorName || '')} ${esc(rec.notes || '')} ${esc(rec.status)}`.toLowerCase();
