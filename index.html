@@ -51,9 +51,9 @@
             background-color: var(--bg-primary);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 24px;
+            padding: 16px;
             direction: rtl;
-            font-size: 17px;
+            font-size: 15px;
             background-image: 
                 radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
                 radial-gradient(circle at 90% 90%, rgba(129, 140, 248, 0.12) 0%, transparent 40%),
@@ -423,16 +423,16 @@
             .table-columns-wrap .table-col-1 { border-left: none; border-bottom: 1px solid var(--glass-border); }
         }
 
-        table { width: 100%; border-collapse: collapse; text-align: right; white-space: nowrap; }
+        table { width: 100%; border-collapse: collapse; text-align: right; white-space: normal; word-break: break-word; }
         thead { background: rgba(226, 232, 240, 0.85); border-bottom: 2px solid var(--glass-border); }
-        th { padding: 10px 14px; font-size: 0.82rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.3px; }
+        th { padding: 6px 8px; font-size: 0.72rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.2px; }
         tbody tr { border-bottom: 1px solid var(--glass-border); transition: all 0.2s ease; cursor: pointer; }
         tbody tr:hover { background: rgba(56, 189, 248, 0.08); }
         tbody tr.row-overdue-alert { background: rgba(244, 63, 94, 0.12) !important; border-right: 4px solid var(--status-overdue) !important; }
         tbody tr.row-warning-3days { background: rgba(249, 115, 22, 0.12) !important; border-right: 4px solid var(--status-warning) !important; }
-        td { padding: 8px 14px; font-size: 0.85rem; vertical-align: middle; }
+        td { padding: 5px 8px; font-size: 0.76rem; vertical-align: middle; }
 
-        .badge { display: inline-block; padding: 7px 16px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.3px; backdrop-filter: blur(6px); }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 14px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2px; backdrop-filter: blur(6px); }
         .badge-waiting { background-color: rgba(251, 191, 36, 0.15); color: var(--status-waiting); border: 1px solid rgba(251, 191, 36, 0.35); }
         .badge-overdue { background-color: rgba(244, 63, 94, 0.18); color: var(--status-overdue); border: 1px solid rgba(244, 63, 94, 0.35); box-shadow: 0 0 12px rgba(244, 63, 94, 0.25); }
         .badge-ready { background-color: rgba(16, 185, 129, 0.15); color: var(--status-ready); border: 1px solid rgba(16, 185, 129, 0.35); box-shadow: 0 0 12px rgba(16, 185, 129, 0.25); }
@@ -697,9 +697,6 @@
                     </div>
                     <div class="mini-stat" onclick="setFilterStatus('3days_remaining'); switchMainTab('new');">
                         <span class="ic">⏳</span><span class="val" style="color:#d97706;" id="three-days-remaining-count">0</span><span class="lbl">باقي 3 أيام للتسليم</span>
-                    </div>
-                    <div class="mini-stat" onclick="setFilterStatus('uncompleted_cleaning'); switchMainTab('new');">
-                        <span class="ic">⚠️</span><span class="val" style="color:#e11d48;" id="clean-uncompleted-count">0</span><span class="lbl">تجاوزت التنظيف</span>
                     </div>
                     <div class="mini-stat" onclick="setFilterStatus('not_ready_overdue'); switchMainTab('new');">
                         <span class="ic">🚨</span><span class="val" style="color:#e11d48;" id="not-ready-overdue-count">0</span><span class="lbl">تجاوزت التسليم</span>
@@ -3460,7 +3457,8 @@
     function parseDate(v) {
         if (v == null) return '';
         var s = String(v).trim();
-        if (!s || s === 'خاص') return ''; // قيم غير تاريخية (نتجاهلها بصمت)
+        if (!s) return '';
+        if (s === 'خاص') return 'خاص'; // حالة خاصة: تُعتبر الدار مستلمة بدون تاريخ محدد (بطلب المستخدم)
         // صيغة yyyy-mm-dd أو yyyy/mm/dd
         var m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
         if (m) return m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0');
@@ -3559,7 +3557,8 @@
                 var k = norm(r.houseNo);
                 var sr = sheetRecords[k];
                 if (sr && !r.sheetDelivered) {
-                    list.push({ type: 'new', id: r.id, houseNo: r.houseNo, owner: sr.name || r.ownerName || '-', sector: sr.sector || r.sectorNo || '-', date: sr.date });
+                    // القطاع المسجل محلياً بالنظام أدق من عمود القطاع بالشيت (قد يحتوي الشيت بيانات قديمة/خاطئة) — نُفضّله دائماً
+                    list.push({ type: 'new', id: r.id, houseNo: r.houseNo, owner: r.ownerName || sr.name || '-', sector: r.sectorNo || sr.sector || '-', date: sr.date });
                 }
             });
         }
@@ -3568,7 +3567,7 @@
                 var k = norm(r.houseNo);
                 var sr = sheetRecords[k];
                 if (sr && r.status !== 'مستلم') {
-                    list.push({ type: 'old', id: r.id, houseNo: r.houseNo, owner: sr.name || '-', sector: sr.sector || r.sectorNo || '-', date: sr.date });
+                    list.push({ type: 'old', id: r.id, houseNo: r.houseNo, owner: sr.name || '-', sector: r.sectorNo || sr.sector || '-', date: sr.date });
                 }
             });
         }
@@ -3617,29 +3616,49 @@
         } catch (e) { console.error('slConfirm failed', e); }
     };
 
-    // ---------- 3) مستطيل "🏠 الدور المسلمة": يعكس كامل قائمة الشيت الحالية (القديم يروح والجديد بالشيت ينضاف) ----------
+    // ---------- 3) مستطيل "🏠 الدور المسلمة": يعكس كامل قائمة الشيت الحالية (القديم يروح والجديد بالشيت ينضاف) + خاصية بحث ----------
     function renderDeliveredTile() {
         var box = document.getElementById('delivered-houses-body');
         if (!box) return;
-        var items = Object.keys(sheetRecords).map(function (k) { return sheetRecords[k]; });
-        if (!items.length) { box.innerHTML = 'لا توجد بيانات بعد — بانتظار مزامنة الشيت.'; return; }
+        // نبني شريط البحث مرة واحدة فقط حتى لا يفقد المستخدم تركيزه أثناء الكتابة، وبعدها نحدّث القائمة فقط
+        if (!box.querySelector('#deliveredSearchInput')) {
+            box.innerHTML =
+                '<div style="margin-bottom:10px;">' +
+                '<input type="text" id="deliveredSearchInput" placeholder="🔍 بحث برقم الدار / الاسم / القطاع" oninput="window.__filterDeliveredTile(this.value)" ' +
+                'style="width:100%; max-width:340px; padding:8px 12px; border-radius:10px; border:1px solid var(--glass-border); background:var(--glass-bg-hover); color:var(--text-main); font-size:0.85rem;">' +
+                '</div><div id="delivered-houses-list"></div>';
+        }
+        window.__deliveredAllItems = Object.keys(sheetRecords).map(function (k) { return sheetRecords[k]; });
+        renderDeliveredList((document.getElementById('deliveredSearchInput') || {}).value || '');
+    }
+    function renderDeliveredList(q) {
+        var listBox = document.getElementById('delivered-houses-list');
+        if (!listBox) return;
+        var items = (window.__deliveredAllItems || []).slice();
+        if (!items.length) { listBox.innerHTML = 'لا توجد بيانات بعد — بانتظار مزامنة الشيت.'; return; }
+        var qq = norm(q);
+        if (qq) {
+            items = items.filter(function (x) {
+                return norm(x.houseNo).indexOf(qq) >= 0 || norm(x.name).indexOf(qq) >= 0 || norm(x.sector).indexOf(qq) >= 0;
+            });
+        }
         items.sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
-        box.innerHTML =
+        if (!items.length) { listBox.innerHTML = '<div style="color:var(--text-muted);">لا نتائج مطابقة للبحث.</div>'; return; }
+        listBox.innerHTML =
             '<div style="max-height:360px; overflow-y:auto;">' +
             '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
             '<thead><tr style="text-align:right;"><th style="padding:6px;">رقم البلوك والدار</th><th style="padding:6px;">اسم المستفيد</th><th style="padding:6px;">القطاع</th><th style="padding:6px;">تاريخ الاستلام</th></tr></thead>' +
             '<tbody>' + items.map(function (x) {
                 return '<tr style="border-top:1px solid var(--glass-border);"><td style="padding:6px;"><strong>' + esc(x.houseNo) + '</strong></td><td style="padding:6px;">' + esc(x.name || '-') + '</td><td style="padding:6px;">' + esc(x.sector || '-') + '</td><td style="padding:6px;">' + esc(x.date) + '</td></tr>';
             }).join('') + '</tbody></table></div>' +
-            '<div style="margin-top:8px; color:var(--text-muted);">الإجمالي: ' + items.length + ' دار مسلَّمة (حسب الشيت حالياً)</div>';
+            '<div style="margin-top:8px; color:var(--text-muted);">الإجمالي: ' + items.length + ' دار (من أصل ' + (window.__deliveredAllItems || []).length + ')</div>';
     }
+    window.__filterDeliveredTile = function (q) { renderDeliveredList(q); };
 
     // ---------- 4) مستطيل "📅 الجرد السنوي": تجميع عدد الدور المسلَّمة شهرياً/سنوياً حسب الفئة (أول حرف من رقم الدار) ----------
-    function renderAnnualInventory() {
-        var box = document.getElementById('annual-inventory-body');
-        if (!box) return;
-        var items = Object.keys(sheetRecords).map(function (k) { return sheetRecords[k]; }).filter(function (x) { return !!x.date; });
-        if (!items.length) { box.innerHTML = 'لا توجد بيانات بعد — بانتظار مزامنة الشيت.'; return; }
+    // حساب مجموعات الجرد السنوي (شهر/سنة × فئة) — دالة مشتركة بين العرض والتصدير لملف اكسل
+    function computeAnnualGroups() {
+        var items = Object.keys(sheetRecords).map(function (k) { return sheetRecords[k]; }).filter(function (x) { return !!x.date && x.date !== 'خاص'; });
         var groups = {}; // "yyyy-mm" -> { cats: {A:n,B:n}, total:n }
         var allCats = {};
         items.forEach(function (x) {
@@ -3654,7 +3673,17 @@
         });
         var keys = Object.keys(groups).sort(); // تصاعدياً من أقدم تاريخ بالشيت
         var cats = Object.keys(allCats).sort();
-        var html = '<div style="max-height:380px; overflow-y:auto;"><table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
+        return { items: items, groups: groups, keys: keys, cats: cats };
+    }
+
+    function renderAnnualInventory() {
+        var box = document.getElementById('annual-inventory-body');
+        if (!box) return;
+        var data = computeAnnualGroups();
+        if (!data.items.length) { box.innerHTML = 'لا توجد بيانات بعد — بانتظار مزامنة الشيت.'; return; }
+        var groups = data.groups, keys = data.keys, cats = data.cats;
+        var html = '<div style="margin-bottom:10px;"><button onclick="window.__exportAnnualInventory && window.__exportAnnualInventory()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(2,132,199,.4);background:rgba(2,132,199,.1);color:#0284c7;cursor:pointer;font-weight:700;">📥 تصدير Excel</button></div>' +
+            '<div style="max-height:380px; overflow-y:auto;"><table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
             '<thead><tr style="text-align:right;"><th style="padding:6px;">الشهر/السنة</th>' +
             cats.map(function (c) { return '<th style="padding:6px;">فئة ' + esc(c) + '</th>'; }).join('') +
             '<th style="padding:6px;">الإجمالي</th></tr></thead><tbody>';
@@ -3672,6 +3701,30 @@
         html += '</tbody></table></div>';
         box.innerHTML = html;
     }
+
+    // تصدير الجرد السنوي إلى ملف اكسل: صف لكل شهر/سنة، وعمود لكل فئة + الإجمالي
+    window.__exportAnnualInventory = function () {
+        try {
+            var data = computeAnnualGroups();
+            if (!data.items.length) { alert('لا توجد بيانات كافية للتصدير بعد.'); return; }
+            var groups = data.groups, keys = data.keys, cats = data.cats;
+            var aoa = [['الشهر', 'السنة'].concat(cats.map(function (c) { return 'فئة ' + c; })).concat(['الإجمالي'])];
+            var grandTotal = 0, grandByCat = {};
+            keys.forEach(function (key) {
+                var g = groups[key];
+                grandTotal += g.total;
+                var row = [AR_MONTHS[parseInt(g.m, 10)] || g.m, g.y];
+                cats.forEach(function (c) { grandByCat[c] = (grandByCat[c] || 0) + (g.cats[c] || 0); row.push(g.cats[c] || 0); });
+                row.push(g.total);
+                aoa.push(row);
+            });
+            aoa.push(['الإجمالي الكلي', ''].concat(cats.map(function (c) { return grandByCat[c] || 0; })).concat([grandTotal]));
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.aoa_to_sheet(aoa);
+            XLSX.utils.book_append_sheet(wb, ws, 'الجرد السنوي');
+            XLSX.writeFile(wb, 'الجرد_السنوي_' + todayStr + '.xlsx');
+        } catch (e) { console.error('export annual inventory failed', e); alert('تعذّر التصدير: ' + e.message); }
+    };
 
     function decorate() {
         try { decorateOld(); } catch (e) { console.error('sheet-link old', e); }
@@ -3722,7 +3775,9 @@
                 if (!key || raw == null || String(raw).trim() === '') continue;
                 var iso = parseDate(raw);
                 if (!iso) { bad++; continue; }
-                if (!map[key] || iso > map[key]) {
+                // "خاص" تُعتبر مستلمة بلا تاريخ محدد؛ لو توفر تاريخ حقيقي لنفس الدار نُفضّله عليها
+                var isBetter = !map[key] || (map[key] === 'خاص' && iso !== 'خاص') || (iso !== 'خاص' && map[key] !== 'خاص' && iso > map[key]);
+                if (isBetter) {
                     map[key] = iso;
                     recMap[key] = {
                         houseNo: rows[j][cH],
