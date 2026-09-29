@@ -1575,11 +1575,28 @@
     }
 
     function tryAutoFillHandoverDate() {
-        const status = document.getElementById('old-status').value;
+        const statusSelect = document.getElementById('old-status');
         const houseNo = document.getElementById('old-houseNo').value.trim();
         const hint = document.getElementById('old-handover-date-hint');
         const dateInput = document.getElementById('old-handoverDate');
-        if (status !== 'مستلم' || !houseNo) { hint.innerHTML = ''; return; }
+        if (!houseNo) { hint.innerHTML = ''; return; }
+
+        // أولاً: نفحص شيت Google Sheets المرتبط أونلاين (لو موجود ومتزامن) — بغض النظر عن الحالة المختارة حالياً
+        const sheetDate = (typeof window.getSheetDate === 'function') ? window.getSheetDate(houseNo) : null;
+        if (sheetDate) {
+            if (statusSelect.value !== 'مستلم') {
+                statusSelect.value = 'مستلم';
+                onOldStatusChange();
+                return; // onOldStatusChange بيرجع يستدعي tryAutoFillHandoverDate من جديد بالحالة الجديدة
+            }
+            dateInput.value = sheetDate;
+            hint.innerHTML = '📡 موجودة بشيت المسلَّمة أونلاين — تم تعبئة الحالة والتاريخ تلقائياً';
+            return;
+        }
+
+        if (statusSelect.value !== 'مستلم') { hint.innerHTML = ''; return; }
+
+        // ثانياً: نفحص ملف تواريخ الاستلام المرفوع يدوياً (إن وُجد) كخيار احتياطي
         const found = lookupHandoverDate(houseNo);
         if (found) {
             dateInput.value = found;
@@ -3279,6 +3296,11 @@
         }
         return '';
     }
+
+    // تُستخدم من نموذج إضافة/تعديل الدار القديمة (وظيفة tryAutoFillHandoverDate) للبحث الفوري أثناء كتابة رقم الدار
+    window.getSheetDate = function (houseNo) {
+        return sheetDates[norm(houseNo)] || null;
+    };
 
     // ---------- الشريط والتنبيه فوق الجدول ----------
     var anchor = document.querySelector('.table-container');
