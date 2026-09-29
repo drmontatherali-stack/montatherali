@@ -341,16 +341,21 @@
             box-shadow: 0 12px 35px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255, 255, 255, 0.08);
         }
         .alerts-panel-title { font-size: 1rem; font-weight: 800; color: var(--text-muted); margin-bottom: 14px; display:flex; align-items:center; gap:8px; }
-        .alerts-group { margin-bottom: 14px; }
+        .alerts-columns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: start; }
+        .alerts-column { background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 14px; padding: 12px; }
+        .alerts-column-title { font-weight: 900; font-size: 0.88rem; color: var(--text-main); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--glass-border); display:flex; align-items:center; justify-content:space-between; gap:6px; }
+        .alerts-column-title .count { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: rgba(255,255,255,0.06); border-radius: 10px; padding: 1px 9px; }
+        .alerts-group { margin-bottom: 12px; }
         .alerts-group:last-child { margin-bottom: 0; }
-        .alerts-group-header { font-weight: 800; font-size: 0.9rem; color: #38bdf8; margin-bottom: 8px; display:flex; align-items:center; gap:6px; }
-        .alerts-group-header .count { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: rgba(255,255,255,0.06); border-radius: 10px; padding: 1px 9px; }
-        .alerts-sector-block { margin: 0 0 8px 18px; }
-        .alerts-sector-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
-        .alert-item { display:inline-flex; align-items:center; gap:5px; font-size:0.85rem; background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 10px; padding: 4px 10px; margin: 0 6px 6px 0; }
+        .alerts-group-header { font-weight: 800; font-size: 0.82rem; color: #38bdf8; margin-bottom: 6px; display:flex; align-items:center; gap:6px; }
+        .alerts-group-header .count { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); background: rgba(255,255,255,0.06); border-radius: 10px; padding: 1px 9px; }
+        .alerts-sector-block { margin: 0 0 8px 10px; }
+        .alerts-sector-label { font-size: 0.76rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
+        .alert-item { display:flex; align-items:center; gap:5px; font-size:0.82rem; background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 10px; padding: 4px 10px; margin: 0 0 6px 0; }
         .alert-item.sev-overdue { border-color: rgba(244, 63, 94, 0.4); color: #f43f5e; }
         .alert-item.sev-warning { border-color: rgba(249, 115, 22, 0.4); color: #f97316; }
-        .alerts-empty { font-size: 0.88rem; color: var(--text-muted); text-align:center; padding: 6px 0; }
+        .alerts-empty { font-size: 0.85rem; color: var(--text-muted); text-align:center; padding: 10px 0; }
+        @media (max-width: 1100px) { .alerts-columns { grid-template-columns: repeat(2, 1fr); } }
 
         .notes-hover-box {
             position: relative;
@@ -514,6 +519,7 @@
             box-shadow: 0 12px 35px rgba(0,0,0,0.45);
         }
         @media (max-width: 900px) {
+            .alerts-columns { grid-template-columns: 1fr; }
             .table-container { display: none; }
             .mobile-card-item { display: block; content-visibility: auto; contain-intrinsic-size: auto 210px; }
             /* تحسين الأداء على الجوال: إلغاء التمويه الثقيل والحركات (سبب اللاك الرئيسي) */
@@ -1819,38 +1825,10 @@
     const SECTOR_ORDER = ["القطاع الأول", "القطاع الثاني", "القطاع الثالث", "القطاع الرابع", "القطاع الخامس", "القطاع السادس"];
     function sectorRank(s) { const i = SECTOR_ORDER.indexOf(s); return i === -1 ? 99 : i; }
 
-    // لوحة التنبيهات الموحدة (دور جديدة + قديمة)، مفروزة حسب المقاول ثم القطاع - بلا أي ترتيب عشوائي
-    function checkOldHousesAlerts() {
-        const body = document.getElementById('alerts-panel-body');
-        if (!body) return;
+    // تُبنى قائمة عناصر تنبيه واحدة (مقسّمة حسب المقاول ثم القطاع) لعمود واحد من الأعمدة الأربعة الثابتة
+    function renderAlertsColumnItems(items) {
+        if (!items.length) return '<div class="alerts-empty">لا يوجد 👍</div>';
 
-        let items = [];
-
-        oldHouseRecords.forEach(r => {
-            if (!r.notesEndDate || r.notesCompleted) return;
-            const diff = daysBetween(todayStr, r.notesEndDate);
-            if (diff === 2) {
-                items.push({ houseNo: r.houseNo, sectorNo: r.sectorNo, contractorName: r.contractorName, executionType: r.executionType, sev: 'warning', icon: '📌', label: 'باقي يومين على انتهاء الملاحظات' });
-            } else if (diff < 0) {
-                items.push({ houseNo: r.houseNo, sectorNo: r.sectorNo, contractorName: r.contractorName, executionType: r.executionType, sev: 'overdue', icon: '⚠️', label: 'عبرت 5 أيام على الملاحظات' });
-            }
-        });
-
-        houseRecords.forEach(rec => {
-            const st = calculateRecordStatus(rec);
-            if (st.isHandoverOverdue) {
-                items.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'overdue', icon: '🚨', label: 'عبرت 10 أيام على التسليم' });
-            } else if (st.is3DaysRemaining) {
-                items.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'warning', icon: '⏳', label: 'باقي 3 أيام على التسليم' });
-            }
-        });
-
-        if (!items.length) {
-            body.innerHTML = '<div class="alerts-empty">لا توجد تنبيهات حالياً 👍</div>';
-            return;
-        }
-
-        // تجميع حسب المقاول أولاً
         const groups = {};
         items.forEach(it => {
             const key = it.contractorName || (it.executionType === 'تنفيذ مباشر' ? 'تنفيذ مباشر (بدون مقاول)' : 'غير محدد');
@@ -1875,13 +1853,58 @@
                     html += `<div class="alerts-sector-block"><div class="alerts-sector-label">📍 ${esc(it.sectorNo || 'غير محدد')}</div>`;
                     lastSector = it.sectorNo;
                 }
-                html += `<span class="alert-item sev-${it.sev}">${it.icon} ${esc(it.houseNo)} - ${esc(it.label)}</span>`;
+                html += `<span class="alert-item sev-${it.sev}">${it.icon} ${esc(it.houseNo)}</span>`;
+                lastSector = it.sectorNo;
             });
             if (lastSector !== undefined) html += '</div>';
             html += `</div>`;
         });
 
-        body.innerHTML = html;
+        return html;
+    }
+
+    // لوحة التنبيهات: 4 أقسام عمودية ثابتة (دائماً ظاهرة حتى لو خالية)، تنضاف/تنحذف الدور منها تلقائياً حسب المواعيد،
+    // وكل قسم مفروز داخلياً حسب المقاول ثم القطاع - بلا أي ترتيب عشوائي
+    function checkOldHousesAlerts() {
+        const body = document.getElementById('alerts-panel-body');
+        if (!body) return;
+
+        const oldDue2Days = [];
+        const oldOverdue = [];
+        oldHouseRecords.forEach(r => {
+            if (!r.notesEndDate || r.notesCompleted) return;
+            const diff = daysBetween(todayStr, r.notesEndDate);
+            if (diff === 2) {
+                oldDue2Days.push({ houseNo: r.houseNo, sectorNo: r.sectorNo, contractorName: r.contractorName, executionType: r.executionType, sev: 'warning', icon: '📌' });
+            } else if (diff < 0) {
+                oldOverdue.push({ houseNo: r.houseNo, sectorNo: r.sectorNo, contractorName: r.contractorName, executionType: r.executionType, sev: 'overdue', icon: '⚠️' });
+            }
+        });
+
+        const new3Days = [];
+        const newOverdue = [];
+        houseRecords.forEach(rec => {
+            const st = calculateRecordStatus(rec);
+            if (st.isHandoverOverdue) {
+                newOverdue.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'overdue', icon: '🚨' });
+            } else if (st.is3DaysRemaining) {
+                new3Days.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'warning', icon: '⏳' });
+            }
+        });
+
+        const columns = [
+            { title: '📌 القديمة: باقي يومين عن الملاحظات', items: oldDue2Days },
+            { title: '⚠️ القديمة: عبرت موعد الملاحظات', items: oldOverdue },
+            { title: '⏳ الجديدة: باقي 3 أيام على التسليم', items: new3Days },
+            { title: '🚨 الجديدة: تجاوزت موعد التسليم', items: newOverdue }
+        ];
+
+        body.innerHTML = '<div class="alerts-columns">' + columns.map(col =>
+            `<div class="alerts-column">
+                <div class="alerts-column-title">${col.title} <span class="count">${col.items.length}</span></div>
+                ${renderAlertsColumnItems(col.items)}
+            </div>`
+        ).join('') + '</div>';
     }
 
     function setupCalendarControls() {
@@ -2897,6 +2920,17 @@
         document.getElementById('statusCheckModal').style.display = 'none';
     }
 
+    // تحديد سريع لحالة "هل تم الإكمال" مباشرة من شريط الجدول بدون فتح النافذة؛
+    // نفس الحقل isReady المستخدم بباقي النظام (لو ما تحدد ليوم العاشر تُحسب تلقائياً "تجاوزت الموعد")
+    function toggleReadyQuick(id, event) {
+        if (event) event.stopPropagation();
+        const rec = houseRecords.find(r => r.id === id);
+        if (!rec) return;
+        rec.isReady = !rec.isReady;
+        syncRecordFields(rec.id, { isReady: rec.isReady });
+        renderTable();
+    }
+
     function updateRecordState(id, action) {
         const rec = houseRecords.find(r => r.id === id);
         if (!rec) return;
@@ -3049,6 +3083,7 @@
             headCells.push(
                 '<th>تاريخ الحضور</th>',
                 '<th>موعد التسليم</th>',
+                '<th>✔ هل تم الإكمال؟</th>',
                 '<th>واتساب والتبليغ (3 مرات)</th>',
                 '<th>تعديل</th>'
             );
@@ -3144,6 +3179,9 @@
                     `<td>${datesHtml}</td>`,
                     `<td>${handoverHtml}</td>`,
                     `<td onclick="event.stopPropagation();">
+                        <input type="checkbox" class="ready-check" ${rec.isReady ? 'checked' : ''} onclick="toggleReadyQuick(${rec.id}, event)" title="✔ تحديد الدار كمكتملة">
+                    </td>`,
+                    `<td onclick="event.stopPropagation();">
                         <span class="whatsapp-icon" onclick="triggerWhatsAppNotifyById(${rec.id})">💬</span>
                         ${notifHtml}
                     </td>`,
@@ -3171,6 +3209,7 @@
                             ${showExtra ? `<div>📍 القطاع: ${esc(rec.sectorNo)}</div><div>🛠️ التنفيذ: ${esc(rec.executionType)} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</div>` : ''}
                             <div>📅 الحضور: ${rec.arrivalDate || '-'}</div>
                             <div>⏱️ التسليم: ${rec.handoverDate || rec.houseReadyDate || '-'}${rec.secondHandoverDate && st.isHandoverOverdue ? ` <span style="color:#fbbf24;">(موعد ثاني: ${rec.secondHandoverDate})</span>` : ''}</div>
+                            <div onclick="event.stopPropagation();"><label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" class="ready-check" ${rec.isReady ? 'checked' : ''} onclick="toggleReadyQuick(${rec.id}, event)"> ✔ هل تم الإكمال؟</label></div>
                         </div>
                         <div style="margin-top:12px; display:flex; gap:10px;" onclick="event.stopPropagation();">
                             <button class="action-btn" onclick="editRecord(${rec.id})">✏️ تعديل</button>
