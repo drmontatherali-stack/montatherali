@@ -1825,6 +1825,14 @@
     const SECTOR_ORDER = ["القطاع الأول", "القطاع الثاني", "القطاع الثالث", "القطاع الرابع", "القطاع الخامس", "القطاع السادس"];
     function sectorRank(s) { const i = SECTOR_ORDER.indexOf(s); return i === -1 ? 99 : i; }
 
+    // صيغة عربية سليمة لعدد الأيام المتبقية (0 = اليوم، 1 = يوم، 2 = يومان، 3+ = عدد أيام)
+    function daysLeftLabelAr(n) {
+        if (n <= 0) return 'اليوم';
+        if (n === 1) return 'باقي يوم';
+        if (n === 2) return 'باقي يومان';
+        return `باقي ${n} أيام`;
+    }
+
     // تُبنى قائمة عناصر تنبيه واحدة (مقسّمة حسب المقاول ثم القطاع) لعمود واحد من الأعمدة الأربعة الثابتة
     function renderAlertsColumnItems(items) {
         if (!items.length) return '<div class="alerts-empty">لا يوجد 👍</div>';
@@ -1853,7 +1861,8 @@
                     html += `<div class="alerts-sector-block"><div class="alerts-sector-label">📍 ${esc(it.sectorNo || 'غير محدد')}</div>`;
                     lastSector = it.sectorNo;
                 }
-                html += `<span class="alert-item sev-${it.sev}">${it.icon} ${esc(it.houseNo)}</span>`;
+                const dayLabel = typeof it.remDays === 'number' ? ' - ' + daysLeftLabelAr(it.remDays) : '';
+                html += `<span class="alert-item sev-${it.sev}">${it.icon} ${esc(it.houseNo)}${dayLabel}</span>`;
                 lastSector = it.sectorNo;
             });
             if (lastSector !== undefined) html += '</div>';
@@ -1874,8 +1883,8 @@
         oldHouseRecords.forEach(r => {
             if (!r.notesEndDate || r.notesCompleted) return;
             const diff = daysBetween(todayStr, r.notesEndDate);
-            if (diff === 2) {
-                oldDue2Days.push({ houseNo: r.houseNo, sectorNo: r.sectorNo, contractorName: r.contractorName, executionType: r.executionType, sev: 'warning', icon: '📌' });
+            if (diff >= 0 && diff <= 2) {
+                oldDue2Days.push({ houseNo: r.houseNo, sectorNo: r.sectorNo, contractorName: r.contractorName, executionType: r.executionType, sev: 'warning', icon: '📌', remDays: diff });
             } else if (diff < 0) {
                 oldOverdue.push({ houseNo: r.houseNo, sectorNo: r.sectorNo, contractorName: r.contractorName, executionType: r.executionType, sev: 'overdue', icon: '⚠️' });
             }
@@ -1888,7 +1897,7 @@
             if (st.isHandoverOverdue) {
                 newOverdue.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'overdue', icon: '🚨' });
             } else if (st.is3DaysRemaining) {
-                new3Days.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'warning', icon: '⏳' });
+                new3Days.push({ houseNo: rec.houseNo, sectorNo: rec.sectorNo, contractorName: rec.contractorName, executionType: rec.executionType, sev: 'warning', icon: '⏳', remDays: st.remDays });
             }
         });
 
@@ -2582,7 +2591,7 @@
 
         // الدور القديمة
         const oldAll = oldHouseRecords;
-        const old2Days = oldHouseRecords.filter(rec => rec.notesEndDate && !rec.notesCompleted && daysBetween(todayStr, rec.notesEndDate) === 2);
+        const old2Days = oldHouseRecords.filter(rec => rec.notesEndDate && !rec.notesCompleted && daysBetween(todayStr, rec.notesEndDate) >= 0 && daysBetween(todayStr, rec.notesEndDate) <= 2);
         const old5DaysOverdue = oldHouseRecords.filter(rec => rec.notesEndDate && !rec.notesCompleted && daysBetween(todayStr, rec.notesEndDate) < 0);
 
         let msgText = `📊 *التقرير اليومي الشامل - مجمع الأميرات 2*\n` +
@@ -2685,7 +2694,7 @@
             is3DaysRemaining = true;
         }
 
-        return { statusText, badgeClass, isCleaningOverdue, isHandoverOverdue, is3DaysRemaining, is2DayCleaningNeeded };
+        return { statusText, badgeClass, isCleaningOverdue, isHandoverOverdue, is3DaysRemaining, is2DayCleaningNeeded, remDays };
     }
 
     let lastChartSig = '';
@@ -3063,7 +3072,7 @@
             if (r.notesCompleted) oldNotesCompleted++;
             if (r.notesEndDate && !r.notesCompleted) {
                 const diff = daysBetween(todayStr, r.notesEndDate);
-                if (diff === 2) oldNotesDue2Days++;
+                if (diff >= 0 && diff <= 2) oldNotesDue2Days++;
                 if (diff < 0) oldNotesOverdue++;
             }
         });
@@ -3243,7 +3252,7 @@
 
                 const recIsCompleted = rec.status === 'مستلم';
                 const recNotesDiff = rec.notesEndDate ? daysBetween(todayStr, rec.notesEndDate) : null;
-                if (oldStatusFilter === 'notes_due_2days' && !(recNotesDiff === 2 && !rec.notesCompleted)) return false;
+                if (oldStatusFilter === 'notes_due_2days' && !(recNotesDiff !== null && recNotesDiff >= 0 && recNotesDiff <= 2 && !rec.notesCompleted)) return false;
                 if (oldStatusFilter === 'notes_overdue' && !(recNotesDiff !== null && recNotesDiff < 0 && !rec.notesCompleted)) return false;
                 if (oldStatusFilter === 'completed' && !recIsCompleted) return false;
                 if (oldStatusFilter === 'notes_completed' && !rec.notesCompleted) return false;
