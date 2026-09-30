@@ -3604,19 +3604,15 @@
             var item = list.filter(function (x) { return x.type === type && String(x.id) === String(id); })[0];
             if (!item) return;
             if (type === 'old' && typeof oldHouseRecords !== 'undefined') {
-                var recO = oldHouseRecords.filter(function (r) { return String(r.id) === String(id); })[0];
-                if (recO) {
-                    recO.status = 'مستلم';
-                    recO.handoverDate = item.date;
-                    if (typeof syncOldRecordFields === 'function') syncOldRecordFields(recO.id, { status: 'مستلم', handoverDate: item.date });
-                }
+                // بطلب المستخدم: الدار القديمة (قيد التسليم) المؤكَّدة تسلّمها بلا مشاكل تُحذف من شريط الدور القديمة نهائياً
+                // (تفاصيلها الكاملة تبقى محفوظة دائماً بمستطيل "الدور المسلمة" والجرد السنوي المسحوبين من الشيت مباشرة، فلا ضياع بيانات)
+                oldHouseRecords = oldHouseRecords.filter(function (r) { return String(r.id) !== String(id); });
+                if (typeof deleteOldRecordFromDB === 'function') deleteOldRecordFromDB(id);
             } else if (type === 'new' && typeof houseRecords !== 'undefined') {
-                var recN = houseRecords.filter(function (r) { return String(r.id) === String(id); })[0];
-                if (recN) {
-                    recN.sheetDelivered = true;
-                    recN.sheetDeliveredDate = item.date;
-                    if (typeof syncRecordFields === 'function') syncRecordFields(recN.id, { sheetDelivered: true, sheetDeliveredDate: item.date });
-                }
+                // بطلب المستخدم: الدار الجديدة المؤكَّدة تسلّمها بلا مشاكل تُحذف من شريط الدور الجديدة نهائياً
+                // (تفاصيلها الكاملة تبقى محفوظة دائماً بمستطيل "الدور المسلمة" المسحوب من الشيت مباشرة، فلا ضياع بيانات)
+                houseRecords = houseRecords.filter(function (r) { return String(r.id) !== String(id); });
+                if (typeof deleteRecordFromDB === 'function') deleteRecordFromDB(id);
             }
             if (typeof window.renderTable === 'function') window.renderTable(); else decorate();
         } catch (e) { console.error('slConfirm failed', e); }
