@@ -25,24 +25,25 @@
 
     <style>
         :root {
-            --bg-primary: #eef2f7;
-            --glass-bg: rgba(255, 255, 255, 0.82);
-            --glass-bg-hover: rgba(255, 255, 255, 0.96);
-            --glass-card: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(2, 132, 199, 0.18);
-            --glass-border-glow: rgba(2, 132, 199, 0.45);
+            /* ألوان رسمية هادئة (كحلي/رمادي) بدل الألوان اللامعة السابقة */
+            --bg-primary: #eef1f5;
+            --glass-bg: rgba(255, 255, 255, 0.96);
+            --glass-bg-hover: rgba(255, 255, 255, 1);
+            --glass-card: rgba(255, 255, 255, 0.94);
+            --glass-border: rgba(15, 42, 74, 0.14);
+            --glass-border-glow: rgba(15, 42, 74, 0.4);
 
-            --primary-blue: #0284c7;
-            --primary-indigo: #6366f1;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
+            --primary-blue: #123a63;
+            --primary-indigo: #1d5384;
+            --text-main: #16233a;
+            --text-muted: #5b6b7c;
 
-            --status-waiting: #d97706;
-            --status-overdue: #e11d48;
-            --status-ready: #059669;
-            --status-direct: #0891b2;
-            --status-contractor: #9333ea;
-            --status-warning: #ea580c;
+            --status-waiting: #b45309;
+            --status-overdue: #b91c1c;
+            --status-ready: #15803d;
+            --status-direct: #0e7490;
+            --status-contractor: #6d28d9;
+            --status-warning: #c2410c;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
@@ -54,10 +55,8 @@
             padding: 16px;
             direction: rtl;
             font-size: 15px;
-            background-image: 
-                radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 90%, rgba(129, 140, 248, 0.12) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 60%);
+            /* خلفية هادئة موحّدة اللون (كحلي خفيف جداً) بدل الفقاعات الملوّنة السابقة، لمظهر رسمي أكثر */
+            background-image: linear-gradient(180deg, rgba(18, 58, 99, 0.05) 0%, rgba(18, 58, 99, 0) 220px);
             background-attachment: fixed;
         }
 
@@ -85,11 +84,11 @@
             position: absolute;
             top: 0; right: 0; width: 6px; height: 100%;
             background: linear-gradient(to bottom, var(--primary-blue), var(--primary-indigo));
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+            box-shadow: 0 0 10px rgba(18, 58, 99, 0.5);
         }
 
         header h1 { font-size: 1.75rem; font-weight: 900; color: var(--text-main); letter-spacing: -0.5px; }
-        header h1 span { color: var(--primary-blue); text-shadow: 0 0 30px rgba(56, 189, 248, 0.7); }
+        header h1 span { color: var(--primary-blue); text-shadow: 0 0 30px rgba(18, 58, 99, 0.7); }
         header small { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; margin-top: 4px; display: block; }
 
         .header-info-box { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -99,8 +98,8 @@
             font-size: 1.15rem;
             font-weight: 900;
             color: var(--primary-blue);
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(129, 140, 248, 0.15));
-            border: 1px solid rgba(56, 189, 248, 0.4);
+            background: linear-gradient(135deg, rgba(18, 58, 99, 0.15), rgba(29, 83, 132, 0.15));
+            border: 1px solid rgba(18, 58, 99, 0.4);
             padding: 9px 20px;
             border-radius: 16px;
             letter-spacing: 0.5px;
@@ -108,7 +107,7 @@
             align-items: center;
             gap: 8px;
             direction: ltr;
-            box-shadow: inset 0 1px 4px rgba(56, 189, 248, 0.3), 0 0 20px rgba(56, 189, 248, 0.2);
+            box-shadow: inset 0 1px 4px rgba(18, 58, 99, 0.3), 0 0 20px rgba(18, 58, 99, 0.2);
         }
         .designer-title-large strong { color: var(--text-main); font-weight: 900; }
 
@@ -128,15 +127,15 @@
             font-size: 0.85rem;
             padding: 10px 18px;
             border-radius: 16px;
-            background: rgba(16, 185, 129, 0.12);
+            background: rgba(21, 128, 61, 0.12);
             color: #047857;
-            border: 1px solid rgba(16, 185, 129, 0.4);
+            border: 1px solid rgba(21, 128, 61, 0.4);
             display: flex;
             align-items: center;
             gap: 8px;
             font-weight: 700;
             backdrop-filter: blur(12px);
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+            box-shadow: 0 0 15px rgba(21, 128, 61, 0.15);
         }
 
         .analytics-grid {
@@ -155,7 +154,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
         }
-        .chart-box:hover { border-color: var(--glass-border-glow); box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 25px rgba(56, 189, 248, 0.2); }
+        .chart-box:hover { border-color: var(--glass-border-glow); box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 25px rgba(18, 58, 99, 0.2); }
         .chart-box h3 { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
 
         .metrics-grid {
@@ -195,7 +194,7 @@
             transform: translateY(-4px);
             background: var(--glass-bg-hover);
             border-color: var(--primary-blue);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(18, 58, 99, 0.3);
         }
         .metric-card:hover::before { background: var(--primary-blue); box-shadow: 0 0 15px var(--primary-blue); }
         .metric-card .title { font-size: 0.8rem; color: var(--text-muted); margin: 2px 0 6px; font-weight: 700; line-height: 1.3; }
@@ -229,7 +228,7 @@
             transition: all 0.2s;
             font-weight: 800;
         }
-        .mini-stat:hover { border-color: var(--primary-blue); background: rgba(56, 189, 248, 0.1); }
+        .mini-stat:hover { border-color: var(--primary-blue); background: rgba(18, 58, 99, 0.1); }
         .mini-stat .ic { font-size: 0.95rem; line-height: 1; }
         .mini-stat .val { font-size: 1rem; font-weight: 900; }
         .mini-stat .lbl { font-size: 0.76rem; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
@@ -283,15 +282,15 @@
             backdrop-filter: blur(12px);
             transition: all 0.25s;
         }
-        select:focus, input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), 0 0 20px rgba(56, 189, 248, 0.25); }
+        select:focus, input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(18, 58, 99, 0.25), 0 0 20px rgba(18, 58, 99, 0.25); }
 
         .btn-action-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         
         .btn-daily-checklist, .btn-precleaned-manage, .btn-contractors-score, .btn-calendar-view, .btn-whatsapp-daily, .btn-excel-export, .tools-group-toggle {
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(129, 140, 248, 0.22));
+            background: linear-gradient(135deg, rgba(18, 58, 99, 0.22), rgba(29, 83, 132, 0.22));
             backdrop-filter: blur(12px);
             color: #075985;
-            border: 1px solid rgba(56, 189, 248, 0.35);
+            border: 1px solid rgba(18, 58, 99, 0.35);
             padding: 12px 18px;
             border-radius: 16px;
             font-weight: 800;
@@ -302,7 +301,7 @@
             transition: all 0.25s;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         }
-        .btn-add { background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: 1px solid rgba(255, 255, 255, 0.25); padding: 13px 28px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.35); }
+        .btn-add { background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: 1px solid rgba(255, 255, 255, 0.25); padding: 13px 28px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 8px 20px rgba(18, 58, 99, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.35); }
 
         .btn-daily-checklist:hover, .btn-precleaned-manage:hover, .btn-contractors-score:hover, .btn-calendar-view:hover, .btn-whatsapp-daily:hover, .btn-excel-export:hover, .btn-add:hover {
             transform: translateY(-3px);
@@ -330,7 +329,7 @@
             background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo));
             color: #fff;
             border-color: rgba(255,255,255,0.3);
-            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 6px 20px rgba(18, 58, 99, 0.4);
         }
 
         .old-houses-alert-banner {
@@ -364,7 +363,7 @@
         .alerts-column-title .count { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: rgba(255,255,255,0.06); border-radius: 10px; padding: 1px 9px; }
         .alerts-group { margin-bottom: 12px; }
         .alerts-group:last-child { margin-bottom: 0; }
-        .alerts-group-header { font-weight: 800; font-size: 0.82rem; color: #38bdf8; margin-bottom: 6px; display:flex; align-items:center; gap:6px; }
+        .alerts-group-header { font-weight: 800; font-size: 0.82rem; color: #1d5384; margin-bottom: 6px; display:flex; align-items:center; gap:6px; }
         .alerts-group-header .count { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); background: rgba(255,255,255,0.06); border-radius: 10px; padding: 1px 9px; }
         .alerts-sector-block { margin: 0 0 8px 10px; }
         .alerts-sector-label { font-size: 0.76rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
@@ -427,7 +426,7 @@
         thead { background: rgba(226, 232, 240, 0.85); border-bottom: 2px solid var(--glass-border); }
         th { padding: 6px 8px; font-size: 0.72rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.2px; }
         tbody tr { border-bottom: 1px solid var(--glass-border); transition: all 0.2s ease; cursor: pointer; }
-        tbody tr:hover { background: rgba(56, 189, 248, 0.08); }
+        tbody tr:hover { background: rgba(18, 58, 99, 0.08); }
         tbody tr.row-overdue-alert { background: rgba(244, 63, 94, 0.12) !important; border-right: 4px solid var(--status-overdue) !important; }
         tbody tr.row-warning-3days { background: rgba(249, 115, 22, 0.12) !important; border-right: 4px solid var(--status-warning) !important; }
         td { padding: 5px 8px; font-size: 0.76rem; vertical-align: middle; }
@@ -435,16 +434,16 @@
         .badge { display: inline-block; padding: 4px 10px; border-radius: 14px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2px; backdrop-filter: blur(6px); }
         .badge-waiting { background-color: rgba(251, 191, 36, 0.15); color: var(--status-waiting); border: 1px solid rgba(251, 191, 36, 0.35); }
         .badge-overdue { background-color: rgba(244, 63, 94, 0.18); color: var(--status-overdue); border: 1px solid rgba(244, 63, 94, 0.35); box-shadow: 0 0 12px rgba(244, 63, 94, 0.25); }
-        .badge-ready { background-color: rgba(16, 185, 129, 0.15); color: var(--status-ready); border: 1px solid rgba(16, 185, 129, 0.35); box-shadow: 0 0 12px rgba(16, 185, 129, 0.25); }
+        .badge-ready { background-color: rgba(21, 128, 61, 0.15); color: var(--status-ready); border: 1px solid rgba(21, 128, 61, 0.35); box-shadow: 0 0 12px rgba(21, 128, 61, 0.25); }
         .badge-direct { background-color: rgba(6, 182, 212, 0.15); color: var(--status-direct); border: 1px solid rgba(6, 182, 212, 0.35); }
         .badge-contractor { background-color: rgba(168, 85, 247, 0.15); color: var(--status-contractor); border: 1px solid rgba(168, 85, 247, 0.35); }
         .badge-warning { background-color: rgba(249, 115, 22, 0.18); color: var(--status-warning); border: 1px solid rgba(249, 115, 22, 0.35); }
 
-        .whatsapp-icon { color: #34d399; font-size: 1.3rem; text-decoration: none; margin-left: 10px; display: inline-block; cursor: pointer; transition: transform 0.2s, text-shadow 0.2s; }
-        .whatsapp-icon:hover { transform: scale(1.3); text-shadow: 0 0 12px #34d399; }
+        .whatsapp-icon { color: #15803d; font-size: 1.3rem; text-decoration: none; margin-left: 10px; display: inline-block; cursor: pointer; transition: transform 0.2s, text-shadow 0.2s; }
+        .whatsapp-icon:hover { transform: scale(1.3); text-shadow: 0 0 12px #15803d; }
         
-        .camera-icon-btn { background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); color: var(--primary-blue); padding: 7px 14px; border-radius: 14px; cursor: pointer; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(6px); transition: all 0.2s; }
-        .camera-icon-btn:hover { background: var(--primary-blue); color: #fff; box-shadow: 0 0 18px rgba(56, 189, 248, 0.7); }
+        .camera-icon-btn { background: rgba(18, 58, 99, 0.12); border: 1px solid rgba(18, 58, 99, 0.35); color: var(--primary-blue); padding: 7px 14px; border-radius: 14px; cursor: pointer; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(6px); transition: all 0.2s; }
+        .camera-icon-btn:hover { background: var(--primary-blue); color: #fff; box-shadow: 0 0 18px rgba(18, 58, 99, 0.7); }
 
         .checkbox-container { display: inline-flex; gap: 8px; align-items: center; }
         .notif-box { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary-blue); border-radius: 4px; }
@@ -453,29 +452,28 @@
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(2, 6, 23, 0.85);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            background: rgba(10, 20, 35, 0.72);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             z-index: 10000;
             align-items: center;
             justify-content: center;
-            animation: fadeIn 0.25s ease-out;
+            animation: fadeIn 0.2s ease-out;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* خلفية النافذة صارت أبسط وأصلب (بدل التمويه الثقيل السابق) لتقليل الإحساس بالدوخة عند فتح تفاصيل كثيرة */
         .modal-content {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid var(--glass-border-glow);
-            padding: 36px;
-            border-radius: 26px;
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            padding: 32px;
+            border-radius: 20px;
             width: 90%;
             max-width: 720px;
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 35px 80px rgba(0,0,0,0.85), inset 0 1px 3px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 60px rgba(15, 30, 55, 0.35);
         }
         .close-btn { position: absolute; top: 22px; left: 26px; font-size: 1.7rem; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
         .close-btn:hover { color: var(--primary-blue); text-shadow: none; }
@@ -483,10 +481,10 @@
         .form-group { margin-bottom: 20px; text-align: right; }
         .form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.88rem; font-weight: 700; }
         .form-control { width: 100%; background: rgba(226, 232, 240, 0.7); border: 1px solid var(--glass-border); color: var(--text-main); padding: 13px 18px; border-radius: 16px; font-size: 0.9rem; outline: none; backdrop-filter: blur(12px); transition: all 0.25s; }
-        .form-control:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), 0 0 20px rgba(56, 189, 248, 0.25); }
+        .form-control:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(18, 58, 99, 0.25), 0 0 20px rgba(18, 58, 99, 0.25); }
         
-        .btn-primary { width: 100%; background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: 1px solid rgba(255,255,255,0.25); padding: 14px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 25px rgba(56, 189, 248, 0.45); }
-        .btn-primary:hover { filter: brightness(1.2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(56, 189, 248, 0.65); }
+        .btn-primary { width: 100%; background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo)); color: #fff; border: 1px solid rgba(255,255,255,0.25); padding: 14px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 25px rgba(18, 58, 99, 0.45); }
+        .btn-primary:hover { filter: brightness(1.2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(18, 58, 99, 0.65); }
 
         .hidden-field { display: none; }
         .action-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.15rem; margin: 0 4px; transition: color 0.2s; }
@@ -494,8 +492,8 @@
         .action-btn.delete:hover { color: var(--status-overdue); text-shadow: 0 0 12px var(--status-overdue); }
 
         .modal-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
-        .btn-action-success { background: rgba(16, 185, 129, 0.9); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(52, 211, 153, 0.4); padding: 14px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35); }
-        .btn-action-success:hover { filter: brightness(1.2); box-shadow: 0 0 25px rgba(16, 185, 129, 0.6); }
+        .btn-action-success { background: rgba(21, 128, 61, 0.9); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(52, 211, 153, 0.4); padding: 14px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(21, 128, 61, 0.35); }
+        .btn-action-success:hover { filter: brightness(1.2); box-shadow: 0 0 25px rgba(21, 128, 61, 0.6); }
         .btn-action-danger { background: rgba(244, 63, 94, 0.9); backdrop-filter: blur(12px); color: #fff; border: 1px solid rgba(251, 113, 133, 0.4); padding: 14px; border-radius: 16px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(244, 63, 94, 0.35); }
         .btn-action-danger:hover { filter: brightness(1.2); box-shadow: 0 0 25px rgba(244, 63, 94, 0.6); }
 
@@ -517,9 +515,9 @@
         }
         .excel-option-btn:hover {
             border-color: var(--primary-blue);
-            background: rgba(56, 189, 248, 0.15);
+            background: rgba(18, 58, 99, 0.15);
             transform: translateX(-5px);
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+            box-shadow: 0 0 20px rgba(18, 58, 99, 0.25);
         }
 
         .precleaned-item {
@@ -572,12 +570,12 @@
         }
         .calendar-day-box:hover {
             border-color: var(--primary-blue);
-            background: rgba(56, 189, 248, 0.1);
+            background: rgba(18, 58, 99, 0.1);
             transform: scale(1.02);
         }
 
         .calendar-nav-btn {
-            background: rgba(56, 189, 248, 0.15);
+            background: rgba(18, 58, 99, 0.15);
             border: 1px solid var(--primary-blue);
             color: #075985;
             padding: 8px 16px;
@@ -589,7 +587,7 @@
         .calendar-nav-btn:hover {
             background: var(--primary-blue);
             color: #000;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+            box-shadow: 0 0 15px rgba(18, 58, 99, 0.5);
         }
 
         .team-select-item {
@@ -627,7 +625,7 @@
         .house-type-btn.active {
             background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo));
             border-color: rgba(255,255,255,0.4);
-            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 6px 20px rgba(18, 58, 99, 0.4);
         }
     </style>
 </head>
@@ -744,7 +742,7 @@
                 <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; font-size:0.85rem; color:var(--text-muted);">
                     <span id="cwStatus">🔗 لم يتم ربط ملف موقف المقاولين الأسبوعي بعد</span>
                     <button onclick="window.__cwAskUrl && window.__cwAskUrl()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;">🔗 ربط/تغيير رابط الشيت</button>
-                    <button onclick="window.__cwSync && window.__cwSync(true)" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(16,185,129,.5);background:rgba(16,185,129,.12);color:#059669;cursor:pointer;font-weight:700;">🔄 تحديث</button>
+                    <button onclick="window.__cwSync && window.__cwSync(true)" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21, 128, 61,.5);background:rgba(21, 128, 61,.12);color:#059669;cursor:pointer;font-weight:700;">🔄 تحديث</button>
                 </div>
                 <div id="contractors-weekly-body" style="font-size:0.85rem; color:var(--text-muted);">لا توجد بيانات بعد — اربط ملف الموقف الأسبوعي أولاً.</div>
             </div>
@@ -827,7 +825,7 @@
     <div style="margin-bottom:12px;">
         <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem; color:var(--text-muted);">
             <input type="checkbox" id="show-extra-cols-toggle" onchange="toggleExtraCols()">
-            👁️ إظهار عمودي القطاع ونوع التنفيذ بالجدول
+            👁️ إظهار كل الأعمدة والتفاصيل الإضافية بالجدول (القطاع، نوع التنفيذ، واتساب، تعديل...)
         </label>
     </div>
 
@@ -856,7 +854,7 @@
 <div id="handoverDatesModal" class="modal">
     <div class="modal-content" style="max-width: 560px;">
         <span class="close-btn" onclick="closeHandoverDatesModal()">&times;</span>
-        <h3 style="margin-bottom: 8px; color: #38bdf8; font-weight: 900;">📋 تواريخ الاستلام المرفوعة</h3>
+        <h3 style="margin-bottom: 8px; color: #1d5384; font-weight: 900;">📋 تواريخ الاستلام المرفوعة</h3>
         <p id="handover-dates-meta" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;"></p>
         <input type="text" id="handover-dates-search" class="form-control" placeholder="ابحث برقم الدار..." oninput="onHandoverDatesSearch()" style="margin-bottom: 14px;">
         <div id="handover-dates-list" style="max-height: 360px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); border-radius: 14px; border: 1px solid var(--glass-border);"></div>
@@ -888,7 +886,7 @@
 <div id="customReportModal" class="modal">
     <div class="modal-content" style="max-width: 480px;">
         <span class="close-btn" onclick="closeCustomReportModal()">&times;</span>
-        <h3 id="customReportTitle" style="margin-bottom: 12px; color: #38bdf8; font-weight: 900;">📊 تقرير مخصص</h3>
+        <h3 id="customReportTitle" style="margin-bottom: 12px; color: #1d5384; font-weight: 900;">📊 تقرير مخصص</h3>
         <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">اختر الأقسام التي تريد تضمينها بملف الإكسل:</p>
         <div id="customReportOptions" style="display: flex; flex-direction: column; gap: 4px;"></div>
         <button class="btn-primary" style="margin-top: 18px;" onclick="runCustomReportExport()">📥 تصدير الملف</button>
@@ -898,7 +896,7 @@
 <div id="calendarModal" class="modal">
     <div class="modal-content" style="max-width: 950px;">
         <span class="close-btn" onclick="closeCalendarModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: var(--text-main);">📅 التقويم الهندسي التفاعلي الشامل</h3>
+        <h3 style="margin-bottom: 15px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">📅 التقويم الهندسي التفاعلي الشامل</h3>
         <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">يمكنك التنقل بين الأنماط والأشهر والسنوات بمرونة متكاملة لمتابعة كافة مواعيد الدور المستمرة والعابرة للأشهر والسنوات.</p>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(226, 232, 240, 0.6); padding: 12px 18px; border-radius: 16px; border: 1px solid var(--glass-border); flex-wrap: wrap; gap: 10px;">
@@ -922,7 +920,7 @@
 <div id="dayEventsModal" class="modal">
     <div class="modal-content" style="max-width: 650px;">
         <span class="close-btn" onclick="closeDayEventsModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #38bdf8;" id="day-events-title">📅 أحداث ومواعيد اليوم</h3>
+        <h3 style="margin-bottom: 15px; color: #1d5384;" id="day-events-title">📅 أحداث ومواعيد اليوم</h3>
         <div id="day-events-content" style="max-height: 380px; overflow-y: auto; line-height: 1.8;"></div>
     </div>
 </div>
@@ -930,7 +928,7 @@
 <div id="contractorScorecardModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeContractorScorecardModal()">&times;</span>
-        <h3 style="margin-bottom: 20px; color: var(--text-main);">📊 تقييم أداء المقاولين</h3>
+        <h3 style="margin-bottom: 20px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">📊 تقييم أداء المقاولين</h3>
         <div id="contractor-scorecard-list" style="max-height: 350px; overflow-y: auto;"></div>
     </div>
 </div>
@@ -938,7 +936,7 @@
 <div id="timelineModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeTimelineModal()">&times;</span>
-        <h3 style="margin-bottom: 20px; color: #38bdf8;" id="timeline-modal-title">⏳ السجل التاريخي وجسيم التدقيق</h3>
+        <h3 style="margin-bottom: 20px; color: #1d5384;" id="timeline-modal-title">⏳ السجل التاريخي وجسيم التدقيق</h3>
         <div id="timeline-content-box" style="line-height: 2; color: var(--text-muted);"></div>
     </div>
 </div>
@@ -946,9 +944,9 @@
 <div id="dailyChecklistModal" class="modal">
     <div class="modal-content" style="max-width: 800px;">
         <span class="close-btn" onclick="closeDailyChecklistModal()">&times;</span>
-        <h3 style="margin-bottom: 20px; color: var(--text-main); border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">📋 مواعيد اليوم: <span id="modal-today-date" style="color:#38bdf8;"></span></h3>
+        <h3 style="margin-bottom: 20px; color: var(--primary-blue); font-weight:900; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">📋 مواعيد اليوم: <span id="modal-today-date" style="color:#1d5384;"></span></h3>
         <div style="margin-bottom: 25px;">
-            <h4 style="color: #38bdf8; margin-bottom: 10px;">🧹 دور موعد تنظيفها اليوم:</h4>
+            <h4 style="color: #1d5384; margin-bottom: 10px;">🧹 دور موعد تنظيفها اليوم:</h4>
             <div id="cleaning-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
         </div>
         <div>
@@ -965,7 +963,7 @@
 <div id="preCleanedModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closePreCleanedModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: var(--text-main);">إدارة الدور المنظفة مسبقاً</h3>
+        <h3 style="margin-bottom: 15px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">إدارة الدور المنظفة مسبقاً</h3>
         <div class="form-group">
             <textarea id="bulkPreCleanedInput" class="form-control" rows="4" placeholder="أدخل الدور (كل دار بسطر)..."></textarea>
         </div>
@@ -977,7 +975,7 @@
 <div id="addRecordModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeAddModal()">&times;</span>
-        <h3 id="modal-title" style="margin-bottom: 20px; color: var(--text-main);">إضافة دار جديد</h3>
+        <h3 id="modal-title" style="margin-bottom: 20px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">إضافة دار جديد</h3>
 
         <!-- اختيار نوع الدار (جديد أو قديم) -->
         <div class="house-type-selector" id="house-type-selector-box">
@@ -992,7 +990,7 @@
                 <label>رقم البلوك والدار (يُمنع التكرار)</label>
                 <input type="text" id="houseNo" class="form-control" required placeholder="مثال: A1.1" oninput="checkPreCleanedMatch()">
             </div>
-            <div id="preCleanedAlertBox" style="display:none; background: rgba(16, 185, 129, 0.18); border: 1px solid #10b981; padding: 14px; border-radius: 16px; margin-bottom: 18px; color: #10b981; font-weight: 700; backdrop-filter: blur(12px);">
+            <div id="preCleanedAlertBox" style="display:none; background: rgba(21, 128, 61, 0.18); border: 1px solid #10b981; padding: 14px; border-radius: 16px; margin-bottom: 18px; color: #10b981; font-weight: 700; backdrop-filter: blur(12px);">
                 ✨ هذا الدار مطابق ضمن "الدور المنظفة مسبقاً"! تم تعيين حالته "نظيف" مباشرة وتخطي تواريخ التنظيف لمنع الأخطاء.
             </div>
             <div class="form-group">
@@ -1102,7 +1100,7 @@
 <div id="signatureModal" class="modal">
     <div class="modal-content" style="max-width: 500px; text-align:center;">
         <span class="close-btn" onclick="closeSignatureModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: var(--text-main);">✍️ التوقيع الإلكتروني الإلزامي للاستلام</h3>
+        <h3 style="margin-bottom: 15px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">✍️ التوقيع الإلكتروني الإلزامي للاستلام</h3>
         <canvas id="sigCanvas" class="signature-pad"></canvas>
         <div style="margin-top: 18px; display:flex; gap:12px;">
             <button class="btn-action-danger" style="flex:1;" onclick="clearSignature()">مسح التوقيع</button>
@@ -1130,7 +1128,7 @@
 <div id="statusCheckModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeStatusModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: var(--text-main);">تحديث موقف الدار (نظام التدقيق)</h3>
+        <h3 style="margin-bottom: 15px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">تحديث موقف الدار (نظام التدقيق)</h3>
         <div id="status-modal-details" style="line-height: 1.8; margin-bottom: 20px; color: var(--text-muted);"></div>
         <div id="status-interactive-questions"></div>
     </div>
@@ -1139,7 +1137,7 @@
 <div id="imagePreviewModal" class="modal">
     <div class="modal-content" style="text-align:center;">
         <span class="close-btn" onclick="closeImageModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: var(--text-main);">المرفقات المعتمدة (صور وتوقيع)</h3>
+        <h3 style="margin-bottom: 15px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">المرفقات المعتمدة (صور وتوقيع)</h3>
         <img id="previewImgElement" src="" alt="صورة الملاحظات" style="max-width: 100%; max-height: 70vh; border-radius: 16px; margin-bottom:15px; border:1px solid var(--glass-border);">
         <br>
         <button class="btn-primary" onclick="openSignatureModalForCurrent()">✍️ تعديل التوقيع الرقمي</button>
@@ -2048,12 +2046,12 @@
             const box = document.createElement('div');
             box.className = 'calendar-day-box';
             if (dayEventsCount > 0) {
-                box.style.background = 'rgba(56, 189, 248, 0.18)';
+                box.style.background = 'rgba(18, 58, 99, 0.18)';
                 box.style.border = '1px solid var(--primary-blue)';
             }
             if (dStr === todayStr) {
                 box.style.border = '2px solid #10b981';
-                box.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.4)';
+                box.style.boxShadow = '0 0 10px rgba(21, 128, 61, 0.4)';
             }
 
             box.onclick = () => showDayEvents(dStr);
@@ -2108,7 +2106,7 @@
         ctx = canvas.getContext('2d');
         canvas.width = canvas.parentElement.clientWidth - 40;
         canvas.height = 160;
-        ctx.strokeStyle = '#38bdf8';
+        ctx.strokeStyle = '#1d5384';
         ctx.lineWidth = 3;
 
         canvas.onmousedown = (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
@@ -2228,7 +2226,7 @@
             container.innerHTML += `
                 <div style="background:rgba(226, 232, 240, 0.5); backdrop-filter:blur(12px); border:1px solid var(--glass-border); padding:16px; border-radius:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <strong style="color:#38bdf8; font-size:1.05rem;">👷‍♂️ ${esc(contractor)}</strong>
+                        <strong style="color:#1d5384; font-size:1.05rem;">👷‍♂️ ${esc(contractor)}</strong>
                         <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">إجمالي الدور المسجلة (جديدة + قديمة): ${total}</div>
                     </div>
                     <div style="text-align:left; display:flex; gap:8px;">
@@ -2557,7 +2555,7 @@
         listEl.innerHTML = list.map(x => `
             <div style="display:flex; justify-content:space-between; padding:8px 12px; border-bottom:1px solid var(--glass-border); font-size:0.9rem;">
                 <span>🏠 ${esc(x.houseNo)}</span>
-                <span style="color:#38bdf8;">📅 ${esc(x.date)}</span>
+                <span style="color:#1d5384;">📅 ${esc(x.date)}</span>
             </div>
         `).join('');
     }
@@ -2778,7 +2776,7 @@
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(sectorsCount),
-                    datasets: [{ data: sectorData, backgroundColor: ['#38bdf8', '#818cf8', '#10b981', '#fbbf24', '#f43f5e', '#a855f7'], borderWidth: 0 }]
+                    datasets: [{ data: sectorData, backgroundColor: ['#1d5384', '#1d5384', '#10b981', '#fbbf24', '#f43f5e', '#a855f7'], borderWidth: 0 }]
                 },
                 options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'left', labels: { color: '#94a3b8', font: { family: 'Cairo', weight: '600' } } } } }
             });
@@ -2961,7 +2959,7 @@
 
         questionsHtml += `</div>
             <br>
-            <button class="btn-primary" style="background: rgba(56, 189, 248, 0.2); border-color: var(--primary-blue);" onclick="openTimelineModal(${rec.id})">⏳ عرض السجل التاريخي الشامل</button>
+            <button class="btn-primary" style="background: rgba(18, 58, 99, 0.2); border-color: var(--primary-blue);" onclick="openTimelineModal(${rec.id})">⏳ عرض السجل التاريخي الشامل</button>
         `;
 
         document.getElementById('status-interactive-questions').innerHTML = questionsHtml;
@@ -3140,10 +3138,11 @@
             headCells.push(
                 '<th>تاريخ الحضور</th>',
                 '<th>موعد التسليم</th>',
-                '<th>✔ هل تم الإكمال؟</th>',
-                '<th>واتساب والتبليغ (3 مرات)</th>',
-                '<th>تعديل</th>'
+                '<th>✔ هل تم الإكمال؟</th>'
             );
+            // بطلب المستخدم: عمودا واتساب/التبليغ والتعديل يبقيان مخفيين افتراضياً لتخفيف ازدحام شريط الدور،
+            // ويظهران فقط عند تفعيل "👁️ إظهار كل الأعمدة" (نفس المفتاح الموحّد، بلا مفتاح إضافي منفصل)
+            if (showExtra) headCells.push('<th>واتساب والتبليغ (3 مرات)</th>', '<th>تعديل</th>');
             thead.innerHTML = '<tr>' + headCells.join('') + '</tr>';
             if (thead2) thead2.innerHTML = thead.innerHTML;
 
@@ -3248,16 +3247,21 @@
                     `<td>${handoverHtml}</td>`,
                     `<td onclick="event.stopPropagation();">
                         <input type="checkbox" class="ready-check" ${rec.isReady ? 'checked' : ''} onclick="toggleReadyQuick(${rec.id}, event)" title="✔ تحديد الدار كمكتملة">
-                    </td>`,
-                    `<td onclick="event.stopPropagation();">
-                        <span class="whatsapp-icon" onclick="triggerWhatsAppNotifyById(${rec.id})">💬</span>
-                        ${notifHtml}
-                    </td>`,
-                    `<td onclick="event.stopPropagation();">
-                        <button class="action-btn" onclick="editRecord(${rec.id})">✏️</button>
-                        <button class="action-btn delete" onclick="deleteRecord(${rec.id})">🗑️</button>
                     </td>`
                 );
+                // بطلب المستخدم: عمودا واتساب/التبليغ والتعديل يظهران فقط مع تفعيل "👁️ إظهار كل الأعمدة" (نفس المفتاح الموحّد)
+                if (showExtra) {
+                    rowCells.push(
+                        `<td onclick="event.stopPropagation();">
+                            <span class="whatsapp-icon" onclick="triggerWhatsAppNotifyById(${rec.id})">💬</span>
+                            ${notifHtml}
+                        </td>`,
+                        `<td onclick="event.stopPropagation();">
+                            <button class="action-btn" onclick="editRecord(${rec.id})">✏️</button>
+                            <button class="action-btn delete" onclick="deleteRecord(${rec.id})">🗑️</button>
+                        </td>`
+                    );
+                }
 
                 tr.innerHTML = rowCells.join('');
                 (idx < halfNew ? tbody : tbody2).appendChild(tr);
@@ -3294,12 +3298,11 @@
             const oldHeadCells = ['<th>ت ت</th>', '<th>رقم البلوك والدار</th>', '<th>الحالة</th>', '<th>تاريخ التسليم</th>'];
             if (showExtraOld) oldHeadCells.push('<th>نوع التنفيذ والمقاول</th>', '<th>القطاع</th>');
             oldHeadCells.push(
-                '<th>الملاحظات</th>',
-                '<th>تاريخ المراجعة</th>',
                 '<th>تاريخ إنهاء الملاحظات</th>',
-                '<th>هل تم إكمال الملاحظات؟</th>',
-                '<th>إجراءات</th>'
+                '<th>هل تم إكمال الملاحظات؟</th>'
             );
+            // بطلب المستخدم: الملاحظات وتاريخ المراجعة والإجراءات تظهر فقط مع تفعيل "👁️ إظهار كل الأعمدة"
+            if (showExtraOld) oldHeadCells.push('<th>الملاحظات</th>', '<th>تاريخ المراجعة</th>', '<th>إجراءات</th>');
             thead.innerHTML = '<tr>' + oldHeadCells.join('') + '</tr>';
             if (thead2) thead2.innerHTML = thead.innerHTML;
 
@@ -3368,26 +3371,31 @@
                     oldRowCells.push(`<td>${esc(rec.sectorNo || '-')}</td>`);
                 }
                 oldRowCells.push(
-                    `<td>
-                        <div class="notes-hover-box">
-                            الملاحظات
-                            <div class="notes-popup">
-                                <strong>📝 الملاحظات المسجلة:</strong><br>
-                                ${rec.notes ? esc(rec.notes) : 'لا توجد ملاحظات مدونة.'}
-                            </div>
-                        </div>
-                    </td>`,
-                    `<td>${rec.reviewDate || '-'}</td>`,
                     `<td>${rec.notesEndDate || '-'}</td>`,
                     `<td onclick="event.stopPropagation();" style="text-align:center;">
                         <input type="checkbox" class="notif-box" ${rec.notesCompleted ? 'checked' : ''} onclick="toggleOldNotesCompleted(${rec.id}, event)">
                         ${rec.notesCompleted && rec.notesCompletedDate ? `<br><small style="color:#10b981;">✅ ${rec.notesCompletedDate}</small>` : ''}
-                    </td>`,
-                    `<td>
-                        <button class="action-btn" onclick="editOldRecord(${rec.id})">✏️</button>
-                        <button class="action-btn delete" onclick="deleteOldRecord(${rec.id})">🗑️</button>
                     </td>`
                 );
+                // بطلب المستخدم: الملاحظات وتاريخ المراجعة والإجراءات تظهر فقط مع تفعيل "👁️ إظهار كل الأعمدة"
+                if (showExtraOld) {
+                    oldRowCells.push(
+                        `<td>
+                            <div class="notes-hover-box">
+                                الملاحظات
+                                <div class="notes-popup">
+                                    <strong>📝 الملاحظات المسجلة:</strong><br>
+                                    ${rec.notes ? esc(rec.notes) : 'لا توجد ملاحظات مدونة.'}
+                                </div>
+                            </div>
+                        </td>`,
+                        `<td>${rec.reviewDate || '-'}</td>`,
+                        `<td>
+                            <button class="action-btn" onclick="editOldRecord(${rec.id})">✏️</button>
+                            <button class="action-btn delete" onclick="deleteOldRecord(${rec.id})">🗑️</button>
+                        </td>`
+                    );
+                }
                 // زر "تقرير" أُخفي من الواجهة بطلب المستخدم؛ الدالة generateOldHouseReport بقيت بالكود بدون استخدام بالواجهة
 
                 tr.innerHTML = oldRowCells.join('');
@@ -3503,8 +3511,8 @@
     bar.style.cssText = 'display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px;font-size:.85rem;color:var(--text-muted);';
     bar.innerHTML =
         '<span id="slStatus">🔗 جاري الاتصال بالشيت...</span>' +
-        '<button id="slSync" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(16,185,129,.5);background:rgba(16,185,129,.12);color:#34d399;cursor:pointer;font-weight:700;">🔄 تحديث من الشيت</button>' +
-        '<button id="slUrl" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(56,189,248,.4);background:rgba(56,189,248,.1);color:#38bdf8;cursor:pointer;font-weight:700;">🔗 تغيير رابط الشيت</button>' +
+        '<button id="slSync" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21, 128, 61,.5);background:rgba(21, 128, 61,.12);color:#15803d;cursor:pointer;font-weight:700;">🔄 تحديث من الشيت</button>' +
+        '<button id="slUrl" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(18, 58, 99,.4);background:rgba(18, 58, 99,.1);color:#1d5384;cursor:pointer;font-weight:700;">🔗 تغيير رابط الشيت</button>' +
         '<button id="slDiag" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;">🔍 توضيح فرق العدّاد</button>';
     var alertBox = document.createElement('div');
     alertBox.id = 'slAlert';
@@ -3526,7 +3534,7 @@
     // ---------- 1) الدور القديمة: إظهار تاريخ الاستلام للمستلم ----------
     function dateNote(houseNo) {
         var d = sheetDates[norm(houseNo)];
-        if (d) return '<small style="color:#34d399;white-space:nowrap;">📅 ' + esc(d) + '</small>';
+        if (d) return '<small style="color:#15803d;white-space:nowrap;">📅 ' + esc(d) + '</small>';
         return Object.keys(sheetDates).length ? '<small style="color:#94a3b8;">📅 غير موجودة بالشيت</small>' : '';
     }
     function decorateOld() {
