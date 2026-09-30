@@ -358,11 +358,11 @@
             font-weight: 700;
             text-decoration: underline;
         }
+        /* ملاحظة: النافذة المنبثقة تُموضَع عبر JS بـ position:fixed (سكربت منفصل بنهاية الصفحة) بدل CSS hover،
+           حتى لا تنقص/تنقطع بسبب overflow-x:auto على .table-container، وتظهر صح بأي عمود (يمين/يسار) بالجدول المزدوج */
         .notes-popup {
             display: none;
-            position: absolute;
-            bottom: 125%;
-            right: 0;
+            position: fixed;
             background: #ffffff;
             border: 1px solid var(--primary-blue);
             border-radius: 10px;
@@ -370,14 +370,11 @@
             min-width: 240px;
             max-width: 320px;
             box-shadow: var(--shadow-md);
-            z-index: 1000;
+            z-index: 10001;
             white-space: normal;
             color: var(--text-main);
             font-size: 0.85rem;
             line-height: 1.5;
-        }
-        .notes-hover-box:hover .notes-popup {
-            display: block;
         }
 
         .table-container {
@@ -3379,7 +3376,7 @@
                 if (showExtraOld) {
                     oldRowCells.push(
                         `<td>
-                            <div class="notes-hover-box">
+                            <div class="notes-hover-box" onclick="event.stopPropagation(); window.__toggleNotesPopup && window.__toggleNotesPopup(this)">
                                 الملاحظات
                                 <div class="notes-popup">
                                     <strong>📝 الملاحظات المسجلة:</strong><br>
@@ -4160,6 +4157,63 @@
     document.querySelectorAll('.modal').forEach(function (m) {
         observer.observe(m, { attributes: true, attributeFilter: ['style'] });
     });
+})();
+</script>
+<script>
+/* ===== نافذة "الملاحظات" المنبثقة بجدول الدور القديمة: تُموضَع عبر JS بـ position:fixed بدل الاعتماد على :hover =====
+   السبب: .table-container عندها overflow-x:auto، فأي عنصر position:absolute يطلع خارج حدودها ينقص/ينقطع ولا تبين كتابته،
+   وبالجدول المزدوج (عمودين) العمود الأيسر كانت نافذته تطلع خارج الشاشة تماماً. الحل: نافذة واحدة تتحرك مع الصفحة (fixed)،
+   تنحسب موقعها من مكان الزر المضغوط فعلياً، وتُحصر ضمن حدود الشاشة المرئية دائماً */
+(function () {
+    'use strict';
+    var openPopup = null, openTrigger = null;
+
+    function closeNotesPopup() {
+        if (openPopup) { openPopup.style.display = 'none'; openPopup.style.top = ''; openPopup.style.left = ''; }
+        openPopup = null; openTrigger = null;
+    }
+
+    window.__toggleNotesPopup = function (triggerEl) {
+        var popup = triggerEl.querySelector('.notes-popup');
+        if (!popup) return;
+        if (openPopup === popup) { closeNotesPopup(); return; }
+        closeNotesPopup();
+
+        popup.style.display = 'block';
+        popup.style.visibility = 'hidden';
+        popup.style.top = '0px';
+        popup.style.left = '0px';
+
+        var trigRect = triggerEl.getBoundingClientRect();
+        var pw = popup.offsetWidth, ph = popup.offsetHeight;
+        var vw = window.innerWidth, vh = window.innerHeight;
+        var margin = 8;
+
+        // أفقياً: نحاول محاذاة الحافة اليمنى للنافذة مع الحافة اليمنى للزر (مثل السابق)، ثم نحصرها داخل الشاشة
+        var left = trigRect.right - pw;
+        if (left < margin) left = margin;
+        if (left + pw > vw - margin) left = vw - pw - margin;
+        if (left < margin) left = margin; // لو النافذة أعرض من الشاشة نفسها
+
+        // عمودياً: نحاول إظهارها فوق الزر، وإن ماكو مساحة كافية نظهرها تحته
+        var top = trigRect.top - ph - margin;
+        if (top < margin) top = trigRect.bottom + margin;
+        if (top + ph > vh - margin) top = Math.max(margin, vh - ph - margin);
+
+        popup.style.left = left + 'px';
+        popup.style.top = top + 'px';
+        popup.style.visibility = 'visible';
+        openPopup = popup;
+        openTrigger = triggerEl;
+    };
+
+    document.addEventListener('click', function (e) {
+        if (!openPopup) return;
+        if (openTrigger && openTrigger.contains(e.target)) return;
+        closeNotesPopup();
+    });
+    window.addEventListener('scroll', closeNotesPopup, true);
+    window.addEventListener('resize', closeNotesPopup);
 })();
 </script>
 
