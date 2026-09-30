@@ -475,6 +475,9 @@
             position: relative;
             box-shadow: 0 25px 60px rgba(15, 30, 55, 0.35);
         }
+        /* النافذة "تنمو" من موقع الزر المضغوط (transform-origin يُحدَّد ديناميكياً) بدل ظهورها المفاجئ بمنتصف الشاشة */
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.55); } to { opacity: 1; transform: scale(1); } }
+        .modal-content.modal-pop { animation: modalPop 0.28s cubic-bezier(.2,.9,.3,1.2); }
         .close-btn { position: absolute; top: 22px; left: 26px; font-size: 1.7rem; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
         .close-btn:hover { color: var(--primary-blue); text-shadow: none; }
 
@@ -3685,7 +3688,7 @@
         items.sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
         if (!items.length) { listBox.innerHTML = '<div style="color:var(--text-muted);">لا نتائج مطابقة للبحث.</div>'; return; }
         listBox.innerHTML =
-            '<div style="max-height:360px; overflow-y:auto;">' +
+            '<div style="max-height:700px; overflow-y:auto;">' +
             '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
             '<thead><tr style="text-align:right;"><th style="padding:6px;">رقم البلوك والدار</th><th style="padding:6px;">اسم المستفيد</th><th style="padding:6px;">القطاع</th><th style="padding:6px;">تاريخ الاستلام</th></tr></thead>' +
             '<tbody>' + items.map(function (x) {
@@ -3726,7 +3729,7 @@
         if (!data.items.length) { box.innerHTML = 'لا توجد بيانات بعد — بانتظار مزامنة الشيت.'; return; }
         var groups = data.groups, keys = data.keys, cats = data.cats;
         var html = '<div style="margin-bottom:10px;"><button onclick="window.__exportAnnualInventory && window.__exportAnnualInventory()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(2,132,199,.4);background:rgba(2,132,199,.1);color:#0284c7;cursor:pointer;font-weight:700;">📥 تصدير Excel</button></div>' +
-            '<div style="max-height:380px; overflow-y:auto;"><table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
+            '<div style="max-height:700px; overflow-y:auto;"><table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
             '<thead><tr style="text-align:right;"><th style="padding:6px;">الشهر/السنة</th>' +
             cats.map(function (c) { return '<th style="padding:6px;">فئة ' + esc(c) + '</th>'; }).join('') +
             '<th style="padding:6px;">الإجمالي</th></tr></thead><tbody>';
@@ -3963,23 +3966,19 @@
         if (!box) return;
         if (!cwUrl) { box.innerHTML = 'لم يتم ربط الشيت بعد — اضغط "ربط/تغيير رابط الشيت" بعد نشر ملف الاكسل الأسبوعي كـ Google Sheet.'; return; }
         if (!cwRows.length) { box.innerHTML = 'لا توجد بيانات بعد — بانتظار أول مزامنة.'; return; }
-        var byContractor = {};
-        cwRows.forEach(function (r) {
-            var key = r.contractor || 'غير محدد';
-            if (!byContractor[key]) byContractor[key] = [];
-            byContractor[key].push(r);
-        });
-        var html = '<div style="max-height:400px; overflow-y:auto;">';
-        Object.keys(byContractor).forEach(function (name) {
-            html += '<div style="margin-bottom:14px;">' +
-                '<div style="font-weight:900; color:var(--primary-indigo); margin-bottom:4px;">🛠️ ' + esc(name) + '</div>' +
-                '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
-                '<thead><tr style="text-align:right;"><th style="padding:6px;">القطاع</th><th style="padding:6px;">الكلي</th><th style="padding:6px;">مسلّمة</th><th style="padding:6px;">قيد التسليم</th><th style="padding:6px;">متبقية</th></tr></thead><tbody>' +
-                byContractor[name].map(function (r) {
-                    return '<tr style="border-top:1px solid var(--glass-border);"><td style="padding:6px;">' + esc(r.sector) + '</td><td style="padding:6px;">' + esc(r.total) + '</td><td style="padding:6px; color:#059669;">' + esc(r.delivered) + '</td><td style="padding:6px; color:#d97706;">' + esc(r.inProgress) + '</td><td style="padding:6px; color:#e11d48;">' + esc(r.remaining) + '</td></tr>';
-                }).join('') + '</tbody></table></div>';
-        });
-        html += '</div>';
+        var html = '<div style="max-height:700px; overflow-y:auto;">' +
+            '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
+            '<thead><tr style="text-align:right; position:sticky; top:0; background:#fff; z-index:1;">' +
+            '<th style="padding:6px;">المقاول</th><th style="padding:6px;">القطاع</th><th style="padding:6px;">الكلي</th><th style="padding:6px;">مسلّمة</th><th style="padding:6px;">قيد التسليم</th><th style="padding:6px;">متبقية</th></tr></thead><tbody>' +
+            cwRows.map(function (r) {
+                return '<tr style="border-top:1px solid var(--glass-border);">' +
+                    '<td style="padding:6px; font-weight:700; color:var(--primary-indigo);">' + esc(r.contractor || 'غير محدد') + '</td>' +
+                    '<td style="padding:6px;">' + esc(r.sector) + '</td>' +
+                    '<td style="padding:6px;">' + esc(r.total) + '</td>' +
+                    '<td style="padding:6px; color:#059669;">' + esc(r.delivered) + '</td>' +
+                    '<td style="padding:6px; color:#d97706;">' + esc(r.inProgress) + '</td>' +
+                    '<td style="padding:6px; color:#e11d48;">' + esc(r.remaining) + '</td></tr>';
+            }).join('') + '</tbody></table></div>';
         box.innerHTML = html;
     }
 
@@ -4075,6 +4074,96 @@
             if (!document.hidden) cwSync(false);
         });
     }
+})();
+</script>
+<script>
+/* ===== ربط نوافذ التفاصيل بصرياً بالزر المضغوط: النافذة تنمو من موقع الزر + سهم بسيط يوصلهم لحظة الفتح =====
+   بطلب المستخدم: تقليل إحساس "الدوخة" عند فتح تقارير اليوم وبقية النوافذ بحيث تحس فعلياً أنها طلعت من نفس الزر اللي ضغطته،
+   بدون الحاجة لتعديل كل نافذة (Modal) على حدة — يراقب كل نوافذ .modal تلقائياً */
+(function () {
+    'use strict';
+    var lastTriggerEl = null;
+    // نلتقط آخر عنصر ضُغط عليه (بمرحلة الالتقاط، قبل أي onclick يفتح النافذة)
+    document.addEventListener('click', function (e) {
+        var t = e.target.closest('button, .tools-group-toggle, .mini-stat, .action-btn, .whatsapp-icon, [onclick]');
+        if (t) lastTriggerEl = t;
+    }, true);
+
+    var arrowLayer = null;
+    function ensureArrowLayer() {
+        if (arrowLayer) return arrowLayer;
+        arrowLayer = document.createElement('div');
+        arrowLayer.id = 'modalArrowLayer';
+        arrowLayer.style.cssText = 'position:fixed; inset:0; pointer-events:none; z-index:10001;';
+        document.body.appendChild(arrowLayer);
+        return arrowLayer;
+    }
+    function clearArrow() { if (arrowLayer) arrowLayer.innerHTML = ''; }
+
+    function drawArrow(fromX, fromY, toX, toY) {
+        var layer = ensureArrowLayer();
+        var dx = toX - fromX, dy = toY - fromY;
+        var len = Math.sqrt(dx * dx + dy * dy);
+        var angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        var line = document.createElement('div');
+        line.style.cssText = 'position:fixed; left:' + fromX + 'px; top:' + fromY + 'px; width:' + len + 'px; height:2px; background:linear-gradient(90deg, rgba(18,58,99,0.05), rgba(18,58,99,0.85)); transform-origin:0 50%; transform:rotate(' + angle + 'deg); border-radius:2px;';
+        layer.appendChild(line);
+        var hs = 9;
+        var head = document.createElement('div');
+        head.style.cssText = 'position:fixed; left:' + (toX - hs / 2) + 'px; top:' + (toY - hs / 2) + 'px; width:0; height:0; border-left:' + hs + 'px solid rgba(18,58,99,0.9); border-top:' + (hs * 0.6) + 'px solid transparent; border-bottom:' + (hs * 0.6) + 'px solid transparent; transform:rotate(' + angle + 'deg); transform-origin:0 50%;';
+        layer.appendChild(head);
+    }
+
+    // أقرب نقطة على حافة صندوق النافذة باتجاه نقطة الزر (تقاطع الخط الواصل بين المركزين مع الحافة)
+    function nearestEdgePoint(rect, fromX, fromY) {
+        var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+        var dx = cx - fromX, dy = cy - fromY;
+        if (dx === 0 && dy === 0) return { x: cx, y: cy };
+        var scaleX = dx !== 0 ? (rect.width / 2) / Math.abs(dx) : Infinity;
+        var scaleY = dy !== 0 ? (rect.height / 2) / Math.abs(dy) : Infinity;
+        var scale = Math.min(scaleX, scaleY, 1);
+        return { x: cx - dx * scale, y: cy - dy * scale };
+    }
+
+    function handleModalOpen(modalEl) {
+        var content = modalEl.querySelector('.modal-content');
+        if (!content) return;
+        requestAnimationFrame(function () {
+            var rect = content.getBoundingClientRect();
+            var originX = window.innerWidth / 2, originY = window.innerHeight / 2;
+            if (lastTriggerEl && document.body.contains(lastTriggerEl)) {
+                var tr = lastTriggerEl.getBoundingClientRect();
+                originX = tr.left + tr.width / 2;
+                originY = tr.top + tr.height / 2;
+            }
+            var originXPct = ((originX - rect.left) / rect.width) * 100;
+            var originYPct = ((originY - rect.top) / rect.height) * 100;
+            content.style.transformOrigin = originXPct + '% ' + originYPct + '%';
+            content.classList.remove('modal-pop'); void content.offsetWidth; content.classList.add('modal-pop');
+
+            clearArrow();
+            var boxCx = rect.left + rect.width / 2, boxCy = rect.top + rect.height / 2;
+            if (lastTriggerEl && document.body.contains(lastTriggerEl) && (Math.abs(originX - boxCx) > 40 || Math.abs(originY - boxCy) > 40)) {
+                var edge = nearestEdgePoint(rect, originX, originY);
+                drawArrow(originX, originY, edge.x, edge.y);
+                setTimeout(clearArrow, 900); // السهم يظهر لحظة الفتح فقط، مو بشكل دائم مزعج
+            }
+        });
+    }
+
+    var observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (m) {
+            if (m.type !== 'attributes' || m.attributeName !== 'style') return;
+            var el = m.target;
+            if (!el.classList || !el.classList.contains('modal')) return;
+            var disp = el.style.display;
+            if (disp === 'flex' || disp === 'block') handleModalOpen(el);
+            else clearArrow();
+        });
+    });
+    document.querySelectorAll('.modal').forEach(function (m) {
+        observer.observe(m, { attributes: true, attributeFilter: ['style'] });
+    });
 })();
 </script>
 
