@@ -729,25 +729,26 @@
         </div>
         <div class="tools-toolbar-group">
             <button class="tools-group-toggle" onclick="toggleToolsGroup('delivered-houses-group')">🏠 الدور المسلمة ▾</button>
-            <div class="tools-toolbar-buttons" id="delivered-houses-group" style="display:none; width:100%;">
-                <div id="delivered-houses-body" style="font-size:0.85rem; color:var(--text-muted);">لا توجد بيانات بعد — بانتظار مزامنة الشيت.</div>
+            <div class="tools-toolbar-buttons" id="delivered-houses-group" style="display:none; width:100%; flex-direction:column;">
+                <div id="delivered-houses-body" style="font-size:0.85rem; color:var(--text-muted); width:100%;">لا توجد بيانات بعد — بانتظار مزامنة الشيت.</div>
             </div>
         </div>
         <div class="tools-toolbar-group">
             <button class="tools-group-toggle" onclick="toggleToolsGroup('annual-inventory-group')">📅 الجرد السنوي ▾</button>
-            <div class="tools-toolbar-buttons" id="annual-inventory-group" style="display:none; width:100%;">
-                <div id="annual-inventory-body" style="font-size:0.85rem; color:var(--text-muted);">لا توجد بيانات بعد — بانتظار مزامنة الشيت.</div>
+            <div class="tools-toolbar-buttons" id="annual-inventory-group" style="display:none; width:100%; flex-direction:column;">
+                <div id="annual-inventory-body" style="font-size:0.85rem; color:var(--text-muted); width:100%;">لا توجد بيانات بعد — بانتظار مزامنة الشيت.</div>
             </div>
         </div>
         <div class="tools-toolbar-group">
             <button class="tools-group-toggle" onclick="toggleToolsGroup('contractors-weekly-group')">📊 موقف المقاولين الأسبوعي ▾</button>
-            <div class="tools-toolbar-buttons" id="contractors-weekly-group" style="display:none; width:100%;">
-                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; font-size:0.85rem; color:var(--text-muted);">
+            <div class="tools-toolbar-buttons" id="contractors-weekly-group" style="display:none; width:100%; flex-direction:column;">
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; font-size:0.85rem; color:var(--text-muted); width:100%;">
                     <span id="cwStatus">🔗 لم يتم ربط ملف موقف المقاولين الأسبوعي بعد</span>
                     <button onclick="window.__cwAskUrl && window.__cwAskUrl()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;">🔗 ربط/تغيير رابط الشيت</button>
                     <button onclick="window.__cwSync && window.__cwSync(true)" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21, 128, 61,.5);background:rgba(21, 128, 61,.12);color:#059669;cursor:pointer;font-weight:700;">🔄 تحديث</button>
+                    <button onclick="window.__cwShowDiag && window.__cwShowDiag()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.12);color:#b45309;cursor:pointer;font-weight:700;">🔍 تشخيص الأعمدة</button>
                 </div>
-                <div id="contractors-weekly-body" style="font-size:0.85rem; color:var(--text-muted);">لا توجد بيانات بعد — اربط ملف الموقف الأسبوعي أولاً.</div>
+                <div id="contractors-weekly-body" style="font-size:0.85rem; color:var(--text-muted); width:100%;">لا توجد بيانات بعد — اربط ملف الموقف الأسبوعي أولاً.</div>
             </div>
         </div>
     </div>
@@ -3949,6 +3950,7 @@
     var cwLastSync = localStorage.getItem('contractorsSheetLastSync') || '';
     var cwError = '';
     var cwRunning = false;
+    var cwDiag = null;
     try { cwRows = JSON.parse(localStorage.getItem('contractorsSheetCache') || '[]'); } catch (e) { cwRows = []; }
 
     function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
@@ -4008,13 +4010,22 @@
                 }
             }
             if (hdr < 0) throw new Error('ما لكيت عمودي "اسم المقاول" و"رقم القطاع" — تأكد من رابط النشر');
+            // تشخيص: نحفظ صف العناوين كما هو + عيّنة من صفوف البيانات الخام، حتى يمكن معرفة أي عمود انلكاه فعلياً
+            cwDiag = {
+                headerRowIndex: hdr,
+                headerRow: rows[hdr],
+                colIndex: { contractor: cC, sector: cSec, total: cTot, delivered: cDel, inProgress: cProg, remaining: cRem },
+                sampleRows: rows.slice(hdr + 1, hdr + 6)
+            };
             var out = [];
+            var lastContractor = ''; // بعض ملفات Google Sheets تدمج خلايا اسم المقاول عمودياً لعدة قطاعات، فتُصدَّر فارغة بالـ CSV عدا أول صف — نكمل القيمة من الصف الفوقاني
             for (var j = hdr + 1; j < rows.length; j++) {
                 var row = rows[j];
                 if (!row) continue;
                 var contractor = cC >= 0 && row[cC] != null ? String(row[cC]).trim() : '';
                 var sector = cSec >= 0 && row[cSec] != null ? String(row[cSec]).trim() : '';
                 if (!contractor && !sector) continue;
+                if (contractor) lastContractor = contractor; else contractor = lastContractor;
                 out.push({
                     contractor: contractor,
                     sector: sector,
@@ -4052,6 +4063,27 @@
         cwSync(true);
     };
     window.__cwSync = function (manual) { cwSync(manual); };
+
+    window.__cwShowDiag = function () {
+        if (!cwDiag) { alert('لا توجد بيانات تشخيص بعد — اضغط "🔄 تحديث" أولاً.'); return; }
+        var msg = 'صف العناوين المكتشف (رقم الصف بالملف: ' + (cwDiag.headerRowIndex + 1) + '):\n';
+        cwDiag.headerRow.forEach(function (c, idx) {
+            msg += '[عمود ' + (idx + 1) + '] ' + (c == null ? '(فارغ)' : String(c)) + '\n';
+        });
+        msg += '\nالأعمدة المُعتمدة حالياً:\n';
+        msg += 'المقاول = عمود ' + (cwDiag.colIndex.contractor + 1) + '\n';
+        msg += 'القطاع = عمود ' + (cwDiag.colIndex.sector + 1) + '\n';
+        msg += 'الكلي = ' + (cwDiag.colIndex.total >= 0 ? 'عمود ' + (cwDiag.colIndex.total + 1) : 'غير موجود') + '\n';
+        msg += 'المسلمة = ' + (cwDiag.colIndex.delivered >= 0 ? 'عمود ' + (cwDiag.colIndex.delivered + 1) : 'غير موجود') + '\n';
+        msg += 'قيد التسليم = ' + (cwDiag.colIndex.inProgress >= 0 ? 'عمود ' + (cwDiag.colIndex.inProgress + 1) : 'غير موجود') + '\n';
+        msg += 'المتبقية = ' + (cwDiag.colIndex.remaining >= 0 ? 'عمود ' + (cwDiag.colIndex.remaining + 1) : 'غير موجود') + '\n';
+        msg += '\nعيّنة من أول 5 صفوف بيانات (خام كما بالملف):\n';
+        cwDiag.sampleRows.forEach(function (row, ri) {
+            if (!row) return;
+            msg += 'صف ' + (ri + 1) + ': ' + row.map(function (c, ci) { return '[' + (ci + 1) + ']' + (c == null ? '' : c); }).join(' | ') + '\n';
+        });
+        alert(msg);
+    };
 
     // الرابط يتشارك بين الأجهزة عبر فايربيس (تماماً كرابط شيت تواريخ الاستلام)
     if (typeof dbRef !== 'undefined') {
