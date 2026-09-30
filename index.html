@@ -945,17 +945,17 @@
     <div class="modal-content" style="max-width: 800px;">
         <span class="close-btn" onclick="closeDailyChecklistModal()">&times;</span>
         <h3 style="margin-bottom: 20px; color: var(--primary-blue); font-weight:900; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">📋 مواعيد اليوم: <span id="modal-today-date" style="color:#1d5384;"></span></h3>
-        <div style="margin-bottom: 25px;">
-            <h4 style="color: #1d5384; margin-bottom: 10px;">🧹 دور موعد تنظيفها اليوم:</h4>
-            <div id="cleaning-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
+        <div style="margin-bottom: 22px; border-right: 4px solid var(--status-direct); background: rgba(226,232,240,0.4); border-radius: 12px; padding: 14px 16px;">
+            <h4 style="color: var(--text-main); margin-bottom: 10px; font-weight:900;">🧹 دور موعد تنظيفها اليوم:</h4>
+            <div id="cleaning-checklist-list" style="max-height: 200px; overflow-y: auto; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);"></div>
         </div>
-        <div>
-            <h4 style="color: #a855f7; margin-bottom: 10px;">🏠 دور موعد تسليمها اليوم:</h4>
-            <div id="readiness-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
+        <div style="margin-bottom: 22px; border-right: 4px solid var(--primary-blue); background: rgba(226,232,240,0.4); border-radius: 12px; padding: 14px 16px;">
+            <h4 style="color: var(--text-main); margin-bottom: 10px; font-weight:900;">🏠 دور موعد تسليمها اليوم:</h4>
+            <div id="readiness-checklist-list" style="max-height: 200px; overflow-y: auto; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);"></div>
         </div>
-        <div style="margin-top: 25px;">
-            <h4 style="color: #f97316; margin-bottom: 10px;">🏛️ دور قديمة موعد إنهاء ملاحظاتها اليوم:</h4>
-            <div id="old-notes-checklist-list" style="max-height: 200px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); backdrop-filter: blur(12px); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);"></div>
+        <div style="border-right: 4px solid var(--status-waiting); background: rgba(226,232,240,0.4); border-radius: 12px; padding: 14px 16px;">
+            <h4 style="color: var(--text-main); margin-bottom: 10px; font-weight:900;">🏛️ دور قديمة موعد إنهاء ملاحظاتها اليوم:</h4>
+            <div id="old-notes-checklist-list" style="max-height: 200px; overflow-y: auto; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);"></div>
         </div>
     </div>
 </div>
@@ -2853,6 +2853,23 @@
         }
     }
 
+    // عدّاد "عدد مراجعات المستفيد" — عمود دائم الظهور بالجديدة والقديمة معاً؛ كل ضغطة ➕ تزيد العدد وتُحفظ بالسحابة
+    function bumpReviewCount(kind, id, event) {
+        if (event) event.stopPropagation();
+        if (kind === 'new') {
+            const rec = houseRecords.find(r => r.id === id);
+            if (!rec) return;
+            rec.reviewCount = (rec.reviewCount || 0) + 1;
+            syncRecordFields(rec.id, { reviewCount: rec.reviewCount });
+        } else {
+            const rec = oldHouseRecords.find(r => r.id === id);
+            if (!rec) return;
+            rec.reviewCount = (rec.reviewCount || 0) + 1;
+            syncOldRecordFields(rec.id, { reviewCount: rec.reviewCount });
+        }
+        renderTable();
+    }
+
     function openReopenNotesModal(id) {
         const rec = oldHouseRecords.find(r => r.id === id);
         if (!rec) return;
@@ -3138,6 +3155,7 @@
             headCells.push(
                 '<th>تاريخ الحضور</th>',
                 '<th>موعد التسليم</th>',
+                '<th>عدد مراجعات المستفيد</th>',
                 '<th>✔ هل تم الإكمال؟</th>'
             );
             // بطلب المستخدم: عمودا واتساب/التبليغ والتعديل يبقيان مخفيين افتراضياً لتخفيف ازدحام شريط الدور،
@@ -3245,6 +3263,10 @@
                 rowCells.push(
                     `<td>${datesHtml}</td>`,
                     `<td>${handoverHtml}</td>`,
+                    `<td onclick="event.stopPropagation();" style="text-align:center; white-space:nowrap;">
+                        <button class="action-btn" onclick="bumpReviewCount('new', ${rec.id}, event)" title="إضافة مراجعة">➕</button>
+                        <strong>${rec.reviewCount || 0}</strong>
+                    </td>`,
                     `<td onclick="event.stopPropagation();">
                         <input type="checkbox" class="ready-check" ${rec.isReady ? 'checked' : ''} onclick="toggleReadyQuick(${rec.id}, event)" title="✔ تحديد الدار كمكتملة">
                     </td>`
@@ -3282,6 +3304,7 @@
                             <div>📅 الحضور: ${rec.arrivalDate || '-'}</div>
                             <div>⏱️ التسليم: ${rec.handoverDate || rec.houseReadyDate || '-'}${rec.secondHandoverDate && st.isHandoverOverdue ? ` <span style="color:#fbbf24;">(موعد ثاني: ${rec.secondHandoverDate})</span>` : ''}</div>
                             ${rec.sheetDelivered ? `<div style="color:#059669;">📦 مسلّمة (حسب الشيت) - ${esc(rec.sheetDeliveredDate || '')}</div>` : ''}
+                            <div onclick="event.stopPropagation();">🔁 عدد مراجعات المستفيد: <strong>${rec.reviewCount || 0}</strong> <button class="action-btn" onclick="bumpReviewCount('new', ${rec.id}, event)" title="إضافة مراجعة">➕</button></div>
                             <div onclick="event.stopPropagation();"><label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" class="ready-check" ${rec.isReady ? 'checked' : ''} onclick="toggleReadyQuick(${rec.id}, event)"> ✔ هل تم الإكمال؟</label></div>
                         </div>
                         <div style="margin-top:12px; display:flex; gap:10px;" onclick="event.stopPropagation();">
@@ -3298,11 +3321,13 @@
             const oldHeadCells = ['<th>ت ت</th>', '<th>رقم البلوك والدار</th>', '<th>الحالة</th>', '<th>تاريخ التسليم</th>'];
             if (showExtraOld) oldHeadCells.push('<th>نوع التنفيذ والمقاول</th>', '<th>القطاع</th>');
             oldHeadCells.push(
+                '<th>تاريخ المراجعة</th>',
+                '<th>عدد مراجعات المستفيد</th>',
                 '<th>تاريخ إنهاء الملاحظات</th>',
                 '<th>هل تم إكمال الملاحظات؟</th>'
             );
-            // بطلب المستخدم: الملاحظات وتاريخ المراجعة والإجراءات تظهر فقط مع تفعيل "👁️ إظهار كل الأعمدة"
-            if (showExtraOld) oldHeadCells.push('<th>الملاحظات</th>', '<th>تاريخ المراجعة</th>', '<th>إجراءات</th>');
+            // بطلب المستخدم: الملاحظات والإجراءات فقط تبقى خلف مفتاح "👁️ إظهار كل الأعمدة" (تاريخ المراجعة رجع دائم الظهور)
+            if (showExtraOld) oldHeadCells.push('<th>الملاحظات</th>', '<th>إجراءات</th>');
             thead.innerHTML = '<tr>' + oldHeadCells.join('') + '</tr>';
             if (thead2) thead2.innerHTML = thead.innerHTML;
 
@@ -3371,13 +3396,18 @@
                     oldRowCells.push(`<td>${esc(rec.sectorNo || '-')}</td>`);
                 }
                 oldRowCells.push(
+                    `<td>${rec.reviewDate || '-'}</td>`,
+                    `<td onclick="event.stopPropagation();" style="text-align:center; white-space:nowrap;">
+                        <button class="action-btn" onclick="bumpReviewCount('old', ${rec.id}, event)" title="إضافة مراجعة">➕</button>
+                        <strong>${rec.reviewCount || 0}</strong>
+                    </td>`,
                     `<td>${rec.notesEndDate || '-'}</td>`,
                     `<td onclick="event.stopPropagation();" style="text-align:center;">
                         <input type="checkbox" class="notif-box" ${rec.notesCompleted ? 'checked' : ''} onclick="toggleOldNotesCompleted(${rec.id}, event)">
                         ${rec.notesCompleted && rec.notesCompletedDate ? `<br><small style="color:#10b981;">✅ ${rec.notesCompletedDate}</small>` : ''}
                     </td>`
                 );
-                // بطلب المستخدم: الملاحظات وتاريخ المراجعة والإجراءات تظهر فقط مع تفعيل "👁️ إظهار كل الأعمدة"
+                // بطلب المستخدم: الملاحظات والإجراءات فقط تبقى خلف مفتاح "👁️ إظهار كل الأعمدة"
                 if (showExtraOld) {
                     oldRowCells.push(
                         `<td>
@@ -3389,7 +3419,6 @@
                                 </div>
                             </div>
                         </td>`,
-                        `<td>${rec.reviewDate || '-'}</td>`,
                         `<td>
                             <button class="action-btn" onclick="editOldRecord(${rec.id})">✏️</button>
                             <button class="action-btn delete" onclick="deleteOldRecord(${rec.id})">🗑️</button>
@@ -3414,6 +3443,7 @@
                             ${showExtraOld ? `<div>📍 القطاع: ${esc(rec.sectorNo)}</div><div>🛠️ التنفيذ: ${esc(rec.executionType)} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</div>` : ''}
                             <div>📝 الملاحظات: ${esc(rec.notes || 'لا يوجد')}</div>
                             <div>📅 المراجعة: ${rec.reviewDate || '-'}</div>
+                            <div onclick="event.stopPropagation();">🔁 عدد مراجعات المستفيد: <strong>${rec.reviewCount || 0}</strong> <button class="action-btn" onclick="bumpReviewCount('old', ${rec.id}, event)" title="إضافة مراجعة">➕</button></div>
                             <div>⏳ إنهاء الملاحظات: ${rec.notesEndDate || '-'}</div>
                             <div>✅ إكمال الملاحظات: ${rec.notesCompleted ? `تم (${rec.notesCompletedDate || '-'})` : 'لم يتم بعد'}</div>
                         </div>
