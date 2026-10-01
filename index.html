@@ -875,8 +875,8 @@
     </div>
     <div id="weekly-status-box" style="max-height:700px; overflow-y:auto; overflow-x:auto; border:1px solid var(--glass-border); border-radius:12px; background:var(--glass-bg);"></div>
 
-    <!-- دور كانت مسجلة بالنظام السابق تحت اسم "الدور الجديدة" ولا تظهر حالياً بملف الإكسل (غير متطابقة رقم الدار) —
-         تُعرض هنا حتى لا تضيع من الواجهة؛ بياناتها الكاملة ما زالت محفوظة دائماً -->
+    <!-- بطلب المستخدم: دور كانت بالنظام السابق باسم "الدور الجديدة" ولا تطابق أي سطر بملف الإكسل تُحذف تلقائياً
+         (purgeOrphanLegacyNewHouses) — هذا الحاوي يبقى فارغاً دوماً الآن، أُبقيه بالصفحة تحسباً فقط -->
     <div id="legacy-new-houses-section" style="margin-top:18px;"></div>
 </div>
 
@@ -4546,36 +4546,24 @@
             '<th style="padding:8px;">المراجعة</th>' +
             '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
         box.innerHTML = html;
-        renderLegacyNewHouses();
     }
 
-    // دور كانت مسجلة بالنظام السابق باسم "الدور الجديدة" (houseRecords) ولا تملك سطراً مطابقاً حالياً بملف الإكسل —
-    // تبقى بياناتها الكاملة محفوظة دوماً، وتُعرض هنا صراحة حتى لا تختفي من الواجهة بعد إزالة التبويب القديم
-    function renderLegacyNewHouses() {
-        var box = document.getElementById('legacy-new-houses-section');
-        if (!box) return;
+    // بطلب المستخدم: دور كانت مسجلة بالنظام السابق باسم "الدور الجديدة" (houseRecords) ولا تملك سطراً مطابقاً
+    // حالياً بملف الإكسل تُحذف نهائياً (لم تعد لها فائدة بعد ربط قيد التسليم بالإكسل مباشرة)
+    function purgeOrphanLegacyNewHouses() {
+        if (typeof houseRecords === 'undefined' || !houseRecords.length || !wsUnits.length) return;
         var matched = {};
         wsUnits.forEach(function (u) { matched[normHouseNo(u.unit)] = true; });
-        var orphans = (typeof houseRecords !== 'undefined' ? houseRecords : []).filter(function (r) { return !matched[normHouseNo(r.houseNo)]; });
-        if (!orphans.length) { box.innerHTML = ''; return; }
-        box.innerHTML = '<h4 style="margin:4px 4px 8px; color:#b45309;">🗂️ دور من النظام السابق ("الدور الجديدة") غير موجودة حالياً بملف الإكسل (' + orphans.length + ')</h4>' +
-            '<table style="width:100%; border-collapse:collapse; border:1px solid rgba(217,119,6,.3); border-radius:12px; overflow:hidden;">' +
-            '<thead><tr style="background:rgba(217,119,6,.1); text-align:right;">' +
-            '<th style="padding:8px;">رقم البلوك والدار</th><th style="padding:8px;">اسم المستفيد</th><th style="padding:8px;">رقم الهاتف</th>' +
-            '<th style="padding:8px;">القطاع</th><th style="padding:8px;">نوع التنفيذ</th><th style="padding:8px;">المقاول</th><th style="padding:8px;">تاريخ الحضور</th><th style="padding:8px;">إجراءات</th>' +
-            '</tr></thead><tbody>' +
-            orphans.map(function (r) {
-                return '<tr style="border-top:1px solid rgba(217,119,6,.2);">' +
-                    '<td style="padding:6px; font-weight:700;">' + esc(r.houseNo) + '</td>' +
-                    '<td style="padding:6px;">' + esc(r.ownerName || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(r.phoneNo || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(r.sectorNo || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(r.executionType || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(r.contractorName || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(r.arrivalDate || '-') + '</td>' +
-                    '<td style="padding:6px;"><button onclick="editRecord(' + r.id + ')" style="padding:4px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);cursor:pointer;font-weight:700;font-size:0.8rem;">✏️ تعديل/عرض كامل البيانات</button></td>' +
-                    '</tr>';
-            }).join('') + '</tbody></table>';
+        var toRemove = houseRecords.filter(function (r) { return !matched[normHouseNo(r.houseNo)]; });
+        if (!toRemove.length) return;
+        var removeIds = {};
+        toRemove.forEach(function (r) {
+            removeIds[r.id] = true;
+            if (typeof deleteRecordFromDB === 'function') deleteRecordFromDB(r.id);
+        });
+        houseRecords = houseRecords.filter(function (r) { return !removeIds[r.id]; });
+        var box = document.getElementById('legacy-new-houses-section');
+        if (box) box.innerHTML = '';
     }
 
     // يحوّل نص "الجهة المنفذة" من الشيت إلى القيمة المتوافقة مع نموذج بيانات المراجعة الحالي
@@ -4672,6 +4660,7 @@
                 localStorage.setItem('weeklyStatusLastSync', wsLastSync);
             } catch (e) { console.warn('تعذر حفظ كاش قيد التسليم محلياً', e); }
             populateFilterOptions();
+            purgeOrphanLegacyNewHouses();
             wsRender();
             wsStatusText();
             checkDeliveredCrossovers();
@@ -4774,6 +4763,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         wsStatusText();
         populateFilterOptions();
+        purgeOrphanLegacyNewHouses(); // تنظيف فوري من الكاش المحلي (إن وُجد) حتى قبل اكتمال أول مزامنة
         wsRender(); // عرض فوري من الكاش المحلي (إن وُجد) قبل اكتمال المزامنة
         setTimeout(function () { wsSync(false); }, 4000); // مزامنة أولى بالخلفية بعد تحميل الصفحة
         setTimeout(checkDeliveredCrossovers, 7000); // تحقق أول من التقاطع مع شيت المسلّمة بعد إتاحة الوقت لمزامنته هو أيضاً
@@ -4813,8 +4803,11 @@
             if (q && normHouseNo(r.houseNo).indexOf(q) < 0 && normHouseNo(r.ownerName || '').indexOf(q) < 0 && normHouseNo(r.contractorName || '').indexOf(q) < 0) return false;
             return true;
         });
-        var normal = rvSortList(all.filter(function (r) { return !r.alreadyDelivered; }), rvSortMode);
-        var delivered = rvSortList(all.filter(function (r) { return r.alreadyDelivered; }), rvSortMode);
+        // بطلب المستخدم: أي دار حالتها "مستلم" (سواء كانت أصلاً من الدور القديمة أو أُضيفت يدوياً) تُعزل
+        // بجدولها الخاص أسفل الصفحة — حتى يعرف مباشرة هذي مسلّمة فعلاً مع إبقاء كل تفاصيلها
+        var isDeliveredRec = function (r) { return !!(r.alreadyDelivered || r.status === 'مستلم'); };
+        var normal = rvSortList(all.filter(function (r) { return !isDeliveredRec(r); }), rvSortMode);
+        var delivered = rvSortList(all.filter(isDeliveredRec), rvSortMode);
 
         function buildTable(list, title) {
             if (!list.length) return '';
