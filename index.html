@@ -691,6 +691,9 @@
         </div>
     </header>
 
+    <!-- شريط إشعار: دور موجودة بـ"قيد التسليم" و/أو "المراجعة" لكنها ظهرت كمسلّمة بشيت دور المسلّمة — تحتاج موافقتك لحذف نسختيها -->
+    <div id="delivered-crossover-banner" style="display:none;"></div>
+
     <div class="tools-toolbar">
         <div class="tools-toolbar-group">
             <button class="tools-group-toggle" onclick="toggleToolsGroup('admin-reports-group')">📁 إدارة ▾</button>
@@ -746,7 +749,7 @@
          تتعطل الدوال الداخلية الكثيرة التي ما زالت تُحدّثها بالخلفية (renderTable وغيرها) دون أي خطر على الواجهة المرئية -->
     <div class="nav-tabs">
         <button id="tab-weekly-status" class="nav-tab-btn active" onclick="switchMainTab('weekly')">📋 قيد التسليم</button>
-        <button id="tab-review" class="nav-tab-btn" onclick="switchMainTab('review')">🔍 المراجعة</button>
+        <button id="tab-review" class="nav-tab-btn" onclick="switchMainTab('review')">🔍 الدور التي يتم مراجعة المستفيد عليها</button>
     </div>
 
     <div class="filter-section" style="display:none;">
@@ -1755,6 +1758,8 @@
         if (confirm("⚠️ هل أنت تأكد من حذف هذا السجل بشكل نهائي؟")) {
             oldHouseRecords = oldHouseRecords.filter(r => r.id !== id);
             deleteOldRecordFromDB(id);
+            if (typeof window.__rvRefresh === 'function') window.__rvRefresh();
+            if (typeof window.__wsRefresh === 'function') window.__wsRefresh();
         }
     }
 
@@ -4384,6 +4389,10 @@
     try { wsUnits = JSON.parse(localStorage.getItem('weeklyStatusCache') || '[]'); } catch (e) { wsUnits = []; }
     var wsSearchVal = '';
     var wsVisibleList = [];
+    // دور وافق المستخدم على حذفها بعد تأكدها "مسلّمة" (حذف محلي من العرض فقط — لا يلمس ملف الإكسل نفسه)
+    var wsDismissed = {};
+    try { wsDismissed = JSON.parse(localStorage.getItem('weeklyStatusDismissed') || '{}'); } catch (e) { wsDismissed = {}; }
+    var wsDeliveredAlerts = []; // قائمة الدور التي ظهرت "مسلّمة" وتنتظر موافقة الحذف من قيد التسليم/المراجعة
 
     function cell(v) { return (v == null) ? '' : String(v).trim(); }
 
@@ -4470,9 +4479,10 @@
         var sortMode = sortSel ? sortSel.value : 'default';
         var q = normHouseNo(wsSearchVal);
 
-        // الدور التي صارت قيد "المراجعة" تُستبعد من هذا التبويب — الهدف فصل قيد التسليم (غير المراجَع) عن المراجَع عليها
+        // بطلب المستخدم: الدار التي تُراجَع لا تُحذف من "قيد التسليم" — تبقى هنا أيضاً، ويُصنع لها نسخة بخانة "المراجعة"
+        // (لا حذف إلا عند تأكيد "مسلّمة" من المستخدم عبر شريط الإشعار أعلى الصفحة)
         var list = wsUnits.filter(function (u) {
-            if ((oldHouseRecords || []).some(function (r) { return normHouseNo(r.houseNo) === normHouseNo(u.unit); })) return false;
+            if (wsDismissed[normHouseNo(u.unit)]) return false;
             if (secVal !== 'all' && u.sector !== secVal) return false;
             if (conVal !== 'all' && u.contractor !== conVal) return false;
             if (q && normHouseNo(u.unit).indexOf(q) < 0 && normHouseNo(u.contractor).indexOf(q) < 0 && normHouseNo(u.sector).indexOf(q) < 0) return false;
@@ -4499,7 +4509,10 @@
                 rowsHtml += '<tr><td colspan="9" style="padding:10px 8px; font-weight:900; background:var(--bg-primary); color:var(--primary-blue); border-top:2px solid var(--glass-border);">📍 ' + esc(u.sector || 'غير محدد') + '</td></tr>';
             }
             var b = matchBeneficiary(u.unit);
-            var reviewCell = '<button onclick="window.__wsStartReview(' + idx + ')" style="padding:5px 10px;border-radius:10px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;font-size:0.8rem;">👁️ هل راجع المستفيد؟</button>';
+            var inReview = (oldHouseRecords || []).some(function (r) { return normHouseNo(r.houseNo) === normHouseNo(u.unit); });
+            var reviewCell = inReview
+                ? '<button onclick="window.__wsStartReview(' + idx + ')" style="padding:5px 10px;border-radius:10px;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.12);color:#b45309;cursor:pointer;font-weight:700;font-size:0.8rem;">📋 قيد المراجعة أيضاً (فتح)</button>'
+                : '<button onclick="window.__wsStartReview(' + idx + ')" style="padding:5px 10px;border-radius:10px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;font-size:0.8rem;">👁️ هل راجع المستفيد؟</button>';
             rowsHtml += '<tr style="border-top:1px solid var(--glass-border);">' +
                 '<td style="padding:6px;">' + (idx + 1) + '</td>' +
                 '<td style="padding:6px; font-weight:700;">' + esc(u.unit) + '</td>' +
@@ -4537,6 +4550,13 @@
     window.__wsStartReview = function (idx) {
         var u = wsVisibleList[idx];
         if (!u) return;
+        // إن كانت الدار مسجلة بالمراجعة مسبقاً (نسختها الثانية) نفتحها مباشرة دون سؤال "هل راجع؟" مجدداً
+        var existing = (oldHouseRecords || []).find(function (r) { return normHouseNo(r.houseNo) === normHouseNo(u.unit); });
+        if (existing) {
+            if (typeof switchMainTab === 'function') switchMainTab('review');
+            if (typeof editOldRecord === 'function') editOldRecord(existing.id);
+            return;
+        }
         wsPendingReviewUnit = u;
         var txt = document.getElementById('reviewConfirmText');
         if (txt) txt.textContent = 'الدار رقم (' + u.unit + ') — ' + (u.sector || '') + (u.contractor ? ' — المقاول: ' + u.contractor : '');
@@ -4544,13 +4564,21 @@
         if (modal) modal.style.display = 'flex';
     };
 
-    // استجابة نافذة "هل راجع المستفيد؟" الداخلية
+    // استجابة نافذة "هل راجع المستفيد؟" الداخلية — تُنشئ نسخة بخانة "المراجعة" بينما تبقى الدار بـ"قيد التسليم" أيضاً
     window.__wsConfirmReview = function (yes) {
         var modal = document.getElementById('reviewConfirmModal');
         if (modal) modal.style.display = 'none';
         var u = wsPendingReviewUnit;
         wsPendingReviewUnit = null;
         if (!yes || !u) return;
+
+        // حماية إضافية من تكرار النسخة لو ضُغط الزر مرتين بسرعة
+        var dupCheck = (oldHouseRecords || []).find(function (r) { return normHouseNo(r.houseNo) === normHouseNo(u.unit); });
+        if (dupCheck) {
+            if (typeof switchMainTab === 'function') switchMainTab('review');
+            if (typeof editOldRecord === 'function') editOldRecord(dupCheck.id);
+            return;
+        }
 
         var b = matchBeneficiary(u.unit);
         var mappedType = mapExecutionTypeForOld(u.executionType);
@@ -4577,6 +4605,7 @@
         oldHouseRecords.push(rec);
         if (typeof syncOldRecord === 'function') syncOldRecord(rec);
         if (typeof scheduleLocalSave === 'function') scheduleLocalSave();
+        wsRender(); // الدار تبقى بقيد التسليم أيضاً — فقط يتغيّر شكل زرها لـ"قيد المراجعة أيضاً"
 
         if (typeof switchMainTab === 'function') switchMainTab('review');
         if (typeof editOldRecord === 'function') editOldRecord(rec.id);
@@ -4604,6 +4633,7 @@
             populateFilterOptions();
             wsRender();
             wsStatusText();
+            checkDeliveredCrossovers();
         } catch (e) {
             console.error('weekly-status sync', e);
             if (manual) alert('⚠️ تعذرت مزامنة شيت الموقف الاسبوعي:\n' + e.message);
@@ -4629,6 +4659,7 @@
         if (typeof v === 'string') wsSearchVal = v;
         wsRender();
     };
+    window.__wsRefresh = function () { wsRender(); };
 
     window.__wsShowTab = function () {
         populateFilterOptions();
@@ -4637,16 +4668,80 @@
         if (wsUrl && !wsUnits.length) wsSync(false);
     };
 
+    var wsSnoozed = {}; // تجاهل مؤقت لهذه الجلسة فقط (يعاود الظهور بعد إعادة تحميل الصفحة)
+
+    // يفحص دور "قيد التسليم" و"المراجعة" مقابل شيت "الدور المسلّمة" الموجود أصلاً — أي تطابق يعني الدار صارت مستلمة
+    // فعلياً رغم بقائها بالقائمتين، فيُعرض إشعار للموافقة على حذف النسختين معاً (لا حذف تلقائي بدون موافقة)
+    function checkDeliveredCrossovers() {
+        if (typeof window.getSheetDate !== 'function') return;
+        var seen = {};
+        var alerts = [];
+        wsUnits.forEach(function (u) {
+            var key = normHouseNo(u.unit);
+            if (seen[key] || wsDismissed[key] || wsSnoozed[key]) return;
+            var d = window.getSheetDate(u.unit);
+            if (d) { seen[key] = true; alerts.push({ houseNo: u.unit, date: d }); }
+        });
+        (oldHouseRecords || []).forEach(function (r) {
+            var key = normHouseNo(r.houseNo);
+            if (seen[key] || wsDismissed[key] || wsSnoozed[key]) return;
+            var d = window.getSheetDate(r.houseNo);
+            if (d) { seen[key] = true; alerts.push({ houseNo: r.houseNo, date: d }); }
+        });
+        wsDeliveredAlerts = alerts;
+        renderDeliveredCrossoverBanner();
+    }
+
+    function renderDeliveredCrossoverBanner() {
+        var box = document.getElementById('delivered-crossover-banner');
+        if (!box) return;
+        if (!wsDeliveredAlerts.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+        box.style.display = 'block';
+        box.style.cssText = 'display:block; margin:0 0 14px; padding:12px 16px; border-radius:14px; background:rgba(5,150,105,.08); border:1px solid rgba(5,150,105,.35);';
+        box.innerHTML = '<div style="font-weight:900; color:#059669; margin-bottom:8px;">🔔 دور تحوّلت إلى "مستلم" — موجودة بعد بقيد التسليم و/أو المراجعة، تحذف النسختين؟</div>' +
+            wsDeliveredAlerts.map(function (a) {
+                return '<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:6px 0; border-top:1px dashed rgba(5,150,105,.25);">' +
+                    '<span style="font-weight:700;">🏠 ' + esc(a.houseNo) + '</span>' +
+                    '<span style="color:var(--text-muted); font-size:0.85rem;">تاريخ الاستلام: ' + esc(a.date) + '</span>' +
+                    '<button onclick="window.__wsDeleteBothCopies(\'' + esc(a.houseNo).replace(/'/g, "\\'") + '\')" style="padding:4px 10px;border-radius:8px;border:1px solid rgba(225,29,72,.5);background:rgba(225,29,72,.1);color:#e11d48;cursor:pointer;font-weight:700;font-size:0.8rem;">🗑️ حذف النسختين</button>' +
+                    '<button onclick="window.__wsSnoozeAlert(\'' + esc(a.houseNo).replace(/'/g, "\\'") + '\')" style="padding:4px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-muted);cursor:pointer;font-weight:700;font-size:0.8rem;">🙈 تجاهل الآن</button>' +
+                    '</div>';
+            }).join('') + '</div>';
+    }
+
+    window.__wsDeleteBothCopies = function (houseNo) {
+        var key = normHouseNo(houseNo);
+        wsDismissed[key] = true;
+        try { localStorage.setItem('weeklyStatusDismissed', JSON.stringify(wsDismissed)); } catch (e) {}
+        var existing = (oldHouseRecords || []).find(function (r) { return normHouseNo(r.houseNo) === key; });
+        if (existing) {
+            oldHouseRecords = oldHouseRecords.filter(function (r) { return r.id !== existing.id; });
+            if (typeof deleteOldRecordFromDB === 'function') deleteOldRecordFromDB(existing.id);
+        }
+        wsDeliveredAlerts = wsDeliveredAlerts.filter(function (a) { return normHouseNo(a.houseNo) !== key; });
+        renderDeliveredCrossoverBanner();
+        wsRender();
+        if (typeof window.__rvRefresh === 'function') window.__rvRefresh();
+    };
+
+    window.__wsSnoozeAlert = function (houseNo) {
+        wsSnoozed[normHouseNo(houseNo)] = true;
+        wsDeliveredAlerts = wsDeliveredAlerts.filter(function (a) { return normHouseNo(a.houseNo) !== normHouseNo(houseNo); });
+        renderDeliveredCrossoverBanner();
+    };
+
     document.addEventListener('DOMContentLoaded', function () {
         wsStatusText();
         populateFilterOptions();
         wsRender(); // عرض فوري من الكاش المحلي (إن وُجد) قبل اكتمال المزامنة
         setTimeout(function () { wsSync(false); }, 4000); // مزامنة أولى بالخلفية بعد تحميل الصفحة
+        setTimeout(checkDeliveredCrossovers, 7000); // تحقق أول من التقاطع مع شيت المسلّمة بعد إتاحة الوقت لمزامنته هو أيضاً
     });
     setInterval(function () {
         var sec = document.getElementById('weekly-status-section');
         if (sec && sec.style.display !== 'none') wsSync(false);
     }, 10 * 60 * 1000);
+    setInterval(checkDeliveredCrossovers, 5 * 60 * 1000);
 
     /* ===== تبويب "المراجعة" — مصدر بياناته oldHouseRecords (نفسه الذي نُقلت إليه الدور القديمة كما هي) ===== */
     var rvSearchVal = '';
@@ -4720,7 +4815,7 @@
         if (!normal.length && !delivered.length) {
             html = '<p style="padding:20px; text-align:center; color:var(--text-muted);">لا توجد دور قيد المراجعة حالياً.</p>';
         } else {
-            html = buildTable(normal, '🔍 دور قيد المراجعة') + buildTable(delivered, '📦 دور مسلّمة سابقاً وبها ملاحظات (مفصولة)');
+            html = buildTable(normal, '🔍 الدور التي يتم مراجعة المستفيد عليها') + buildTable(delivered, '📦 دور مسلّمة سابقاً وبها ملاحظات (مفصولة)');
         }
         box.style.maxHeight = '700px';
         box.style.overflow = 'auto';
