@@ -4809,9 +4809,27 @@
         var normal = rvSortList(all.filter(function (r) { return !isDeliveredRec(r); }), rvSortMode);
         var delivered = rvSortList(all.filter(isDeliveredRec), rvSortMode);
 
+        // بطلب المستخدم: إذا كان تاريخ الوارد/التسليم غير محفوظ بسجل المراجعة (دور قديمة قبل هذه الميزة
+        // أو أُضيفت يدوياً) لكن الدار موجودة حالياً بقيد التسليم وبيها هذه التواريخ — تُسحب وتُعرض آلياً
+        var wsUnitByHouse = {};
+        (wsUnits || []).forEach(function (u) { wsUnitByHouse[normHouseNo(u.unit)] = u; });
+        function rvDates(rec) {
+            var inc = rec.incomingDate || '';
+            var dlv = rec.deliveryDate || '';
+            if (!inc || !dlv) {
+                var match = wsUnitByHouse[normHouseNo(rec.houseNo)];
+                if (match) {
+                    if (!inc) inc = match.incomingDate || '';
+                    if (!dlv) dlv = match.deliveryDate || '';
+                }
+            }
+            return { incomingDate: inc, deliveryDate: dlv };
+        }
+
         function buildTable(list, title) {
             if (!list.length) return '';
             var rows = list.map(function (rec, idx) {
+                var dts = rvDates(rec);
                 return '<tr style="border-top:1px solid var(--glass-border);">' +
                     '<td style="padding:6px;">' + (idx + 1) + '</td>' +
                     '<td style="padding:6px; font-weight:700;">' + esc(rec.houseNo) + '</td>' +
@@ -4819,8 +4837,8 @@
                     '<td style="padding:6px;">' + esc(rec.phoneNo || '-') + '</td>' +
                     '<td style="padding:6px;">' + esc(rec.executionType || '-') + '</td>' +
                     '<td style="padding:6px;">' + esc(rec.contractorName || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(rec.incomingDate || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(rec.deliveryDate || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(dts.incomingDate || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(dts.deliveryDate || '-') + '</td>' +
                     '<td style="padding:6px;">' + esc(rec.reviewDate || '-') + '</td>' +
                     '<td style="padding:6px;">' + esc(rec.notesEndDate || '-') + '</td>' +
                     '<td style="padding:6px; max-width:200px; white-space:pre-wrap;">' + esc(rec.notes || '-') + '</td>' +
