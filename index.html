@@ -874,6 +874,10 @@
         </div>
     </div>
     <div id="weekly-status-box" style="max-height:700px; overflow-y:auto; overflow-x:auto; border:1px solid var(--glass-border); border-radius:12px; background:var(--glass-bg);"></div>
+
+    <!-- دور كانت مسجلة بالنظام السابق تحت اسم "الدور الجديدة" ولا تظهر حالياً بملف الإكسل (غير متطابقة رقم الدار) —
+         تُعرض هنا حتى لا تضيع من الواجهة؛ بياناتها الكاملة ما زالت محفوظة دائماً -->
+    <div id="legacy-new-houses-section" style="margin-top:18px;"></div>
 </div>
 
 <!-- تبويب "المراجعة" — الدور التي يراجع المستفيد مكتب التسليم بخصوصها (ومعها الدور المنقولة من النظام القديم سابقاً) -->
@@ -3633,7 +3637,9 @@
     var AR_MONTHS = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 
     // ---------- الشريط والتنبيه فوق الجدول ----------
-    var anchor = document.querySelector('.table-container');
+    // المرساة كانت .table-container (الجدول القديم المخفي الآن) فتظهر هذي اللوحة بمكان غير واضح؛ نُرسيها عند .nav-tabs
+    // (أعلى الصفحة مباشرة، ظاهرة بكل الأحوال بغض النظر عن التبويب النشط)
+    var anchor = document.querySelector('.nav-tabs');
     var bar = document.createElement('div');
     bar.id = 'sheetLinkBar';
     bar.style.cssText = 'display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px;font-size:.85rem;color:var(--text-muted);';
@@ -3751,6 +3757,11 @@
                 if (typeof deleteRecordFromDB === 'function') deleteRecordFromDB(id);
             }
             if (typeof window.renderTable === 'function') window.renderTable(); else decorate();
+            // تحديث فوري لشريط هذا الإشعار نفسه (كان ناقصاً — لذلك يبدو الزر وكأنه "ما يصير شي" رغم أن الحذف تم فعلياً)
+            renderPendingAlert();
+            // وتحديث تبويبي "قيد التسليم" و"المراجعة" الجديدين لأنهما قد يعرضان نفس الدار (مطابقة بالاسم/الهاتف أو كنسخة مراجعة)
+            if (typeof window.__wsRefresh === 'function') window.__wsRefresh();
+            if (typeof window.__rvRefresh === 'function') window.__rvRefresh();
         } catch (e) { console.error('slConfirm failed', e); }
     };
 
@@ -4535,6 +4546,36 @@
             '<th style="padding:8px;">المراجعة</th>' +
             '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
         box.innerHTML = html;
+        renderLegacyNewHouses();
+    }
+
+    // دور كانت مسجلة بالنظام السابق باسم "الدور الجديدة" (houseRecords) ولا تملك سطراً مطابقاً حالياً بملف الإكسل —
+    // تبقى بياناتها الكاملة محفوظة دوماً، وتُعرض هنا صراحة حتى لا تختفي من الواجهة بعد إزالة التبويب القديم
+    function renderLegacyNewHouses() {
+        var box = document.getElementById('legacy-new-houses-section');
+        if (!box) return;
+        var matched = {};
+        wsUnits.forEach(function (u) { matched[normHouseNo(u.unit)] = true; });
+        var orphans = (typeof houseRecords !== 'undefined' ? houseRecords : []).filter(function (r) { return !matched[normHouseNo(r.houseNo)]; });
+        if (!orphans.length) { box.innerHTML = ''; return; }
+        box.innerHTML = '<h4 style="margin:4px 4px 8px; color:#b45309;">🗂️ دور من النظام السابق ("الدور الجديدة") غير موجودة حالياً بملف الإكسل (' + orphans.length + ')</h4>' +
+            '<table style="width:100%; border-collapse:collapse; border:1px solid rgba(217,119,6,.3); border-radius:12px; overflow:hidden;">' +
+            '<thead><tr style="background:rgba(217,119,6,.1); text-align:right;">' +
+            '<th style="padding:8px;">رقم البلوك والدار</th><th style="padding:8px;">اسم المستفيد</th><th style="padding:8px;">رقم الهاتف</th>' +
+            '<th style="padding:8px;">القطاع</th><th style="padding:8px;">نوع التنفيذ</th><th style="padding:8px;">المقاول</th><th style="padding:8px;">تاريخ الحضور</th><th style="padding:8px;">إجراءات</th>' +
+            '</tr></thead><tbody>' +
+            orphans.map(function (r) {
+                return '<tr style="border-top:1px solid rgba(217,119,6,.2);">' +
+                    '<td style="padding:6px; font-weight:700;">' + esc(r.houseNo) + '</td>' +
+                    '<td style="padding:6px;">' + esc(r.ownerName || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(r.phoneNo || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(r.sectorNo || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(r.executionType || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(r.contractorName || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(r.arrivalDate || '-') + '</td>' +
+                    '<td style="padding:6px;"><button onclick="editRecord(' + r.id + ')" style="padding:4px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);cursor:pointer;font-weight:700;font-size:0.8rem;">✏️ تعديل/عرض كامل البيانات</button></td>' +
+                    '</tr>';
+            }).join('') + '</tbody></table>';
     }
 
     // يحوّل نص "الجهة المنفذة" من الشيت إلى القيمة المتوافقة مع نموذج بيانات المراجعة الحالي
