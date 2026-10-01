@@ -721,6 +721,7 @@
         <button class="btn-add" style="padding:12px 24px; border-radius:16px;" onclick="openAddModal()">+ إضافة دار جديدة</button>
         <button id="tab-new-houses" class="nav-tab-btn active" onclick="switchMainTab('new')">🏠 الدور الجديدة</button>
         <button id="tab-old-houses" class="nav-tab-btn" onclick="switchMainTab('old')">🏛️ دور التسليم القديمة</button>
+        <button id="tab-weekly-status" class="nav-tab-btn" onclick="switchMainTab('weekly')">📋 قيد التسليم (من الإكسل)</button>
     </div>
 
 
@@ -813,6 +814,32 @@
 
     <div id="mobile-cards-container"></div>
     <div id="load-more-container" style="text-align:center; margin: 18px 0 30px;"></div>
+</div>
+
+<!-- تبويب "قيد التسليم (من الإكسل)" — مصدره الحصري شيت Google "الموقف الاسبوعي"، تواريخه تُعرض كما هي بالضبط
+     بدون أي حساب من النظام. هذا القسم مستقل بالكامل عن تبويبي "الدور الجديدة/القديمة" أعلاه ولا يؤثر ببياناتهما -->
+<div id="weekly-status-section" style="display:none;">
+    <div class="filter-section">
+        <div class="filter-group">
+            <label>البحث:</label>
+            <input type="text" id="ws-search-input" placeholder="ابحث برقم الدار، المقاول، أو القطاع..." oninput="window.__wsFilter && window.__wsFilter(this.value)">
+
+            <label>القطاع:</label>
+            <select id="ws-sector-filter" onchange="window.__wsFilter && window.__wsFilter()">
+                <option value="all">جميع القطاعات</option>
+            </select>
+
+            <label>المقاول:</label>
+            <select id="ws-contractor-filter" onchange="window.__wsFilter && window.__wsFilter()">
+                <option value="all">جميع المقاولين</option>
+            </select>
+
+            <button onclick="window.__wsAskUrl && window.__wsAskUrl()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;">🔗 ربط/تغيير رابط شيت الموقف الاسبوعي</button>
+            <button onclick="window.__wsSync && window.__wsSync(true)" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21,128,61,.5);background:rgba(21,128,61,.12);color:#059669;cursor:pointer;font-weight:700;">🔄 تحديث</button>
+            <span id="wsStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
+        </div>
+    </div>
+    <div id="weekly-status-box" style="max-height:700px; overflow-y:auto; overflow-x:auto; border:1px solid var(--glass-border); border-radius:12px; background:var(--glass-bg);"></div>
 </div>
 
 <!-- Modals -->
@@ -1524,6 +1551,25 @@
     }
 
     function switchMainTab(tab) {
+        // تبويب "قيد التسليم (من الإكسل)" مستقل تماماً عن جدولي "الدور الجديدة/القديمة" القديمين ولا يغيّر activeTab
+        // الخاص بهما (تبقى منطقهما كما هي)، فقط يُخفي قسمهما ويُظهر قسمه الخاص
+        document.getElementById('tab-weekly-status').classList.toggle('active', tab === 'weekly');
+        var weeklySection = document.getElementById('weekly-status-section');
+        if (tab === 'weekly') {
+            document.getElementById('tab-new-houses').classList.remove('active');
+            document.getElementById('tab-old-houses').classList.remove('active');
+            document.querySelector('.filter-section').style.display = 'none';
+            document.getElementById('show-extra-cols-toggle').closest('div').style.display = 'none';
+            document.querySelector('.table-container.table-columns-wrap').style.display = 'none';
+            if (weeklySection) weeklySection.style.display = 'block';
+            if (window.__wsShowTab) window.__wsShowTab();
+            return;
+        }
+        if (weeklySection) weeklySection.style.display = 'none';
+        document.querySelector('.filter-section').style.display = 'block';
+        document.getElementById('show-extra-cols-toggle').closest('div').style.display = 'block';
+        document.querySelector('.table-container.table-columns-wrap').style.display = '';
+
         activeTab = tab;
         document.getElementById('tab-new-houses').classList.toggle('active', tab === 'new');
         document.getElementById('tab-old-houses').classList.toggle('active', tab === 'old');
@@ -3636,9 +3682,19 @@
         window.__deliveredAllItems = sheetAllRows;
         renderDeliveredList((document.getElementById('deliveredSearchInput') || {}).value || '');
     }
-    function renderDeliveredList(q) {
+    // بطلب المستخدم: تخفيف حمل الجهاز مع كبر البيانات — نعرض دفعة محدودة من الصفوف بالبداية (Pagination)
+    // بدل رسم كل الصفوف دفعة وحدة، مع زر "تحميل المزيد" لمن يريد يشوف الباقي، وبحث بتأخير بسيط (debounce) حتى لا يعيد الرسم بكل حرف
+    var deliveredPageSize = 150;
+    var deliveredVisibleCount = deliveredPageSize;
+    var deliveredLastQuery = '';
+    var deliveredSearchTimer = null;
+    function renderDeliveredList(q, keepPage) {
         var listBox = document.getElementById('delivered-houses-list');
         if (!listBox) return;
+        if (!keepPage) {
+            if (q !== deliveredLastQuery) deliveredVisibleCount = deliveredPageSize;
+            deliveredLastQuery = q;
+        }
         var items = (window.__deliveredAllItems || []).slice();
         if (!items.length) { listBox.innerHTML = 'لا توجد بيانات بعد — بانتظار مزامنة الشيت.'; return; }
         var qq = norm(q);
@@ -3649,16 +3705,29 @@
         }
         items.sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
         if (!items.length) { listBox.innerHTML = '<div style="color:var(--text-muted);">لا نتائج مطابقة للبحث.</div>'; return; }
+        var totalMatched = items.length;
+        var shown = items.slice(0, deliveredVisibleCount);
+        var moreBtn = totalMatched > shown.length
+            ? '<button onclick="window.__deliveredLoadMore && window.__deliveredLoadMore()" style="margin-top:8px; padding:8px 16px; border-radius:10px; border:1px solid var(--glass-border); background:#eef4fa; color:var(--primary-blue); cursor:pointer; font-weight:700;">⬇️ تحميل المزيد (' + shown.length + ' من ' + totalMatched + ')</button>'
+            : '';
         listBox.innerHTML =
             '<div style="max-height:700px; overflow-y:auto;">' +
             '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
             '<thead><tr style="text-align:right;"><th style="padding:6px;">رقم البلوك والدار</th><th style="padding:6px;">اسم المستفيد</th><th style="padding:6px;">القطاع</th><th style="padding:6px;">تاريخ الاستلام</th></tr></thead>' +
-            '<tbody>' + items.map(function (x) {
+            '<tbody>' + shown.map(function (x) {
                 return '<tr style="border-top:1px solid var(--glass-border);"><td style="padding:6px;"><strong>' + esc(x.houseNo) + '</strong></td><td style="padding:6px;">' + esc(x.name || '-') + '</td><td style="padding:6px;">' + esc(x.sector || '-') + '</td><td style="padding:6px;">' + esc(x.date) + '</td></tr>';
             }).join('') + '</tbody></table></div>' +
-            '<div style="margin-top:8px; color:var(--text-muted);">الإجمالي: ' + items.length + ' دار (من أصل ' + (window.__deliveredAllItems || []).length + ')</div>';
+            moreBtn +
+            '<div style="margin-top:8px; color:var(--text-muted);">معروض: ' + shown.length + ' من ' + totalMatched + ' مطابق (الإجمالي الكلي: ' + (window.__deliveredAllItems || []).length + ' دار)</div>';
     }
-    window.__filterDeliveredTile = function (q) { renderDeliveredList(q); };
+    window.__deliveredLoadMore = function () {
+        deliveredVisibleCount += deliveredPageSize;
+        renderDeliveredList(deliveredLastQuery, true);
+    };
+    window.__filterDeliveredTile = function (q) {
+        if (deliveredSearchTimer) clearTimeout(deliveredSearchTimer);
+        deliveredSearchTimer = setTimeout(function () { renderDeliveredList(q); }, 220);
+    };
 
     // ---------- 4) مستطيل "📅 الجرد السنوي": تجميع عدد الدور المسلَّمة شهرياً/سنوياً حسب الفئة (أول حرف من رقم الدار) ----------
     // حساب مجموعات الجرد السنوي (شهر/سنة × فئة) — دالة مشتركة بين العرض والتصدير لملف اكسل
@@ -4214,6 +4283,197 @@
     });
     window.addEventListener('scroll', closeNotesPopup, true);
     window.addEventListener('resize', closeNotesPopup);
+})();
+</script>
+<script>
+/* ===== تبويب "قيد التسليم (من الإكسل)" =====
+   المصدر الحصري: شيت Google "الموقف الاسبوعي" فقط (باقي شيتات الملف لا علاقة لها بهذا التبويب).
+   تاريخ الوارد وتاريخ التسليم يُقرآن ويُعرضان كما هما بالضبط بالشيت نصّاً — النظام لا يحسب أي موعد بنفسه أبداً
+   (حتى لو تكرر ظهور فرق 10 أيام بالبيانات، فهذا راجع لطريقة تعبئة الشيت نفسه وليس حساباً من النظام). */
+(function () {
+    'use strict';
+    var SECTOR_NAMES = ['القطاع الأول', 'القطاع الثاني', 'القطاع الثالث', 'القطاع الرابع', 'القطاع الخامس', 'القطاع السادس', 'دور VIP'];
+    var wsUrl = localStorage.getItem('weeklyStatusSheetUrl') || '';
+    var wsRunning = false;
+    var wsLastSync = localStorage.getItem('weeklyStatusLastSync') || '';
+    var wsUnits = [];
+    try { wsUnits = JSON.parse(localStorage.getItem('weeklyStatusCache') || '[]'); } catch (e) { wsUnits = []; }
+    var wsSearchVal = '';
+
+    function cell(v) { return (v == null) ? '' : String(v).trim(); }
+
+    // يحلل صفوف شيت "الموقف الاسبوعي" الخام (رؤوس قطاع/مقاول مُدمجة الخلايا أصلاً بالشيت) إلى قائمة دور مفردة
+    function parseWeeklySheet(rows) {
+        var out = [];
+        var curSector = null, curContractor = null, curExecutor = null, skipContractor = false;
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i] || [];
+            var A = cell(row[0]), D = cell(row[3]), G = cell(row[6]), H = cell(row[7]), I = row[8], J = row[9], K = cell(row[10]);
+            if (A && SECTOR_NAMES.indexOf(A) >= 0) { curSector = A; }
+            // صفوف عناوين الأعمدة أو صف "المجموع" الإجمالي — لا تحمل بيانات دور حقيقية
+            if (D === 'المقاول' || A === 'المجموع' || D === 'المجموع' || H === 'رقم الوحدة السكنية') continue;
+            if (D !== '') {
+                curContractor = D;
+                skipContractor = (G === 'تم تسليم جميع الوحدات السكنية'); // هذا المقاول سلّم كل دوره، لا دور قيد تسليم له
+                if (K !== '') curExecutor = K;
+            } else if (K !== '') {
+                curExecutor = K;
+            }
+            if (skipContractor) continue;
+            if (H !== '') {
+                out.push({
+                    sector: curSector || '',
+                    contractor: curContractor || '',
+                    executionType: curExecutor || '',
+                    unit: H,
+                    incomingDate: cell(I),   // كما هي بالشيت حرفياً، بدون أي تحويل
+                    deliveryDate: cell(J)    // كما هي بالشيت حرفياً، بدون أي تحويل
+                });
+            }
+        }
+        return out;
+    }
+
+    function matchBeneficiary(unit) {
+        var key = normHouseNo(unit);
+        var found = (houseRecords || []).find(function (r) { return normHouseNo(r.houseNo) === key; });
+        if (!found) found = (oldHouseRecords || []).find(function (r) { return normHouseNo(r.houseNo) === key; });
+        return found ? { name: found.ownerName || '', phone: found.phoneNo || '' } : { name: '', phone: '' };
+    }
+
+    function wsStatusText() {
+        var el = document.getElementById('wsStatus');
+        if (!el) return;
+        el.textContent = wsLastSync ? ('آخر تحديث: ' + wsLastSync + ' | عدد الدور قيد التسليم: ' + wsUnits.length) : (wsUrl ? 'لم تتم المزامنة بعد — اضغط "تحديث"' : 'لم يُربط رابط الشيت بعد');
+    }
+
+    function populateFilterOptions() {
+        var secSel = document.getElementById('ws-sector-filter');
+        var conSel = document.getElementById('ws-contractor-filter');
+        if (!secSel || !conSel) return;
+        var sectors = [], contractors = [];
+        wsUnits.forEach(function (u) {
+            if (u.sector && sectors.indexOf(u.sector) < 0) sectors.push(u.sector);
+            if (u.contractor && contractors.indexOf(u.contractor) < 0) contractors.push(u.contractor);
+        });
+        var curSec = secSel.value, curCon = conSel.value;
+        secSel.innerHTML = '<option value="all">جميع القطاعات</option>' + sectors.map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + '</option>'; }).join('');
+        conSel.innerHTML = '<option value="all">جميع المقاولين</option>' + contractors.map(function (c) { return '<option value="' + esc(c) + '">' + esc(c) + '</option>'; }).join('');
+        if (sectors.indexOf(curSec) >= 0) secSel.value = curSec;
+        if (contractors.indexOf(curCon) >= 0) conSel.value = curCon;
+    }
+
+    function wsRender() {
+        var box = document.getElementById('weekly-status-box');
+        if (!box) return;
+        var secSel = document.getElementById('ws-sector-filter');
+        var conSel = document.getElementById('ws-contractor-filter');
+        var secVal = secSel ? secSel.value : 'all';
+        var conVal = conSel ? conSel.value : 'all';
+        var q = normHouseNo(wsSearchVal);
+
+        var list = wsUnits.filter(function (u) {
+            if (secVal !== 'all' && u.sector !== secVal) return false;
+            if (conVal !== 'all' && u.contractor !== conVal) return false;
+            if (q && normHouseNo(u.unit).indexOf(q) < 0 && normHouseNo(u.contractor).indexOf(q) < 0 && normHouseNo(u.sector).indexOf(q) < 0) return false;
+            return true;
+        });
+
+        if (!list.length) {
+            box.innerHTML = '<p style="padding:20px; text-align:center; color:var(--text-muted);">' +
+                (wsUnits.length ? 'لا توجد نتائج مطابقة.' : (wsUrl ? '⏳ لا توجد بيانات محمّلة بعد — اضغط "تحديث".' : '🔗 يرجى الضغط على زر "ربط/تغيير رابط شيت الموقف الاسبوعي" أولاً، ولصق رابط نشر تبويب "الموقف الاسبوعي" بصيغة CSV.')) +
+                '</p>';
+            return;
+        }
+
+        var html = '<table style="width:100%; border-collapse:collapse;">' +
+            '<thead><tr style="background:var(--bg-primary); text-align:right; position:sticky; top:0;">' +
+            '<th style="padding:8px;">ت</th><th style="padding:8px;">رقم البلوك والدار</th>' +
+            '<th style="padding:8px;">اسم المستفيد</th><th style="padding:8px;">رقم الهاتف</th>' +
+            '<th style="padding:8px;">نوع التنفيذ</th><th style="padding:8px;">اسم المقاول</th>' +
+            '<th style="padding:8px;">القطاع</th>' +
+            '<th style="padding:8px;">تاريخ الوارد</th><th style="padding:8px;">تاريخ التسليم</th>' +
+            '</tr></thead><tbody>' +
+            list.map(function (u, idx) {
+                var b = matchBeneficiary(u.unit);
+                return '<tr style="border-top:1px solid var(--glass-border);">' +
+                    '<td style="padding:6px;">' + (idx + 1) + '</td>' +
+                    '<td style="padding:6px; font-weight:700;">' + esc(u.unit) + '</td>' +
+                    '<td style="padding:6px;">' + esc(b.name || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(b.phone || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(u.executionType || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(u.contractor || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(u.sector || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(u.incomingDate || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(u.deliveryDate || '-') + '</td>' +
+                    '</tr>';
+            }).join('') +
+            '</tbody></table>';
+        box.innerHTML = html;
+    }
+
+    async function wsSync(manual) {
+        if (wsRunning) return;
+        if (!wsUrl) { if (manual) window.__wsAskUrl(); return; }
+        wsRunning = true;
+        if (manual && document.getElementById('wsStatus')) document.getElementById('wsStatus').textContent = '⏳ جاري الجلب...';
+        try {
+            var url = wsUrl + (wsUrl.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+            var res = await fetch(url, { cache: 'no-store' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            var wb = XLSX.read(await res.text(), { type: 'string', raw: true });
+            var rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true, defval: null });
+            var parsed = parseWeeklySheet(rows);
+            if (!parsed.length) throw new Error('ما لكيت أي صفوف دور قيد التسليم — تأكد من رابط النشر ومن أن المنشور هو تبويب "الموقف الاسبوعي" بالتحديد');
+            wsUnits = parsed;
+            wsLastSync = new Date().toLocaleString('ar-IQ');
+            try {
+                localStorage.setItem('weeklyStatusCache', JSON.stringify(wsUnits));
+                localStorage.setItem('weeklyStatusLastSync', wsLastSync);
+            } catch (e) { console.warn('تعذر حفظ كاش قيد التسليم محلياً', e); }
+            populateFilterOptions();
+            wsRender();
+            wsStatusText();
+        } catch (e) {
+            console.error('weekly-status sync', e);
+            if (manual) alert('⚠️ تعذرت مزامنة شيت الموقف الاسبوعي:\n' + e.message);
+            wsStatusText();
+        } finally {
+            wsRunning = false;
+        }
+    }
+
+    window.__wsAskUrl = function () {
+        var u = prompt('ألصق رابط نشر تبويب "الموقف الاسبوعي" بصيغة CSV (من Google Sheets: ملف ← مشاركة ← نشر على الويب ← اختر هذا التبويب بالتحديد ← CSV):', wsUrl || '');
+        if (u === null) return;
+        u = u.trim();
+        if (!u) return;
+        wsUrl = u;
+        try { localStorage.setItem('weeklyStatusSheetUrl', u); } catch (e) {}
+        wsSync(true);
+    };
+
+    window.__wsSync = function (manual) { wsSync(manual); };
+
+    window.__wsFilter = function (v) {
+        if (typeof v === 'string') wsSearchVal = v;
+        wsRender();
+    };
+
+    window.__wsShowTab = function () {
+        populateFilterOptions();
+        wsRender();
+        wsStatusText();
+        if (wsUrl && !wsUnits.length) wsSync(false);
+    };
+
+    if (wsUnits.length) {
+        document.addEventListener('DOMContentLoaded', function () { wsStatusText(); });
+    }
+    setInterval(function () {
+        var sec = document.getElementById('weekly-status-section');
+        if (sec && sec.style.display !== 'none') wsSync(false);
+    }, 10 * 60 * 1000);
 })();
 </script>
 
