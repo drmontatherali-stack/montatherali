@@ -738,20 +738,22 @@
     <!-- زرا رفع/عرض ملف تواريخ الاستلام اليدوي أُلغيا من الواجهة بعد ربط النظام مباشرة بشيت Google Sheets؛
          الدوال (handleHandoverDatesFile, openHandoverDatesModal, lookupHandoverDate) بقيت بالكود بدون استخدام كخيار احتياطي -->
 
-    <!-- ثلاثة أزرار جنب بعض: إضافة دار جديدة + التنقل بين نوعي الدور -->
+    <!-- ===== "النظام القديم" (تبويبا الدور الجديدة/القديمة بشكلهما العام القديم) أُزيل من الواجهة بطلب المستخدم
+         واستُبدل بهيكلية "جدول الدور النشطة" الجديدة ذات النوافذ الثلاث: قيد التسليم / المراجعة / المسلمة.
+         بيانات houseRecords و oldHouseRecords لم تُحذف إطلاقاً (محفوظة بالكامل بالسحابة والتخزين المحلي)؛
+         oldHouseRecords أصبحت هي نفسها مصدر بيانات تبويب "المراجعة" الجديد أدناه (نُقلت كما هي كما طُلب).
+         عناصر الواجهة القديمة (الجدول والبطاقات) بقيت موجودة بالصفحة لكن مخفية دائماً (display:none) حتى لا
+         تتعطل الدوال الداخلية الكثيرة التي ما زالت تُحدّثها بالخلفية (renderTable وغيرها) دون أي خطر على الواجهة المرئية -->
     <div class="nav-tabs">
-        <button class="btn-add" style="padding:12px 24px; border-radius:16px;" onclick="openAddModal()">+ إضافة دار جديدة</button>
-        <button id="tab-new-houses" class="nav-tab-btn active" onclick="switchMainTab('new')">🏠 الدور الجديدة</button>
-        <button id="tab-old-houses" class="nav-tab-btn" onclick="switchMainTab('old')">🏛️ دور التسليم القديمة</button>
-        <button id="tab-weekly-status" class="nav-tab-btn" onclick="switchMainTab('weekly')">📋 قيد التسليم (من الإكسل)</button>
+        <button id="tab-weekly-status" class="nav-tab-btn active" onclick="switchMainTab('weekly')">📋 قيد التسليم</button>
+        <button id="tab-review" class="nav-tab-btn" onclick="switchMainTab('review')">🔍 المراجعة</button>
     </div>
 
-
-    <div class="filter-section">
+    <div class="filter-section" style="display:none;">
         <div class="filter-group">
             <label>البحث الذكي:</label>
             <input type="text" id="search-input" placeholder="ابحث برقم الدار، الاسم، أو كلمة (متأخر، جاهز)..." oninput="onSearchInput()">
-            
+
             <label>نوع التنفيذ:</label>
             <select id="execution-filter" onchange="renderTable()">
                 <option value="all">الكل</option>
@@ -810,14 +812,14 @@
         </div>
     </div>
 
-    <div style="margin-bottom:12px;">
+    <div style="margin-bottom:12px; display:none;">
         <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem; color:var(--text-muted);">
             <input type="checkbox" id="show-extra-cols-toggle" onchange="toggleExtraCols()">
             👁️ إظهار كل الأعمدة والتفاصيل الإضافية بالجدول (القطاع، نوع التنفيذ، واتساب، تعديل...)
         </label>
     </div>
 
-    <div class="table-container table-columns-wrap">
+    <div class="table-container table-columns-wrap" style="display:none;">
         <table class="table-col-1">
             <thead id="table-head">
                 <!-- سيتم توليده ديناميكياً بناءً على الواجهة المختارة -->
@@ -834,13 +836,12 @@
         </table>
     </div>
 
-    <div id="mobile-cards-container"></div>
-    <div id="load-more-container" style="text-align:center; margin: 18px 0 30px;"></div>
+    <div id="mobile-cards-container" style="display:none;"></div>
+    <div id="load-more-container" style="text-align:center; margin: 18px 0 30px; display:none;"></div>
 </div>
 
-<!-- تبويب "قيد التسليم (من الإكسل)" — مصدره الحصري شيت Google "الموقف الاسبوعي"، تواريخه تُعرض كما هي بالضبط
-     بدون أي حساب من النظام. هذا القسم مستقل بالكامل عن تبويبي "الدور الجديدة/القديمة" أعلاه ولا يؤثر ببياناتهما -->
-<div id="weekly-status-section" style="display:none;">
+<!-- تبويب "قيد التسليم" — مصدره الحصري شيت Google "الموقف الاسبوعي"، تواريخه تُعرض كما هي بالضبط بدون أي حساب من النظام -->
+<div id="weekly-status-section">
     <div class="filter-section">
         <div class="filter-group">
             <label>البحث:</label>
@@ -856,12 +857,68 @@
                 <option value="all">جميع المقاولين</option>
             </select>
 
+            <label>فرز حسب:</label>
+            <select id="ws-sort-select" onchange="window.__wsFilter && window.__wsFilter()">
+                <option value="default">الترتيب الافتراضي (القطاع)</option>
+                <option value="execution">نوع التنفيذ</option>
+                <option value="sector">القطاع</option>
+                <option value="contractor">المقاول</option>
+            </select>
+
             <button onclick="window.__wsAskUrl && window.__wsAskUrl()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;">🔗 ربط/تغيير رابط شيت الموقف الاسبوعي</button>
             <button onclick="window.__wsSync && window.__wsSync(true)" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21,128,61,.5);background:rgba(21,128,61,.12);color:#059669;cursor:pointer;font-weight:700;">🔄 تحديث</button>
             <span id="wsStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
         </div>
     </div>
     <div id="weekly-status-box" style="max-height:700px; overflow-y:auto; overflow-x:auto; border:1px solid var(--glass-border); border-radius:12px; background:var(--glass-bg);"></div>
+</div>
+
+<!-- تبويب "المراجعة" — الدور التي يراجع المستفيد مكتب التسليم بخصوصها (ومعها الدور المنقولة من النظام القديم سابقاً) -->
+<div id="review-section" style="display:none;">
+    <div class="filter-section">
+        <div class="filter-group">
+            <label>البحث:</label>
+            <input type="text" id="rv-search-input" placeholder="ابحث برقم الدار، الاسم، المقاول..." oninput="window.__rvFilter && window.__rvFilter(this.value)">
+
+            <label>فرز حسب:</label>
+            <select id="rv-sort-select" onchange="window.__rvFilter && window.__rvFilter()">
+                <option value="default">الترتيب الافتراضي</option>
+                <option value="execution">نوع التنفيذ</option>
+                <option value="sector">القطاع</option>
+                <option value="contractor">المقاول</option>
+            </select>
+
+            <button onclick="window.__rvManualAdd && window.__rvManualAdd()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21,128,61,.5);background:rgba(21,128,61,.12);color:#059669;cursor:pointer;font-weight:700;">+ إضافة دار (مسلّمة وبها ملاحظات)</button>
+            <span id="rvStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
+        </div>
+    </div>
+    <div id="review-box"></div>
+</div>
+
+<!-- نافذة تأكيد "هل راجع المستفيد؟" داخل النظام (ليست نافذة متصفح قياسية) -->
+<div id="reviewConfirmModal" class="modal">
+    <div class="modal-content" style="max-width: 420px; text-align:center;">
+        <span class="close-btn" onclick="document.getElementById('reviewConfirmModal').style.display='none';">&times;</span>
+        <h3 style="margin-bottom: 10px; color: var(--primary-blue); font-weight:900;">👁️ هل راجع المستفيد؟</h3>
+        <p id="reviewConfirmText" style="color: var(--text-muted); margin-bottom: 18px;"></p>
+        <div style="display:flex; gap:12px;">
+            <button class="btn-action-success" style="flex:1;" onclick="window.__wsConfirmReview && window.__wsConfirmReview(true)">✅ نعم</button>
+            <button class="btn-action-danger" style="flex:1;" onclick="window.__wsConfirmReview && window.__wsConfirmReview(false)">❌ لا</button>
+        </div>
+    </div>
+</div>
+
+<!-- نافذة "هل تم إكمال الملاحظات؟" -->
+<div id="notesCompleteModal" class="modal">
+    <div class="modal-content" style="max-width: 420px; text-align:center;">
+        <span class="close-btn" onclick="document.getElementById('notesCompleteModal').style.display='none';">&times;</span>
+        <h3 style="margin-bottom: 10px; color: var(--primary-blue); font-weight:900;">📝 هل تم إكمال الملاحظات؟</h3>
+        <p id="notesCompleteText" style="color: var(--text-muted); margin-bottom: 18px;"></p>
+        <div style="display:flex; gap:12px;">
+            <button class="btn-action-success" style="flex:1;" onclick="window.__rvNotesCompleteAnswer && window.__rvNotesCompleteAnswer(true)">✅ نعم - جاهز</button>
+            <button class="btn-action-danger" style="flex:1;" onclick="window.__rvNotesCompleteAnswer && window.__rvNotesCompleteAnswer(false)">❌ لا - موعد جديد</button>
+        </div>
+    </div>
 </div>
 
 <!-- Modals -->
@@ -1114,7 +1171,7 @@
                 <label>تاريخ إنهاء الملاحظات (تلقائي بعد 5 أيام، قابل للتعديل)</label>
                 <input type="date" id="old-notesEndDate" class="form-control">
             </div>
-            <button type="submit" class="btn-primary" style="margin-top: 10px;">حفظ بيانات الدار القديمة</button>
+            <button type="submit" class="btn-primary" style="margin-top: 10px;">💾 حفظ بيانات المراجعة</button>
         </form>
     </div>
 </div>
@@ -1580,34 +1637,21 @@
         }
     }
 
+    // هيكلية "جدول الدور النشطة" الجديدة: نافذتان بالواجهة (قيد التسليم / المراجعة) — "المسلّمة" تبقى بمكانها
+    // الحالي ضمن شريط الأدوات ("🏠 الدور المسلمة") دون أي تغيير بآليتها، كما طُلب صراحة.
+    // تبويبا "الدور الجديدة/القديمة" القديمان أُزيلا من الواجهة؛ عناصرهما بالصفحة باقية لكن مخفية دائماً
+    // (انظر التعليق أعلى .nav-tabs) حتى لا تتعطل الدوال الداخلية (renderTable وغيرها) التي ما زالت تُستدعى بالخلفية.
     function switchMainTab(tab) {
-        // تبويب "قيد التسليم (من الإكسل)" مستقل تماماً عن جدولي "الدور الجديدة/القديمة" القديمين ولا يغيّر activeTab
-        // الخاص بهما (تبقى منطقهما كما هي)، فقط يُخفي قسمهما ويُظهر قسمه الخاص
-        document.getElementById('tab-weekly-status').classList.toggle('active', tab === 'weekly');
         var weeklySection = document.getElementById('weekly-status-section');
-        if (tab === 'weekly') {
-            document.getElementById('tab-new-houses').classList.remove('active');
-            document.getElementById('tab-old-houses').classList.remove('active');
-            document.querySelector('.filter-section').style.display = 'none';
-            document.getElementById('show-extra-cols-toggle').closest('div').style.display = 'none';
-            document.querySelector('.table-container.table-columns-wrap').style.display = 'none';
-            if (weeklySection) weeklySection.style.display = 'block';
-            if (window.__wsShowTab) window.__wsShowTab();
-            return;
-        }
-        if (weeklySection) weeklySection.style.display = 'none';
-        document.querySelector('.filter-section').style.display = 'block';
-        document.getElementById('show-extra-cols-toggle').closest('div').style.display = 'block';
-        document.querySelector('.table-container.table-columns-wrap').style.display = '';
-
-        activeTab = tab;
-        document.getElementById('tab-new-houses').classList.toggle('active', tab === 'new');
-        document.getElementById('tab-old-houses').classList.toggle('active', tab === 'old');
-        document.getElementById('new-sort-select').style.display = (tab === 'new') ? 'inline-block' : 'none';
-        document.getElementById('old-sort-select').style.display = (tab === 'old') ? 'inline-block' : 'none';
-        document.getElementById('new-status-filter-select').style.display = (tab === 'new') ? 'inline-block' : 'none';
-        document.getElementById('old-status-filter-select').style.display = (tab === 'old') ? 'inline-block' : 'none';
-        renderTable();
+        var reviewSection = document.getElementById('review-section');
+        var tabWeekly = document.getElementById('tab-weekly-status');
+        var tabReview = document.getElementById('tab-review');
+        if (tabWeekly) tabWeekly.classList.toggle('active', tab === 'weekly');
+        if (tabReview) tabReview.classList.toggle('active', tab === 'review');
+        if (weeklySection) weeklySection.style.display = (tab === 'weekly') ? 'block' : 'none';
+        if (reviewSection) reviewSection.style.display = (tab === 'review') ? 'block' : 'none';
+        if (tab === 'weekly' && window.__wsShowTab) window.__wsShowTab();
+        if (tab === 'review' && window.__rvShowTab) window.__rvShowTab();
     }
 
     function selectHouseCategory(cat) {
@@ -1692,7 +1736,7 @@
         document.getElementById('old-reviewDate').value = rec.reviewDate || todayStr;
         document.getElementById('old-notesEndDate').value = rec.notesEndDate || addDays(todayStr, 5);
 
-        document.getElementById('modal-title').innerText = "تعديل بيانات الدار القديمة";
+        document.getElementById('modal-title').innerText = "📋 بيانات مراجعة الدار";
         document.getElementById('house-type-selector-box').style.display = 'none';
         selectHouseCategory('old');
         document.getElementById('addRecordModal').style.display = 'flex';
@@ -1789,7 +1833,7 @@
         // فحص تكرار رقم الدار يعمل دائماً (عند الإضافة وعند التعديل)
         const existsOld = oldHouseRecords.some(r => String(r.id) !== String(editId) && normHouseNo(r.houseNo) === normHouseNo(houseNo));
         if (existsOld) {
-            alert("⚠️ رقم الدار والبلوك هذا مسجل سابقاً ضمن الدور القديمة! يرجى التثبت بدقة.");
+            alert("⚠️ رقم الدار والبلوك هذا مسجل سابقاً ضمن قائمة المراجعة! يرجى التثبت بدقة.");
             return;
         }
 
@@ -1819,13 +1863,14 @@
 
         syncOldRecord(rec, baselineOld);
         closeAddModal();
+        if (typeof window.__rvRefresh === 'function') window.__rvRefresh();
 
-        // إرسال تفاصيل الدار القديمة عبر واتساب بيتا (رسالة مختصرة: رقم الدار، تاريخ المجيء، تاريخ إكمال الملاحظات، والملاحظات فقط)
-        let msgText = `تسجيل دار قديمة جديدة\n` +
+        // إرسال تفاصيل المراجعة عبر واتساب (رسالة مختصرة: رقم الدار، تاريخ المراجعة، موعد انتهاء الملاحظات، والملاحظات)
+        let msgText = `تسجيل مراجعة دار\n` +
                       `رقم الدار والبلوك: ${rec.houseNo}\n` +
                       (rec.ownerName ? `اسم المستفيد: ${rec.ownerName}\n` : '') +
-                      `تاريخ مجيء المستفيد: ${rec.reviewDate}\n` +
-                      `تاريخ إكمال الملاحظات: ${rec.notesEndDate}\n` +
+                      `تاريخ مراجعة المستفيد: ${rec.reviewDate}\n` +
+                      `موعد إنهاء الملاحظات: ${rec.notesEndDate}\n` +
                       `الملاحظات: ${rec.notes || 'لا يوجد'}` +
                       `\n\nمكتب التسليم الفني - مجمع الأميرات 2`;
 
@@ -4406,82 +4451,106 @@
         if (contractors.indexOf(curCon) >= 0) conSel.value = curCon;
     }
 
+    function wsSortList(list, mode) {
+        var arr = list.slice();
+        if (mode === 'execution') arr.sort(function (a, b) { return cell(a.executionType).localeCompare(cell(b.executionType), 'ar'); });
+        else if (mode === 'contractor') arr.sort(function (a, b) { return cell(a.contractor).localeCompare(cell(b.contractor), 'ar'); });
+        else if (mode === 'sector') arr.sort(function (a, b) { return cell(a.sector).localeCompare(cell(b.sector), 'ar'); });
+        return arr;
+    }
+
     function wsRender() {
         var box = document.getElementById('weekly-status-box');
         if (!box) return;
         var secSel = document.getElementById('ws-sector-filter');
         var conSel = document.getElementById('ws-contractor-filter');
+        var sortSel = document.getElementById('ws-sort-select');
         var secVal = secSel ? secSel.value : 'all';
         var conVal = conSel ? conSel.value : 'all';
+        var sortMode = sortSel ? sortSel.value : 'default';
         var q = normHouseNo(wsSearchVal);
 
+        // الدور التي صارت قيد "المراجعة" تُستبعد من هذا التبويب — الهدف فصل قيد التسليم (غير المراجَع) عن المراجَع عليها
         var list = wsUnits.filter(function (u) {
+            if ((oldHouseRecords || []).some(function (r) { return normHouseNo(r.houseNo) === normHouseNo(u.unit); })) return false;
             if (secVal !== 'all' && u.sector !== secVal) return false;
             if (conVal !== 'all' && u.contractor !== conVal) return false;
             if (q && normHouseNo(u.unit).indexOf(q) < 0 && normHouseNo(u.contractor).indexOf(q) < 0 && normHouseNo(u.sector).indexOf(q) < 0) return false;
             return true;
         });
+        list = wsSortList(list, sortMode);
 
         if (!list.length) {
+            wsVisibleList = [];
             box.innerHTML = '<p style="padding:20px; text-align:center; color:var(--text-muted);">' +
-                (wsUnits.length ? 'لا توجد نتائج مطابقة.' : (wsUrl ? '⏳ لا توجد بيانات محمّلة بعد — اضغط "تحديث".' : '🔗 يرجى الضغط على زر "ربط/تغيير رابط شيت الموقف الاسبوعي" أولاً، ولصق رابط نشر تبويب "الموقف الاسبوعي" بصيغة CSV.')) +
+                (wsUnits.length ? 'لا توجد دور قيد تسليم مطابقة (أو جميعها انتقلت لقائمة المراجعة).' : (wsUrl ? '⏳ لا توجد بيانات محمّلة بعد — اضغط "تحديث".' : '🔗 يرجى الضغط على زر "ربط/تغيير رابط شيت الموقف الاسبوعي" أولاً، ولصق رابط نشر تبويب "الموقف الاسبوعي" بصيغة CSV.')) +
                 '</p>';
             return;
         }
 
         wsVisibleList = list;
+        // تجميع بعنوان "رقم القطاع" أعلى كل تقسيم (كما بالمواصفة) — إلا عند الفرز بمعيار آخر غير الافتراضي فتُعرض كجدول مسطح
+        var groupBySector = (sortMode === 'default');
+        var rowsHtml = '';
+        var lastSector = null;
+        list.forEach(function (u, idx) {
+            if (groupBySector && u.sector !== lastSector) {
+                lastSector = u.sector;
+                rowsHtml += '<tr><td colspan="9" style="padding:10px 8px; font-weight:900; background:var(--bg-primary); color:var(--primary-blue); border-top:2px solid var(--glass-border);">📍 ' + esc(u.sector || 'غير محدد') + '</td></tr>';
+            }
+            var b = matchBeneficiary(u.unit);
+            var reviewCell = '<button onclick="window.__wsStartReview(' + idx + ')" style="padding:5px 10px;border-radius:10px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;font-size:0.8rem;">👁️ هل راجع المستفيد؟</button>';
+            rowsHtml += '<tr style="border-top:1px solid var(--glass-border);">' +
+                '<td style="padding:6px;">' + (idx + 1) + '</td>' +
+                '<td style="padding:6px; font-weight:700;">' + esc(u.unit) + '</td>' +
+                '<td style="padding:6px;">' + esc(b.name || '-') + '</td>' +
+                '<td style="padding:6px;">' + esc(b.phone || '-') + '</td>' +
+                '<td style="padding:6px;">' + esc(u.executionType || '-') + '</td>' +
+                '<td style="padding:6px;">' + esc(u.contractor || '-') + '</td>' +
+                '<td style="padding:6px;">' + esc(u.incomingDate || '-') + '</td>' +
+                '<td style="padding:6px;">' + esc(u.deliveryDate || '-') + '</td>' +
+                '<td style="padding:6px;">' + reviewCell + '</td>' +
+                '</tr>';
+        });
+
         var html = '<table style="width:100%; border-collapse:collapse;">' +
             '<thead><tr style="background:var(--bg-primary); text-align:right; position:sticky; top:0;">' +
             '<th style="padding:8px;">ت</th><th style="padding:8px;">رقم البلوك والدار</th>' +
             '<th style="padding:8px;">اسم المستفيد</th><th style="padding:8px;">رقم الهاتف</th>' +
             '<th style="padding:8px;">نوع التنفيذ</th><th style="padding:8px;">اسم المقاول</th>' +
-            '<th style="padding:8px;">القطاع</th>' +
             '<th style="padding:8px;">تاريخ الوارد</th><th style="padding:8px;">تاريخ التسليم</th>' +
             '<th style="padding:8px;">المراجعة</th>' +
-            '</tr></thead><tbody>' +
-            list.map(function (u, idx) {
-                var b = matchBeneficiary(u.unit);
-                var inReview = (oldHouseRecords || []).some(function (r) { return normHouseNo(r.houseNo) === normHouseNo(u.unit); });
-                var reviewCell = inReview
-                    ? '<button onclick="window.__wsStartReview(' + idx + ')" style="padding:5px 10px;border-radius:10px;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.12);color:#b45309;cursor:pointer;font-weight:700;font-size:0.8rem;">📋 قيد المراجعة (فتح)</button>'
-                    : '<button onclick="window.__wsStartReview(' + idx + ')" style="padding:5px 10px;border-radius:10px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;font-size:0.8rem;">👁️ هل راجع المستفيد؟</button>';
-                return '<tr style="border-top:1px solid var(--glass-border);">' +
-                    '<td style="padding:6px;">' + (idx + 1) + '</td>' +
-                    '<td style="padding:6px; font-weight:700;">' + esc(u.unit) + '</td>' +
-                    '<td style="padding:6px;">' + esc(b.name || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(b.phone || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(u.executionType || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(u.contractor || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(u.sector || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(u.incomingDate || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(u.deliveryDate || '-') + '</td>' +
-                    '<td style="padding:6px;">' + reviewCell + '</td>' +
-                    '</tr>';
-            }).join('') +
-            '</tbody></table>';
+            '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
         box.innerHTML = html;
     }
 
-    // يحوّل نص "الجهة المنفذة" من الشيت إلى القيمة المتوافقة مع نموذج "الدور القديمة/المراجعة" الحالي
+    // يحوّل نص "الجهة المنفذة" من الشيت إلى القيمة المتوافقة مع نموذج بيانات المراجعة الحالي
     function mapExecutionTypeForOld(txt) {
         txt = cell(txt);
         if (txt.indexOf('مباشر') >= 0) return 'تنفيذ مباشر';
         return 'مقاولين';
     }
 
-    // بدء إجراء "المراجعة" لدار من تبويب قيد التسليم: يسأل هل راجع المستفيد، ثم يفتح/ينشئ سجلها
-    // ضمن نظام "الدور القديمة" الحالي (هو نفسه خانة "المراجعة" بالمواصفة الجديدة: الملاحظات، موعد انتهاء الملاحظات +5 أيام،
-    // عدد مرات المراجعة، وموعد تسليم ثانٍ عند عدم الإكمال — هذه الآلية موجودة وتعمل مسبقاً ولا داعي لإعادة بنائها)
+    var wsPendingReviewUnit = null;
+
+    // بدء إجراء "المراجعة" لدار من تبويب قيد التسليم: يفتح نافذة تأكيد داخل النظام (ليست نافذة متصفح) "هل راجع المستفيد؟"
     window.__wsStartReview = function (idx) {
         var u = wsVisibleList[idx];
         if (!u) return;
-        var existing = (oldHouseRecords || []).find(function (r) { return normHouseNo(r.houseNo) === normHouseNo(u.unit); });
-        if (existing) {
-            if (typeof switchMainTab === 'function') switchMainTab('old');
-            if (typeof editOldRecord === 'function') editOldRecord(existing.id);
-            return;
-        }
-        if (!confirm('هل راجع المستفيد مكتب التسليم بخصوص الدار رقم (' + u.unit + ')؟\n\nبالضغط على "موافق" سيتم تسجيلها ضمن قائمة المراجعة لإدخال الملاحظات.')) return;
+        wsPendingReviewUnit = u;
+        var txt = document.getElementById('reviewConfirmText');
+        if (txt) txt.textContent = 'الدار رقم (' + u.unit + ') — ' + (u.sector || '') + (u.contractor ? ' — المقاول: ' + u.contractor : '');
+        var modal = document.getElementById('reviewConfirmModal');
+        if (modal) modal.style.display = 'flex';
+    };
+
+    // استجابة نافذة "هل راجع المستفيد؟" الداخلية
+    window.__wsConfirmReview = function (yes) {
+        var modal = document.getElementById('reviewConfirmModal');
+        if (modal) modal.style.display = 'none';
+        var u = wsPendingReviewUnit;
+        wsPendingReviewUnit = null;
+        if (!yes || !u) return;
 
         var b = matchBeneficiary(u.unit);
         var mappedType = mapExecutionTypeForOld(u.executionType);
@@ -4499,13 +4568,17 @@
             reviewDate: todayStr,
             notesEndDate: (typeof addDays === 'function') ? addDays(todayStr, 5) : todayStr,
             reviewCount: 0,
-            notesCompleted: false
+            notesCompleted: null,
+            handoverRound: 1,
+            // تُحفظ تواريخ الإكسل الأصلية كمرجع يظهر بقائمة المراجعة (حرفية بدون أي حساب)
+            incomingDate: u.incomingDate || '',
+            deliveryDate: u.deliveryDate || ''
         };
         oldHouseRecords.push(rec);
         if (typeof syncOldRecord === 'function') syncOldRecord(rec);
         if (typeof scheduleLocalSave === 'function') scheduleLocalSave();
 
-        if (typeof switchMainTab === 'function') switchMainTab('old');
+        if (typeof switchMainTab === 'function') switchMainTab('review');
         if (typeof editOldRecord === 'function') editOldRecord(rec.id);
     };
 
@@ -4566,12 +4639,178 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         wsStatusText();
+        populateFilterOptions();
+        wsRender(); // عرض فوري من الكاش المحلي (إن وُجد) قبل اكتمال المزامنة
         setTimeout(function () { wsSync(false); }, 4000); // مزامنة أولى بالخلفية بعد تحميل الصفحة
     });
     setInterval(function () {
         var sec = document.getElementById('weekly-status-section');
         if (sec && sec.style.display !== 'none') wsSync(false);
     }, 10 * 60 * 1000);
+
+    /* ===== تبويب "المراجعة" — مصدر بياناته oldHouseRecords (نفسه الذي نُقلت إليه الدور القديمة كما هي) ===== */
+    var rvSearchVal = '';
+    var rvSortMode = 'default';
+    var rvPendingNotesId = null;
+
+    function rvSortList(list, mode) {
+        var arr = list.slice();
+        if (mode === 'execution') arr.sort(function (a, b) { return cell(a.executionType).localeCompare(cell(b.executionType), 'ar'); });
+        else if (mode === 'contractor') arr.sort(function (a, b) { return cell(a.contractorName).localeCompare(cell(b.contractorName), 'ar'); });
+        else if (mode === 'sector') arr.sort(function (a, b) { return cell(a.sectorNo).localeCompare(cell(b.sectorNo), 'ar'); });
+        return arr;
+    }
+
+    function rvStatusBadge(rec) {
+        if (rec.notesCompleted === true) return '<span style="color:#059669;font-weight:700;">✅ جاهز (اكتملت الملاحظات)</span>';
+        var nextDate = rec.thirdHandoverDate || rec.secondHandoverDate || rec.notesEndDate;
+        var overdue = !!(nextDate && nextDate < todayStr);
+        var label = (rec.handoverRound && rec.handoverRound > 1) ? ('بانتظار موعد رقم ' + rec.handoverRound + ': ' + (nextDate || '-')) : ('بانتظار انتهاء الملاحظات: ' + (rec.notesEndDate || '-'));
+        return '<span style="color:' + (overdue ? '#e11d48' : '#d97706') + ';font-weight:700;">' + (overdue ? '⚠️ تجاوزت المدة — ' : '⏳ ') + label + '</span>';
+    }
+
+    function renderReviewTab() {
+        var box = document.getElementById('review-box');
+        if (!box) return;
+        var q = normHouseNo(rvSearchVal);
+        var all = (oldHouseRecords || []).filter(function (r) {
+            if (q && normHouseNo(r.houseNo).indexOf(q) < 0 && normHouseNo(r.ownerName || '').indexOf(q) < 0 && normHouseNo(r.contractorName || '').indexOf(q) < 0) return false;
+            return true;
+        });
+        var normal = rvSortList(all.filter(function (r) { return !r.alreadyDelivered; }), rvSortMode);
+        var delivered = rvSortList(all.filter(function (r) { return r.alreadyDelivered; }), rvSortMode);
+
+        function buildTable(list, title) {
+            if (!list.length) return '';
+            var rows = list.map(function (rec, idx) {
+                return '<tr style="border-top:1px solid var(--glass-border);">' +
+                    '<td style="padding:6px;">' + (idx + 1) + '</td>' +
+                    '<td style="padding:6px; font-weight:700;">' + esc(rec.houseNo) + '</td>' +
+                    '<td style="padding:6px;">' + esc(rec.ownerName || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(rec.phoneNo || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(rec.executionType || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(rec.contractorName || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(rec.incomingDate || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(rec.deliveryDate || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(rec.reviewDate || '-') + '</td>' +
+                    '<td style="padding:6px;">' + esc(rec.notesEndDate || '-') + '</td>' +
+                    '<td style="padding:6px; max-width:200px; white-space:pre-wrap;">' + esc(rec.notes || '-') + '</td>' +
+                    '<td style="padding:6px; text-align:center;">' + (rec.reviewCount || 0) + ' <button onclick="window.__rvBumpCount(' + rec.id + ')" style="margin-right:4px;cursor:pointer;border:none;background:none;color:var(--primary-indigo);font-weight:900;">➕</button></td>' +
+                    '<td style="padding:6px;">' + rvStatusBadge(rec) + (rec.notesCompleted !== true ? '<br><button onclick="window.__rvOpenNotesComplete(' + rec.id + ')" style="margin-top:4px;padding:4px 8px;border-radius:8px;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.12);color:#b45309;cursor:pointer;font-weight:700;font-size:0.75rem;">📝 تحديث حالة الملاحظات</button>' : '') + '</td>' +
+                    '<td style="padding:6px; white-space:nowrap;">' +
+                        '<button onclick="editOldRecord(' + rec.id + ')" title="تعديل" style="cursor:pointer;border:none;background:none;font-size:1rem;">✏️</button> ' +
+                        '<button onclick="triggerWhatsAppNotify(\'' + esc(rec.phoneNo || '') + '\', \'' + esc(rec.ownerName || '') + '\', \'' + esc(rec.houseNo || '') + '\', \'' + esc(rec.sectorNo || '') + '\')" title="واتساب" style="cursor:pointer;border:none;background:none;font-size:1rem;">💬</button> ' +
+                        '<button onclick="deleteOldRecord(' + rec.id + ')" title="حذف" style="cursor:pointer;border:none;background:none;font-size:1rem;">🗑️</button>' +
+                    '</td>' +
+                    '</tr>';
+            }).join('');
+            return '<h4 style="margin:14px 4px 8px; color:var(--primary-blue);">' + title + ' (' + list.length + ')</h4>' +
+                '<table style="width:100%; border-collapse:collapse; margin-bottom:10px;">' +
+                '<thead><tr style="background:var(--bg-primary); text-align:right; position:sticky; top:0;">' +
+                '<th style="padding:8px;">ت</th><th style="padding:8px;">رقم البلوك والدار</th><th style="padding:8px;">المستفيد</th><th style="padding:8px;">الهاتف</th>' +
+                '<th style="padding:8px;">التنفيذ</th><th style="padding:8px;">المقاول</th>' +
+                '<th style="padding:8px;">تاريخ الوارد</th><th style="padding:8px;">تاريخ التسليم</th>' +
+                '<th style="padding:8px;">تاريخ المراجعة</th><th style="padding:8px;">انتهاء الملاحظات</th>' +
+                '<th style="padding:8px;">الملاحظات</th><th style="padding:8px;">مرات المراجعة</th>' +
+                '<th style="padding:8px;">الحالة</th><th style="padding:8px;">إجراءات</th>' +
+                '</tr></thead><tbody>' + rows + '</tbody></table>';
+        }
+
+        var html;
+        if (!normal.length && !delivered.length) {
+            html = '<p style="padding:20px; text-align:center; color:var(--text-muted);">لا توجد دور قيد المراجعة حالياً.</p>';
+        } else {
+            html = buildTable(normal, '🔍 دور قيد المراجعة') + buildTable(delivered, '📦 دور مسلّمة سابقاً وبها ملاحظات (مفصولة)');
+        }
+        box.style.maxHeight = '700px';
+        box.style.overflow = 'auto';
+        box.innerHTML = html;
+    }
+
+    window.__rvFilter = function (v) {
+        if (typeof v === 'string') rvSearchVal = v;
+        var sortSel = document.getElementById('rv-sort-select');
+        rvSortMode = sortSel ? sortSel.value : 'default';
+        renderReviewTab();
+    };
+
+    window.__rvShowTab = function () { renderReviewTab(); };
+    window.__rvRefresh = function () { renderReviewTab(); };
+
+    window.__rvBumpCount = function (id) {
+        var rec = (oldHouseRecords || []).find(function (r) { return r.id === id; });
+        if (!rec) return;
+        rec.reviewCount = (rec.reviewCount || 0) + 1;
+        if (typeof syncOldRecordFields === 'function') syncOldRecordFields(rec.id, { reviewCount: rec.reviewCount });
+        renderReviewTab();
+    };
+
+    window.__rvOpenNotesComplete = function (id) {
+        rvPendingNotesId = id;
+        var rec = (oldHouseRecords || []).find(function (r) { return r.id === id; });
+        var txt = document.getElementById('notesCompleteText');
+        if (txt) txt.textContent = 'الدار رقم (' + (rec ? rec.houseNo : '') + ')';
+        var modal = document.getElementById('notesCompleteModal');
+        if (modal) modal.style.display = 'flex';
+    };
+
+    window.__rvNotesCompleteAnswer = function (yes) {
+        var modal = document.getElementById('notesCompleteModal');
+        if (modal) modal.style.display = 'none';
+        var id = rvPendingNotesId;
+        rvPendingNotesId = null;
+        var rec = (oldHouseRecords || []).find(function (r) { return r.id === id; });
+        if (!rec) return;
+        if (yes) {
+            rec.notesCompleted = true;
+            rec.notesCompletedDate = todayStr;
+            if (typeof syncOldRecordFields === 'function') syncOldRecordFields(rec.id, { notesCompleted: true, notesCompletedDate: todayStr });
+        } else {
+            rec.handoverRound = (rec.handoverRound || 1) + 1;
+            var nextDate = (typeof addDays === 'function') ? addDays(todayStr, 1) : todayStr;
+            var fields = { notesCompleted: null, handoverRound: rec.handoverRound };
+            if (rec.handoverRound === 2) { rec.secondHandoverDate = nextDate; fields.secondHandoverDate = nextDate; }
+            else { rec.thirdHandoverDate = nextDate; fields.thirdHandoverDate = nextDate; }
+            rec.notesCompleted = null;
+            if (typeof syncOldRecordFields === 'function') syncOldRecordFields(rec.id, fields);
+        }
+        renderReviewTab();
+    };
+
+    // "+ إضافة دار" ضمن المراجعة: لدار مسلّمة سابقاً لكن عاد المستفيد بملاحظة عليها — تُعزل بجدولها الخاص (حالة التسليم: مسلم)
+    window.__rvManualAdd = function () {
+        var houseNo = prompt('رقم البلوك والدار:');
+        if (!houseNo) return;
+        houseNo = houseNo.trim();
+        if (!houseNo) return;
+        if ((oldHouseRecords || []).some(function (r) { return normHouseNo(r.houseNo) === normHouseNo(houseNo); })) {
+            alert('⚠️ هذه الدار مسجلة مسبقاً ضمن المراجعة.');
+            return;
+        }
+        var rec = {
+            id: Date.now(),
+            houseNo: houseNo,
+            ownerName: '', phoneNo: '',
+            status: 'مستلم',
+            handoverDate: todayStr,
+            executionType: 'تنفيذ مباشر',
+            sectorNo: 'القطاع الأول',
+            contractorName: '',
+            notes: '',
+            reviewDate: todayStr,
+            notesEndDate: (typeof addDays === 'function') ? addDays(todayStr, 5) : todayStr,
+            reviewCount: 0,
+            notesCompleted: null,
+            handoverRound: 1,
+            incomingDate: '', deliveryDate: '',
+            alreadyDelivered: true
+        };
+        oldHouseRecords.push(rec);
+        if (typeof syncOldRecord === 'function') syncOldRecord(rec);
+        if (typeof scheduleLocalSave === 'function') scheduleLocalSave();
+        if (typeof editOldRecord === 'function') editOldRecord(rec.id);
+        renderReviewTab();
+    };
 })();
 </script>
 <script>
