@@ -4293,7 +4293,9 @@
 (function () {
     'use strict';
     var SECTOR_NAMES = ['القطاع الأول', 'القطاع الثاني', 'القطاع الثالث', 'القطاع الرابع', 'القطاع الخامس', 'القطاع السادس', 'دور VIP'];
-    var wsUrl = localStorage.getItem('weeklyStatusSheetUrl') || '';
+    // الرابط الافتراضي لشيت "الموقف الاسبوعي" — محفوظ بالكود حتى لا يُطلب إدخاله كل مرة (نفس مبدأ DEFAULT_SHEET_URL أعلاه)
+    var DEFAULT_WEEKLY_STATUS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-i0UZgy0e04HVijl7Pmc1l47pxcQlgLzl1H_-2ifnSU_GEBzf2OtwVah8hl5wBjHzN51r6e_D_FUG/pub?output=csv';
+    var wsUrl = localStorage.getItem('weeklyStatusSheetUrl') || DEFAULT_WEEKLY_STATUS_URL;
     var wsRunning = false;
     var wsLastSync = localStorage.getItem('weeklyStatusLastSync') || '';
     var wsUnits = [];
@@ -4314,7 +4316,10 @@
             if (D === 'المقاول' || A === 'المجموع' || D === 'المجموع' || H === 'رقم الوحدة السكنية') continue;
             if (D !== '') {
                 curContractor = D;
-                skipContractor = (G === 'تم تسليم جميع الوحدات السكنية'); // هذا المقاول سلّم كل دوره، لا دور قيد تسليم له
+                // عمود "عدد الدور قيد التسليم" يكون رقماً عادياً، أو جملة نصية تفيد أن هذا المقاول سلّم كل دوره
+                // (صيغة الجملة تختلف أحياناً بين نسخ الشيت: "تم تسليم جميع الوحدات السكنية" / "تم تسليم جميع الدور للمقاول في القطاع..." إلخ)
+                // فالمعيار الموثوق هو: إذا كانت القيمة نصاً غير رقمي، فلا يوجد دور قيد تسليم لهذا المقاول بهذا الصف
+                skipContractor = (G !== '' && isNaN(Number(G)));
                 if (K !== '') curExecutor = K;
             } else if (K !== '') {
                 curExecutor = K;
@@ -4467,9 +4472,10 @@
         if (wsUrl && !wsUnits.length) wsSync(false);
     };
 
-    if (wsUnits.length) {
-        document.addEventListener('DOMContentLoaded', function () { wsStatusText(); });
-    }
+    document.addEventListener('DOMContentLoaded', function () {
+        wsStatusText();
+        setTimeout(function () { wsSync(false); }, 4000); // مزامنة أولى بالخلفية بعد تحميل الصفحة
+    });
     setInterval(function () {
         var sec = document.getElementById('weekly-status-section');
         if (sec && sec.style.display !== 'none') wsSync(false);
