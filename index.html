@@ -612,29 +612,11 @@
         #splash-screen img {
             width: 150px;
             height: 150px;
-            object-fit: cover;
-            border-radius: 50%;
+            object-fit: contain;
             opacity: 0;
             transform: scale(0.4);
             animation: splashPopIn 1s cubic-bezier(.22, 1.4, .36, 1) forwards;
         }
-        #splash-screen .splash-enter-btn {
-            margin-top: 8px;
-            padding: 12px 34px;
-            border-radius: 30px;
-            border: none;
-            background: var(--primary-blue, #1e40af);
-            color: #fff;
-            font-weight: 900;
-            font-size: 1rem;
-            cursor: pointer;
-            opacity: 0;
-            transform: translateY(8px);
-            animation: splashFadeIn 0.6s ease forwards;
-            animation-delay: 1.1s;
-            box-shadow: 0 6px 18px rgba(30,64,175,.35);
-        }
-        #splash-screen .splash-enter-btn:active { transform: scale(0.96); }
         #splash-screen .splash-text {
             text-align: center;
             opacity: 0;
@@ -674,6 +656,33 @@
             to { opacity: 1; }
         }
 
+        /* بطلب المستخدم: النظام مصمم للعرض الأفقي خصوصاً على الأجهزة اللوحية (آيباد) — يظهر هذا التنبيه
+           فقط عند استخدام جهاز بحجم لوحي (عرض شاشة ≥ 600px) وهو بالوضع العمودي، ويختفي تلقائياً فور تدوير الجهاز */
+        #rotate-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99998;
+            background: #0f172a;
+            color: #fff;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            text-align: center;
+            padding: 20px;
+        }
+        #rotate-overlay .rotate-icon { font-size: 3.5rem; animation: rotateHint 1.6s ease-in-out infinite; }
+        #rotate-overlay h3 { margin: 0; font-size: 1.2rem; font-weight: 900; }
+        #rotate-overlay p { margin: 0; color: #cbd5e1; font-size: 0.95rem; }
+        @keyframes rotateHint {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+        @media (orientation: portrait) and (min-width: 600px) {
+            #rotate-overlay { display: flex; }
+        }
+
     </style>
 </head>
 <body>
@@ -685,7 +694,12 @@
         <p>مكتب التسليم الفني</p>
         <small>يرحب بكم</small>
     </div>
-    <button type="button" class="splash-enter-btn" onclick="window.__enterSystem && window.__enterSystem()">🔑 الدخول</button>
+</div>
+
+<div id="rotate-overlay">
+    <div class="rotate-icon">🔄</div>
+    <h3>الرجاء تدوير الجهاز إلى الوضع الأفقي</h3>
+    <p>هذا النظام مصمم للعرض الأفقي (Landscape) للحصول على أفضل تجربة استخدام</p>
 </div>
 
 <div class="app-container" id="printable-area">
@@ -4583,10 +4597,19 @@
         var groupBySector = (sortMode === 'default');
         var rowsHtml = '';
         var lastSector = null;
+        var lastContractorKey = null;
         list.forEach(function (u, idx) {
             if (groupBySector && u.sector !== lastSector) {
                 lastSector = u.sector;
-                rowsHtml += '<tr><td colspan="9" style="padding:10px 8px; font-weight:900; background:var(--bg-primary); color:var(--primary-blue); border-top:2px solid var(--glass-border);">📍 ' + esc(u.sector || 'غير محدد') + '</td></tr>';
+                lastContractorKey = null; // كل قطاع جديد يعيد إظهار سطر المقاول/التنفيذ من جديد
+                rowsHtml += '<tr><td colspan="7" style="padding:10px 8px; font-weight:900; background:var(--bg-primary); color:var(--primary-blue); border-top:2px solid var(--glass-border);">📍 ' + esc(u.sector || 'غير محدد') + '</td></tr>';
+            }
+            // بطلب المستخدم: نوع التنفيذ واسم المقاول لا يتكرران بكل بيت — يظهران مرة واحدة فقط فوق كل مجموعة بيوت لنفس المقاول (تماماً كالإكسل)
+            // هذا التجميع يعمل بكل أنماط الفرز (ليس فقط الافتراضي) لأن أي فرز بمعيار معين يجمع القيم المتشابهة أصلاً بالتسلسل
+            var contractorKey = (u.executionType || '') + '||' + (u.contractor || '');
+            if (contractorKey !== lastContractorKey) {
+                lastContractorKey = contractorKey;
+                rowsHtml += '<tr><td colspan="7" style="padding:7px 10px; font-weight:800; background:rgba(99,102,241,.07); color:var(--primary-indigo); border-top:1px solid var(--glass-border);">🛠️ ' + esc(u.executionType || 'غير محدد') + (u.contractor ? ' — ' + esc(u.contractor) : '') + '</td></tr>';
             }
             var inReview = (oldHouseRecords || []).some(function (r) { return normHouseNo(r.houseNo) === normHouseNo(u.unit); });
             var reviewCell = inReview
@@ -4599,8 +4622,6 @@
             rowsHtml += '<tr style="border-top:1px solid var(--glass-border);">' +
                 '<td style="padding:6px;">' + (idx + 1) + '</td>' +
                 '<td style="padding:6px; font-weight:700;">' + esc(u.unit) + '</td>' +
-                '<td style="padding:6px;">' + esc(u.executionType || '-') + '</td>' +
-                '<td style="padding:6px;">' + esc(u.contractor || '-') + '</td>' +
                 '<td style="padding:6px;">' + esc(u.incomingDate || '-') + '</td>' +
                 '<td style="padding:6px;">' + esc(u.deliveryDate || '-') + '</td>' +
                 '<td style="padding:6px;">' + readyCell + '</td>' +
@@ -4612,7 +4633,6 @@
         var html = '<table style="width:100%; border-collapse:collapse;">' +
             '<thead><tr style="background:var(--bg-primary); text-align:right; position:sticky; top:0;">' +
             '<th style="padding:8px;">ت</th><th style="padding:8px;">رقم البلوك والدار</th>' +
-            '<th style="padding:8px;">نوع التنفيذ</th><th style="padding:8px;">اسم المقاول</th>' +
             '<th style="padding:8px;">تاريخ الوارد</th><th style="padding:8px;">تاريخ التسليم</th>' +
             '<th style="padding:8px;">جاهز/غير جاهز</th><th style="padding:8px;">أيام التجاوز</th>' +
             '<th style="padding:8px;">المراجعة</th>' +
@@ -4941,7 +4961,7 @@
             return '<h4 style="margin:14px 4px 8px; color:var(--primary-blue);">' + title + ' (' + list.length + ')</h4>' +
                 '<table style="width:100%; border-collapse:collapse; margin-bottom:10px;">' +
                 '<thead><tr style="background:var(--bg-primary); text-align:right; position:sticky; top:0;">' +
-                '<th style="padding:8px;">ت</th><th style="padding:8px;">رقم البلوك والدار</th><th style="padding:8px;">المستفيد</th><th style="padding:8px;">الهاتف</th>' +
+                '<th style="padding:8px;">ت</th><th style="padding:8px;">رقم البلوك والدار</th>' +
                 '<th style="padding:8px;">التنفيذ</th><th style="padding:8px;">المقاول</th>' +
                 '<th style="padding:8px;">تاريخ الوارد</th><th style="padding:8px;">تاريخ التسليم</th>' +
                 '<th style="padding:8px;">تاريخ المراجعة</th><th style="padding:8px;">انتهاء الملاحظات</th>' +
@@ -5048,17 +5068,33 @@
 })();
 </script>
 <script>
-/* ===== الشاشة الافتتاحية: تبقى ظاهرة حتى يضغط المستخدم زر "🔑 الدخول" بنفسه ===== */
+/* ===== إخفاء الشاشة الافتتاحية تلقائياً بعد تحميل التطبيق (لا تبقى عالقة أبداً مهما حصل) ===== */
 (function () {
     'use strict';
-    function doHide() {
+    var MIN_SPLASH_MS = 1200; // أقل مدة ظهور حتى لا تومض بسرعة عند التحميل الخاطف
+    var shownAt = Date.now();
+    var hidden = false;
+    function hideSplash() {
+        if (hidden) return;
+        hidden = true;
         var el = document.getElementById('splash-screen');
         if (!el) return;
-        el.classList.add('splash-hide');
-        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 700);
+        var elapsed = Date.now() - shownAt;
+        var wait = Math.max(0, MIN_SPLASH_MS - elapsed);
+        setTimeout(function () {
+            el.classList.add('splash-hide');
+            setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 700);
+        }, wait);
     }
-    // الدخول اليدوي: يُستدعى من زر "🔑 الدخول" بالشاشة الافتتاحية
-    window.__enterSystem = function () { doHide(); };
+    // نعتبر التطبيق "جاهزاً" إما عند اكتمال تحميل الصفحة بالكامل (window load)
+    // أو بعد مهلة أقصى 3 ثوانٍ احتياطاً — حتى لا تعلق الشاشة الافتتاحية أبداً مهما تأخر تحميل أي مورد
+    // (هذا يحل مشكلة بقاء الشاشة البيضاء عالقة على بعض الأجهزة مثل الآيباد)
+    if (document.readyState === 'complete') {
+        hideSplash();
+    } else {
+        window.addEventListener('load', hideSplash);
+    }
+    setTimeout(hideSplash, 3000);
 })();
 </script>
 
