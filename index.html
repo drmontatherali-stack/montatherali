@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>مجمع الأميرات 2 - مكتب التسليم الفني </title>
 
     <!-- PWA: manifest + أيقونات الشاشة الرئيسية -->
@@ -4514,6 +4514,13 @@
         return Math.round((d - today) / 86400000);
     }
 
+    // بطلب المستخدم: التنبيهات تكون عناوين مطوية — الضغط على العنوان فقط يُظهر/يُخفي تفاصيله
+    window.__toggleAlertSection = function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+    };
+
     /* ===== التنبيهات العلوية: عد تنازلي لمواعيد قيد التسليم (3/2/1/0) والمراجعة (2/1/0) + تنبيهات تجاوز المدة ===== */
     function renderDeadlineAlerts() {
         var box = document.getElementById('deadline-alerts-banner');
@@ -4538,8 +4545,12 @@
             else if (diff <= -5) rvOverdue5.push({ houseNo: rec.houseNo, contractor: rec.contractorName, sector: rec.sectorNo, detail: 'تجاوزت المدة بـ ' + (-diff) + ' يوم' + (rec.notes ? ' — ' + rec.notes : '') });
         });
 
+        // بطلب المستخدم: التنبيهات تكون عناوين مطوية مبدئياً (مغلقة) — الضغط على العنوان فقط يفتح تفاصيله
+        var secIdx = 0;
         function section(title, color, list) {
             if (!list.length) return '';
+            secIdx++;
+            var bodyId = 'deadline-alert-sec-' + secIdx;
             var rows = list.map(function (x) {
                 return '<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:5px 0; border-top:1px dashed rgba(100,116,139,.2);">' +
                     '<span style="font-weight:800;">🏠 ' + esc(x.houseNo) + '</span>' +
@@ -4548,7 +4559,11 @@
                     '<span style="color:' + color + '; font-weight:700; font-size:0.85rem;">' + esc(x.detail) + '</span>' +
                     '</div>';
             }).join('');
-            return '<div style="margin-bottom:10px;"><div style="font-weight:900; color:' + color + '; margin-bottom:4px;">' + title + ' (' + list.length + ')</div>' + rows + '</div>';
+            return '<div style="margin-bottom:8px;">' +
+                '<button type="button" onclick="window.__toggleAlertSection(\'' + bodyId + '\')" style="width:100%; text-align:right; display:flex; justify-content:space-between; align-items:center; cursor:pointer; border:1px solid ' + color + '55; background:' + color + '14; color:' + color + '; font-weight:900; padding:8px 12px; border-radius:10px;">' +
+                '<span>' + title + ' (' + list.length + ')</span><span>▾</span></button>' +
+                '<div id="' + bodyId + '" style="display:none; padding:4px 10px;">' + rows + '</div>' +
+                '</div>';
         }
 
         var html = section('⏳ قيد التسليم — اقترب موعد التسليم', '#d97706', wsCountdown) +
@@ -5022,7 +5037,14 @@
                     '<td style="padding:6px;">' + esc(dts.deliveryDate || '-') + '</td>' +
                     '<td style="padding:6px;">' + esc(rec.reviewDate || '-') + '</td>' +
                     '<td style="padding:6px;">' + esc(rec.notesEndDate || '-') + '</td>' +
-                    '<td style="padding:6px; max-width:200px; white-space:pre-wrap;">' + esc(rec.notes || '-') + '</td>' +
+                    '<td style="padding:6px; position:relative;">' +
+                        (rec.notes ?
+                            '<span style="position:relative; display:inline-block;" onmouseleave="var p=this.querySelector(\'.rv-notes-pop\'); if(p) p.style.display=\'none\';">' +
+                                '<button type="button" onclick="var p=this.nextElementSibling; p.style.display = (p.style.display===\'block\') ? \'none\' : \'block\';" style="cursor:pointer; border:1px solid rgba(29,83,132,.35); background:rgba(29,83,132,.08); color:var(--primary-indigo); font-weight:700; padding:4px 10px; border-radius:8px; font-size:0.8rem;">📝 ملاحظات</button>' +
+                                '<div class="rv-notes-pop" style="display:none; position:absolute; z-index:80; top:100%; right:0; margin-top:4px; background:var(--glass-card); color:var(--text-main); border:1px solid var(--glass-border); border-radius:10px; padding:10px 12px; min-width:180px; max-width:260px; white-space:pre-wrap; box-shadow:var(--shadow-md); font-size:0.85rem;">' + esc(rec.notes) + '</div>' +
+                            '</span>'
+                            : '<span style="color:var(--text-muted);">-</span>') +
+                    '</td>' +
                     '<td style="padding:6px; text-align:center;">' + (rec.reviewCount || 0) + ' <button onclick="window.__rvBumpCount(' + rec.id + ')" style="margin-right:4px;cursor:pointer;border:none;background:none;color:var(--primary-indigo);font-weight:900;">➕</button></td>' +
                     '<td style="padding:6px;">' + rvStatusBadge(rec) + (rec.notesCompleted !== true ? '<br><button onclick="window.__rvOpenNotesComplete(' + rec.id + ')" style="margin-top:4px;padding:4px 8px;border-radius:8px;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.12);color:#b45309;cursor:pointer;font-weight:700;font-size:0.75rem;">📝 تحديث حالة الملاحظات</button>' : '') + '</td>' +
                     '<td style="padding:6px; white-space:nowrap;">' +
@@ -5161,18 +5183,33 @@
             setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 700);
         }, wait);
     }
+    // آيباد/آيفون (Safari) لا يدعمان Fullscreen API إطلاقاً لعناصر الصفحة العادية (قيد تقني من آبل نفسها، وليس خللاً بالنظام)
+    // الطريقة الوحيدة لفتح النظام بملء الشاشة فعلياً على آيباد هي: تثبيته على الشاشة الرئيسية وفتحه من هناك (بدون متصفح سفاري حوله)
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
     function requestFs() {
         try {
             var el = document.documentElement;
             var fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
             if (fn) fn.call(el);
-        } catch (e) { /* بعض المتصفحات (خصوصاً آيباد Safari) قد لا تدعم ملء الشاشة — نتجاهل الخطأ ونكمل عادياً */ }
+        } catch (e) { /* بعض المتصفحات قد لا تدعم ملء الشاشة — نتجاهل الخطأ ونكمل عادياً */ }
+    }
+    function showIosHint() {
+        if (!isIOS || isStandalone) return;
+        try { if (localStorage.getItem('iosFullscreenHintShown')) return; } catch (e) {}
+        var hint = document.createElement('div');
+        hint.style.cssText = 'position:fixed; bottom:16px; left:16px; right:16px; z-index:999999; background:#0f172a; color:#fff; padding:14px 18px; border-radius:14px; font-size:0.9rem; line-height:1.7; box-shadow:0 8px 24px rgba(0,0,0,.3); text-align:center;';
+        hint.innerHTML = '📲 لفتح النظام بملء الشاشة فعلياً على الآيباد (بدون شريط سفاري): اضغط زر المشاركة <b>⬆️</b> بالأسفل ← <b>"إضافة إلى الشاشة الرئيسية"</b> ← ثم افتح التطبيق من أيقونته هناك.' +
+            '<br><button type="button" onclick="this.parentNode.remove();" style="margin-top:10px; padding:6px 20px; border-radius:8px; border:none; background:#fff; color:#0f172a; font-weight:800; cursor:pointer;">فهمت</button>';
+        document.body.appendChild(hint);
+        try { localStorage.setItem('iosFullscreenHintShown', '1'); } catch (e) {}
     }
     // زر "اضغط للدخول": يطلب ملء الشاشة فوراً (يتطلب ضغطة مستخدم فعلية) ثم يخفي الشاشة الافتتاحية بلا انتظار
     window.__enterSystem = function () {
         requestFs();
         hidden = false; shownAt = 0; // دخول يدوي فوري بلا أي انتظار للحد الأدنى
         hideSplash();
+        setTimeout(showIosHint, 900);
     };
     // نعتبر التطبيق "جاهزاً" إما عند اكتمال تحميل الصفحة بالكامل (window load)
     // أو بعد مهلة أقصى 3 ثوانٍ احتياطاً — حتى لا تعلق الشاشة الافتتاحية أبداً مهما تأخر تحميل أي مورد
