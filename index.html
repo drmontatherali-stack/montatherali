@@ -868,13 +868,6 @@
         </div>
     </div>
 
-    <div style="margin-bottom:12px; display:none;">
-        <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem; color:var(--text-muted);">
-            <input type="checkbox" id="show-extra-cols-toggle" onchange="toggleExtraCols()">
-            👁️ إظهار كل الأعمدة والتفاصيل الإضافية بالجدول (القطاع، نوع التنفيذ، واتساب، تعديل...)
-        </label>
-    </div>
-
     <div class="table-container table-columns-wrap" style="display:none;">
         <table class="table-col-1">
             <thead id="table-head">
@@ -892,8 +885,6 @@
         </table>
     </div>
 
-    <div id="mobile-cards-container" style="display:none;"></div>
-    <div id="load-more-container" style="text-align:center; margin: 18px 0 30px; display:none;"></div>
 </div>
 
 <!-- تبويب "قيد التسليم" — مصدره الحصري شيت Google "الموقف الاسبوعي"، تواريخه تُعرض كما هي بالضبط بدون أي حساب من النظام -->
@@ -1003,105 +994,6 @@
         <p id="handover-dates-meta" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;"></p>
         <input type="text" id="handover-dates-search" class="form-control" placeholder="ابحث برقم الدار..." oninput="onHandoverDatesSearch()" style="margin-bottom: 14px;">
         <div id="handover-dates-list" style="max-height: 360px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); border-radius: 14px; border: 1px solid var(--glass-border);"></div>
-    </div>
-</div>
-
-<div id="reopenNotesModal" class="modal">
-    <div class="modal-content" style="max-width: 520px;">
-        <span class="close-btn" onclick="closeReopenNotesModal()">&times;</span>
-        <h3 style="margin-bottom: 8px; color: #f97316; font-weight: 900;">🔄 إعادة فتح ملاحظات الدار</h3>
-        <p id="reopen-notes-house" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 18px;"></p>
-        <input type="hidden" id="reopen-notes-id">
-        <div class="form-group">
-            <label>الملاحظات الجديدة</label>
-            <textarea id="reopen-notes-text" class="form-control" rows="3" placeholder="اكتب الملاحظات الجديدة على الدار..."></textarea>
-        </div>
-        <div class="form-group">
-            <label>تاريخ المراجعة الجديد (تلقائي اليوم، قابل للتعديل)</label>
-            <input type="date" id="reopen-review-date" class="form-control">
-        </div>
-        <div class="form-group">
-            <label>تاريخ إنهاء الملاحظات الجديد (تلقائي بعد 5 أيام، قابل للتعديل)</label>
-            <input type="date" id="reopen-notes-end" class="form-control">
-        </div>
-        <button class="btn-primary" onclick="confirmReopenNotes()">حفظ وإعادة تفعيل التنبيهات</button>
-    </div>
-</div>
-
-<div id="customReportModal" class="modal">
-    <div class="modal-content" style="max-width: 480px;">
-        <span class="close-btn" onclick="closeCustomReportModal()">&times;</span>
-        <h3 id="customReportTitle" style="margin-bottom: 12px; color: #1d5384; font-weight: 900;">📊 تقرير مخصص</h3>
-        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">اختر الأقسام التي تريد تضمينها بملف الإكسل:</p>
-        <div id="customReportOptions" style="display: flex; flex-direction: column; gap: 4px;"></div>
-        <button class="btn-primary" style="margin-top: 18px;" onclick="runCustomReportExport()">📥 تصدير الملف</button>
-    </div>
-</div>
-
-<div id="calendarModal" class="modal">
-    <div class="modal-content" style="max-width: 950px;">
-        <span class="close-btn" onclick="closeCalendarModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">📅 التقويم الهندسي التفاعلي الشامل</h3>
-        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">يمكنك التنقل بين الأنماط والأشهر والسنوات بمرونة متكاملة لمتابعة كافة مواعيد الدور المستمرة والعابرة للأشهر والسنوات.</p>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(226, 232, 240, 0.6); padding: 12px 18px; border-radius: 16px; border: 1px solid var(--glass-border); flex-wrap: wrap; gap: 10px;">
-            <button class="calendar-nav-btn" onclick="changeCalendarMonth(-1)">◀ الشهر السابق</button>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <select id="calendar-month-select" onchange="onCalendarPickerChange()" style="padding: 6px 12px;"></select>
-                <input type="number" id="calendar-year-input" onchange="onCalendarPickerChange()" style="width: 100px; padding: 6px 12px;" min="2020" max="2100">
-                <button class="calendar-nav-btn" style="padding: 6px 12px;" onclick="resetCalendarToToday()">اليوم</button>
-            </div>
-            <button class="calendar-nav-btn" onclick="changeCalendarMonth(1)">الشهر التالي ▶</button>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-weight: 800; color: var(--primary-blue); margin-bottom: 8px;">
-            <div>الأحد</div><div>الإثنين</div><div>الثلاثاء</div><div>الأربعاء</div><div>الخميس</div><div>الجمعة</div><div>السبت</div>
-        </div>
-
-        <div id="calendar-view-container" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; max-height: 450px; overflow-y: auto;"></div>
-    </div>
-</div>
-
-<div id="dayEventsModal" class="modal">
-    <div class="modal-content" style="max-width: 650px;">
-        <span class="close-btn" onclick="closeDayEventsModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: #1d5384;" id="day-events-title">📅 أحداث ومواعيد اليوم</h3>
-        <div id="day-events-content" style="max-height: 380px; overflow-y: auto; line-height: 1.8;"></div>
-    </div>
-</div>
-
-<div id="contractorScorecardModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeContractorScorecardModal()">&times;</span>
-        <h3 style="margin-bottom: 20px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">📊 تقييم أداء المقاولين</h3>
-        <div id="contractor-scorecard-list" style="max-height: 350px; overflow-y: auto;"></div>
-    </div>
-</div>
-
-<div id="timelineModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeTimelineModal()">&times;</span>
-        <h3 style="margin-bottom: 20px; color: #1d5384;" id="timeline-modal-title">⏳ السجل التاريخي وجسيم التدقيق</h3>
-        <div id="timeline-content-box" style="line-height: 2; color: var(--text-muted);"></div>
-    </div>
-</div>
-
-<div id="dailyChecklistModal" class="modal">
-    <div class="modal-content" style="max-width: 800px;">
-        <span class="close-btn" onclick="closeDailyChecklistModal()">&times;</span>
-        <h3 style="margin-bottom: 20px; color: var(--primary-blue); font-weight:900; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">📋 مواعيد اليوم: <span id="modal-today-date" style="color:#1d5384;"></span></h3>
-        <div style="margin-bottom: 22px; border-right: 4px solid var(--status-direct); background: rgba(226,232,240,0.4); border-radius: 12px; padding: 14px 16px;">
-            <h4 style="color: var(--text-main); margin-bottom: 10px; font-weight:900;">🧹 دور موعد تنظيفها اليوم:</h4>
-            <div id="cleaning-checklist-list" style="max-height: 200px; overflow-y: auto; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);"></div>
-        </div>
-        <div style="margin-bottom: 22px; border-right: 4px solid var(--primary-blue); background: rgba(226,232,240,0.4); border-radius: 12px; padding: 14px 16px;">
-            <h4 style="color: var(--text-main); margin-bottom: 10px; font-weight:900;">🏠 دور موعد تسليمها اليوم:</h4>
-            <div id="readiness-checklist-list" style="max-height: 200px; overflow-y: auto; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);"></div>
-        </div>
-        <div style="border-right: 4px solid var(--status-waiting); background: rgba(226,232,240,0.4); border-radius: 12px; padding: 14px 16px;">
-            <h4 style="color: var(--text-main); margin-bottom: 10px; font-weight:900;">🏛️ دور قديمة موعد إنهاء ملاحظاتها اليوم:</h4>
-            <div id="old-notes-checklist-list" style="max-height: 200px; overflow-y: auto; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);"></div>
-        </div>
     </div>
 </div>
 
@@ -1242,18 +1134,6 @@
     </div>
 </div>
 
-<div id="signatureModal" class="modal">
-    <div class="modal-content" style="max-width: 500px; text-align:center;">
-        <span class="close-btn" onclick="closeSignatureModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">✍️ التوقيع الإلكتروني الإلزامي للاستلام</h3>
-        <canvas id="sigCanvas" class="signature-pad"></canvas>
-        <div style="margin-top: 18px; display:flex; gap:12px;">
-            <button class="btn-action-danger" style="flex:1;" onclick="clearSignature()">مسح التوقيع</button>
-            <button class="btn-action-success" style="flex:1;" onclick="saveSignature()">اعتماد التوقيع الصفر خطأ</button>
-        </div>
-    </div>
-</div>
-
 <!-- نافذة الواتساب المطورة متعددة الاختيارات وإضافة المستخدمين -->
 <div id="whatsappNotifyModal" class="modal">
     <div class="modal-content" style="text-align: center; max-width: 600px;">
@@ -1269,27 +1149,6 @@
         </div>
     </div>
 </div>
-
-<div id="statusCheckModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeStatusModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">تحديث موقف الدار (نظام التدقيق)</h3>
-        <div id="status-modal-details" style="line-height: 1.8; margin-bottom: 20px; color: var(--text-muted);"></div>
-        <div id="status-interactive-questions"></div>
-    </div>
-</div>
-
-<div id="imagePreviewModal" class="modal">
-    <div class="modal-content" style="text-align:center;">
-        <span class="close-btn" onclick="closeImageModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">المرفقات المعتمدة (صور وتوقيع)</h3>
-        <img id="previewImgElement" src="" alt="صورة الملاحظات" style="max-width: 100%; max-height: 70vh; border-radius: 16px; margin-bottom:15px; border:1px solid var(--glass-border);">
-        <br>
-        <button class="btn-primary" onclick="openSignatureModalForCurrent()">✍️ تعديل التوقيع الرقمي</button>
-    </div>
-</div>
-
-<input type="file" id="cameraFileInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImageCapture(event)">
 
 <script>
     const firebaseConfig = {
@@ -1444,10 +1303,6 @@
     }
 
     let searchTimer = null;
-    function onSearchInput() {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(renderTable, 180);
-    }
 
     function formatPhoneForWhatsApp(phone) {
         if (!phone) return '9647840971766';
@@ -1614,10 +1469,6 @@
         if (remoteOldBase[id] || !remoteLoaded) dbRef.child('oldRecords/' + id).update(fields);
         saveLocalAndRender();
     }
-    function deleteRecordFromDB(id) {
-        dbRef.child('records/' + id).remove();
-        saveLocalAndRender();
-    }
     function deleteOldRecordFromDB(id) {
         dbRef.child('oldRecords/' + id).remove();
         saveLocalAndRender();
@@ -1738,51 +1589,9 @@
         }
     }
 
-    function openAddModal() {
-        document.getElementById('edit-id').value = "";
-        document.getElementById('old-edit-id').value = "";
-        document.getElementById('record-form').reset();
-        document.getElementById('old-record-form').reset();
-        document.getElementById('arrivalDate').value = todayStr;
-        document.getElementById('modal-title').innerText = "إضافة دار جديدة";
-        
-        document.getElementById('house-type-selector-box').style.display = 'flex';
-        selectHouseCategory(activeTab);
-
-        populateContractorsDropdown();
-        document.getElementById('preCleanedAlertBox').style.display = 'none';
-        document.getElementById('addRecordModal').style.display = 'flex';
-        onExecutionTypeChange();
-        onOldExecutionTypeChange();
-        onOldStatusChange();
-    }
 
     function closeAddModal() { document.getElementById('addRecordModal').style.display = 'none'; }
 
-    function editRecord(id) {
-        const rec = houseRecords.find(r => r.id === id);
-        if (!rec) return;
-        window.editBaseline = Object.assign({}, rec);
-        document.getElementById('edit-id').value = rec.id;
-        document.getElementById('houseNo').value = rec.houseNo || '';
-        document.getElementById('phoneNo').value = rec.phoneNo || '';
-        document.getElementById('executionType').value = rec.executionType || '';
-        populateContractorsDropdown();
-        if (rec.contractorName) document.getElementById('contractorName').value = rec.contractorName;
-        document.getElementById('sectorNo').value = rec.sectorNo || 'القطاع الأول';
-        document.getElementById('ownerName').value = rec.ownerName || '';
-        document.getElementById('arrivalDate').value = rec.arrivalDate || todayStr;
-        document.getElementById('cleaningStartDate').value = rec.cleaningStartDate || '';
-        document.getElementById('cleaningEndDate').value = rec.cleaningEndDate || '';
-        document.getElementById('contractorStartDate').value = rec.contractorStartDate || '';
-        document.getElementById('houseReadyDate').value = rec.houseReadyDate || '';
-
-        document.getElementById('modal-title').innerText = "تعديل بيانات الدار الجديدة";
-        document.getElementById('house-type-selector-box').style.display = 'none';
-        selectHouseCategory('new');
-        document.getElementById('addRecordModal').style.display = 'flex';
-        checkPreCleanedMatch();
-    }
 
     function editOldRecord(id) {
         const rec = oldHouseRecords.find(r => r.id === id);
@@ -1808,12 +1617,6 @@
         onOldExecutionTypeChange();
     }
 
-    function deleteRecord(id) {
-        if (confirm("⚠️ هل أنت تأكد من حذف هذا السجل بشكل نهائي؟")) {
-            houseRecords = houseRecords.filter(r => r.id !== id);
-            deleteRecordFromDB(id);
-        }
-    }
 
     // بطلب المستخدم: عند حذف سجل من المراجعة يُعرض خيارين داخل النظام — حذف نهائي (من المراجعة وقيد التسليم معاً)
     // أو حذف من المراجعة فقط مع إبقاء الدار ظاهرة بقيد التسليم
@@ -1960,82 +1763,6 @@
         }, 300);
     }
 
-    function saveRecord(e) {
-        e.preventDefault();
-        const editId = document.getElementById('edit-id').value;
-        const houseNo = document.getElementById('houseNo').value.trim();
-        const phoneNo = document.getElementById('phoneNo').value.trim();
-        const executionType = document.getElementById('executionType').value;
-        const contractorName = executionType === "تنفيذ مقاولين" ? document.getElementById('contractorName').value : "";
-        const sectorNo = document.getElementById('sectorNo').value;
-        const ownerName = document.getElementById('ownerName').value.trim();
-        const arrivalDate = document.getElementById('arrivalDate').value || todayStr;
-
-        // فحص تكرار رقم الدار يعمل دائماً (عند الإضافة وعند التعديل)
-        const dupNew = houseRecords.some(r => String(r.id) !== String(editId) && normHouseNo(r.houseNo) === normHouseNo(houseNo));
-        if (dupNew) {
-            alert("⚠️ رقم الدار والبلوك هذا مسجل سابقاً بالمشروع! يرجى التثبت بدقة.");
-            return;
-        }
-
-        const isPreCleaned = preCleanedHouses.some(item => item.trim() === houseNo.trim());
-
-        let rec = editId ? houseRecords.find(r => r.id == editId) : { id: Date.now(), isCleaned: isPreCleaned, isReady: false, notifications: [null, null, null] };
-        if (!rec) {
-            alert("⚠️ هذا السجل لم يعد موجوداً (ربما حُذف من جهاز آخر).");
-            closeAddModal();
-            return;
-        }
-        const baselineNew = (editId && window.editBaseline && String(window.editBaseline.id) === String(editId)) ? window.editBaseline : undefined;
-
-        rec.houseNo = houseNo;
-        rec.phoneNo = phoneNo;
-        rec.executionType = executionType;
-        rec.contractorName = contractorName;
-        rec.sectorNo = sectorNo;
-        rec.ownerName = ownerName;
-        rec.arrivalDate = arrivalDate;
-
-        if (executionType === "تنفيذ مباشر") {
-            if (isPreCleaned) {
-                rec.isCleaned = true;
-                rec.cleaningStartDate = "";
-                rec.cleaningEndDate = "";
-            } else {
-                rec.cleaningStartDate = document.getElementById('cleaningStartDate').value || arrivalDate;
-                rec.cleaningEndDate = document.getElementById('cleaningEndDate').value || addDays(arrivalDate, 2);
-            }
-            rec.handoverDate = addDays(arrivalDate, 10);
-            rec.inspectionDate = arrivalDate;
-        } else if (executionType === "تنفيذ مقاولين") {
-            rec.contractorStartDate = document.getElementById('contractorStartDate').value || addDays(arrivalDate, 1);
-            rec.houseReadyDate = document.getElementById('houseReadyDate').value || addDays(arrivalDate, 10);
-            rec.handoverDate = rec.houseReadyDate;
-            rec.inspectionDate = rec.contractorStartDate;
-        }
-
-        if (!editId) {
-            houseRecords.push(rec);
-        }
-
-        syncRecord(rec, baselineNew);
-        closeAddModal();
-
-        if (arrivalDate) {
-            // رسالة مختصرة: رقم الدار والبلوك، تاريخ مجيء المستفيد، وتاريخ الإكمال (بعد 10 أيام) فقط
-            const completionDate = executionType === "تنفيذ مقاولين" ? rec.houseReadyDate : rec.handoverDate;
-            let msgText = `تبليغ جديد - تسجيل موعد حضور مستفيد\n` +
-                      `الدار: ${rec.houseNo}\n` +
-                      `تاريخ مجيء المستفيد: ${rec.arrivalDate}\n` +
-                      `تاريخ الإكمال (10 أيام): ${completionDate}\n\n` +
-                      `مكتب التسليم الفني - مجمع الأميرات 2`;
-
-            setTimeout(() => {
-                // هذا التبليغ موجه لفريق العمل عند تسجيل الدار لأول مرة، لذا لا داعي لإدراج رقم المستفيد هنا تلقائياً
-                openWhatsappNotifyDialog(msgText, "07840971766");
-            }, 300);
-        }
-    }
 
     const SECTOR_ORDER = ["القطاع الأول", "القطاع الثاني", "القطاع الثالث", "القطاع الرابع", "القطاع الخامس", "القطاع السادس"];
     function sectorRank(s) { const i = SECTOR_ORDER.indexOf(s); return i === -1 ? 99 : i; }
@@ -2131,187 +1858,10 @@
         ).join('') + '</div>';
     }
 
-    function setupCalendarControls() {
-        const monthSelect = document.getElementById('calendar-month-select');
-        const yearInput = document.getElementById('calendar-year-input');
-        
-        if (monthSelect) {
-            monthSelect.innerHTML = "";
-            arabicMonths.forEach((m, idx) => {
-                monthSelect.innerHTML += `<option value="${idx}">${m}</option>`;
-            });
-            monthSelect.value = calendarCurrentMonth;
-        }
-        if (yearInput) {
-            yearInput.value = calendarCurrentYear;
-        }
-    }
 
-    function changeCalendarMonth(delta) {
-        calendarCurrentMonth += delta;
-        if (calendarCurrentMonth > 11) {
-            calendarCurrentMonth = 0;
-            calendarCurrentYear++;
-        } else if (calendarCurrentMonth < 0) {
-            calendarCurrentMonth = 11;
-            calendarCurrentYear--;
-        }
-        setupCalendarControls();
-        renderCalendarGrid();
-    }
 
-    function onCalendarPickerChange() {
-        const monthSelect = document.getElementById('calendar-month-select');
-        const yearInput = document.getElementById('calendar-year-input');
-        if (monthSelect && yearInput) {
-            calendarCurrentMonth = parseInt(monthSelect.value);
-            calendarCurrentYear = parseInt(yearInput.value) || new Date().getFullYear();
-            renderCalendarGrid();
-        }
-    }
-
-    function resetCalendarToToday() {
-        const now = new Date();
-        calendarCurrentYear = now.getFullYear();
-        calendarCurrentMonth = now.getMonth();
-        setupCalendarControls();
-        renderCalendarGrid();
-    }
-
-    function openCalendarModal() {
-        setupCalendarControls();
-        renderCalendarGrid();
-        document.getElementById('calendarModal').style.display = 'flex';
-    }
-
-    function renderCalendarGrid() {
-        const container = document.getElementById('calendar-view-container');
-        if (!container) return;
-        container.innerHTML = "";
-
-        const daysInMonth = new Date(calendarCurrentYear, calendarCurrentMonth + 1, 0).getDate();
-        const firstDayOfWeek = new Date(calendarCurrentYear, calendarCurrentMonth, 1).getDay();
-
-        for (let pad = 0; pad < firstDayOfWeek; pad++) {
-            const emptyBox = document.createElement('div');
-            emptyBox.style.background = 'transparent';
-            emptyBox.style.border = 'none';
-            container.appendChild(emptyBox);
-        }
-
-        for (let i = 1; i <= daysInMonth; i++) {
-            const mStr = String(calendarCurrentMonth + 1).padStart(2, '0');
-            const dNumStr = String(i).padStart(2, '0');
-            const dStr = `${calendarCurrentYear}-${mStr}-${dNumStr}`;
-            let dayEventsCount = 0;
-            
-            houseRecords.forEach(r => {
-                if (r.arrivalDate === dStr || r.cleaningStartDate === dStr || r.cleaningEndDate === dStr || r.contractorStartDate === dStr || r.houseReadyDate === dStr || r.inspectionDate === dStr || r.handoverDate === dStr || r.secondHandoverDate === dStr) {
-                    dayEventsCount++;
-                }
-            });
-
-            oldHouseRecords.forEach(r => {
-                if (r.handoverDate === dStr || r.reviewDate === dStr || (r.notesEndDate === dStr && !r.notesCompleted)) {
-                    dayEventsCount++;
-                }
-            });
-
-            const box = document.createElement('div');
-            box.className = 'calendar-day-box';
-            if (dayEventsCount > 0) {
-                box.style.background = 'rgba(18, 58, 99, 0.18)';
-                box.style.border = '1px solid var(--primary-blue)';
-            }
-            if (dStr === todayStr) {
-                box.style.border = '2px solid #10b981';
-                box.style.boxShadow = '0 0 10px rgba(21, 128, 61, 0.4)';
-            }
-
-            box.onclick = () => showDayEvents(dStr);
-
-            box.innerHTML = `
-                <div style="font-weight:900; color:${dStr === todayStr ? '#10b981' : '#fff'}; margin-bottom:4px; font-size:1rem;">${i}</div>
-                <div style="font-size:0.75rem; color:#fbbf24; font-weight:700;">${dayEventsCount > 0 ? `📌 ${dayEventsCount} أحداث` : ''}</div>
-            `;
-            container.appendChild(box);
-        }
-    }
-
-    function closeCalendarModal() { document.getElementById('calendarModal').style.display = 'none'; }
-
-    function showDayEvents(dateStr) {
-        document.getElementById('day-events-title').innerText = `📅 الأحداث والمواعيد ليوم: ${dateStr}`;
-        const content = document.getElementById('day-events-content');
-        content.innerHTML = "";
-        let events = [];
-
-        houseRecords.forEach(r => {
-            if (r.arrivalDate === dateStr) events.push(`👤 <strong>حضور مستفيد:</strong> الدار ${esc(r.houseNo)} - القطاع: ${esc(r.sectorNo)} - المستفيد: ${esc(r.ownerName)}`);
-            if (r.cleaningStartDate === dateStr) events.push(`🧹 <strong>بدء التنظيف:</strong> الدار ${esc(r.houseNo)} - القطاع: ${esc(r.sectorNo)}`);
-            if (r.cleaningEndDate === dateStr) events.push(`⏳ <strong>انتهاء التنظيف:</strong> الدار ${esc(r.houseNo)} - القطاع: ${esc(r.sectorNo)}`);
-            if (r.contractorStartDate === dateStr) events.push(`👷‍♂️ <strong>بدء عمل المقاول:</strong> الدار ${esc(r.houseNo)} - المقاول: ${esc(r.contractorName)}`);
-            if (r.houseReadyDate === dateStr && r.executionType === 'تنفيذ مقاولين') events.push(`🏠 <strong>موعد جهوزية الدار:</strong> الدار ${esc(r.houseNo)} - المقاول: ${esc(r.contractorName)}`);
-            if (r.inspectionDate === dateStr) events.push(`🔍 <strong>موعد الكشف الفني:</strong> الدار ${esc(r.houseNo)} - المستفيد: ${esc(r.ownerName)}`);
-            if (r.handoverDate === dateStr) events.push(`⏱️ <strong>موعد التسليم الـ 10 أيام:</strong> الدار ${esc(r.houseNo)} - المستفيد: ${esc(r.ownerName)}`);
-            if (r.secondHandoverDate === dateStr) events.push(`🔄 <strong>موعد التسليم الثاني:</strong> الدار ${esc(r.houseNo)} - السبب: ${esc(r.notReadyReason || '-')}`);
-        });
-
-        oldHouseRecords.forEach(r => {
-            if (r.handoverDate === dateStr) events.push(`🏛️ <strong>تسليم دار قديمة:</strong> الدار ${esc(r.houseNo)} - القطاع: ${esc(r.sectorNo)}`);
-            if (r.notesEndDate === dateStr && !r.notesCompleted) events.push(`📝 <strong>انتهاء ملاحظات دار قديمة:</strong> الدار ${esc(r.houseNo)}`);
-        });
-
-        if (events.length === 0) {
-            content.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد أي مواعيد أو أحداث هندسية مسجلة لهذا اليوم.</p>`;
-        } else {
-            events.forEach(e => {
-                content.innerHTML += `<div style="background:rgba(226, 232, 240, 0.6); padding:12px; border-radius:14px; margin-bottom:10px; border:1px solid var(--glass-border); color:var(--text-main);">${e}</div>`;
-            });
-        }
-        document.getElementById('dayEventsModal').style.display = 'flex';
-    }
-    function closeDayEventsModal() { document.getElementById('dayEventsModal').style.display = 'none'; }
 
     let canvas, ctx, drawing = false;
-    function initCanvas() {
-        canvas = document.getElementById('sigCanvas');
-        if (!canvas) return;
-        ctx = canvas.getContext('2d');
-        canvas.width = canvas.parentElement.clientWidth - 40;
-        canvas.height = 160;
-        ctx.strokeStyle = '#1d5384';
-        ctx.lineWidth = 3;
-
-        canvas.onmousedown = (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
-        canvas.onmousemove = (e) => { if (!drawing) return; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); };
-        canvas.onmouseup = () => { drawing = false; };
-        canvas.ontouchstart = (e) => { drawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault(); };
-        canvas.ontouchmove = (e) => { if (!drawing) return; const rect = canvas.getBoundingClientRect(); ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault(); };
-        canvas.ontouchend = () => { drawing = false; };
-    }
-    function openSignatureModal(id) {
-        activeRecordIdForSig = id;
-        document.getElementById('signatureModal').style.display = 'flex';
-        setTimeout(initCanvas, 100);
-    }
-    function openSignatureModalForCurrent() {
-        closeImageModal();
-        openSignatureModal(activeRecordIdForCamera);
-    }
-    function closeSignatureModal() { document.getElementById('signatureModal').style.display = 'none'; }
-    function clearSignature() { if(ctx) ctx.clearRect(0, 0, canvas.width, canvas.height); }
-    function saveSignature() {
-        if (!canvas) return;
-        const dataUrl = canvas.toDataURL();
-        const rec = houseRecords.find(r => r.id === activeRecordIdForSig);
-        if (rec) {
-            rec.signatureImg = dataUrl;
-            syncRecordFields(rec.id, { signatureImg: dataUrl });
-            alert("✅ تم اعتماد التوقيع الرقمي بنجاح تام!");
-        }
-        closeSignatureModal();
-    }
 
     function openPreCleanedModal() { renderPreCleanedList(); document.getElementById('preCleanedModal').style.display = 'flex'; }
     function closePreCleanedModal() { document.getElementById('preCleanedModal').style.display = 'none'; }
@@ -2335,264 +1885,10 @@
         });
     }
 
-    function checkPreCleanedMatch() {
-        const houseInput = document.getElementById('houseNo').value.trim();
-        document.getElementById('preCleanedAlertBox').style.display = (preCleanedHouses.some(item => item.trim() === houseInput) && houseInput !== "") ? 'block' : 'none';
-        onExecutionTypeChange();
-    }
 
-    function openDailyChecklistModal() {
-        document.getElementById('modal-today-date').innerText = todayStr;
-        const cleaningListDiv = document.getElementById('cleaning-checklist-list');
-        const readinessListDiv = document.getElementById('readiness-checklist-list');
-        const oldNotesListDiv = document.getElementById('old-notes-checklist-list');
-        cleaningListDiv.innerHTML = ""; readinessListDiv.innerHTML = ""; oldNotesListDiv.innerHTML = "";
-        let cCount = 0, rCount = 0, oCount = 0;
 
-        houseRecords.forEach(rec => {
-            const isPreCleaned = preCleanedHouses.some(item => item.trim() === (rec.houseNo||'').trim());
-            if (rec.executionType === "تنفيذ مباشر" && !isPreCleaned && !rec.isCleaned && rec.cleaningEndDate === todayStr) {
-                cCount++;
-                cleaningListDiv.innerHTML += `<div style="padding: 8px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.9rem;">📍 القطاع: <strong>${esc(rec.sectorNo)}</strong> | الدار: <strong>${esc(rec.houseNo)}</strong> | المستفيد: ${esc(rec.ownerName)}</div>`;
-            }
-            const targetDate = rec.secondHandoverDate || rec.handoverDate || rec.houseReadyDate || '';
-            if (!rec.isReady && targetDate === todayStr) {
-                rCount++;
-                readinessListDiv.innerHTML += `<div style="padding: 8px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.9rem;">📍 القطاع: <strong>${esc(rec.sectorNo)}</strong> | الدار: <strong>${esc(rec.houseNo)}</strong> | المستفيد: ${esc(rec.ownerName)}</div>`;
-            }
-        });
 
-        oldHouseRecords.forEach(rec => {
-            if (rec.notesEndDate === todayStr && !rec.notesCompleted) {
-                oCount++;
-                oldNotesListDiv.innerHTML += `<div style="padding: 8px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.9rem;">📍 القطاع: <strong>${esc(rec.sectorNo)}</strong> | الدار: <strong>${esc(rec.houseNo)}</strong> | الحالة: ${esc(rec.status)}</div>`;
-            }
-        });
 
-        if (cCount === 0) cleaningListDiv.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>لا توجد دور موعد تنظيفها اليوم.</p>";
-        if (rCount === 0) readinessListDiv.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>لا توجد دور موعد تسليمها اليوم.</p>";
-        if (oCount === 0) oldNotesListDiv.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>لا توجد دور قديمة موعد إنهاء ملاحظاتها اليوم.</p>";
-        document.getElementById('dailyChecklistModal').style.display = 'flex';
-    }
-    function closeDailyChecklistModal() { document.getElementById('dailyChecklistModal').style.display = 'none'; }
-
-    function openContractorScorecardModal() {
-        const container = document.getElementById('contractor-scorecard-list');
-        container.innerHTML = "";
-        contractorsList.forEach(contractor => {
-            let total = 0, ready = 0, overdue = 0;
-            houseRecords.forEach(r => {
-                if (r.contractorName === contractor) {
-                    total++;
-                    if (r.isReady) ready++;
-                    const target = r.secondHandoverDate || r.handoverDate || r.houseReadyDate || '';
-                    if (target && target < todayStr && !r.isReady) overdue++;
-                }
-            });
-            oldHouseRecords.forEach(r => {
-                if (r.contractorName === contractor) {
-                    total++;
-                    const isCompleted = r.status === 'مستلم';
-                    if (isCompleted) ready++;
-                    if (!isCompleted && r.handoverDate && r.handoverDate < todayStr) overdue++;
-                }
-            });
-            container.innerHTML += `
-                <div style="background:#f4f6f9; border:1px solid var(--glass-border); padding:16px; border-radius:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <strong style="color:#1d5384; font-size:1.05rem;">👷‍♂️ ${esc(contractor)}</strong>
-                        <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">إجمالي الدور المسجلة (جديدة + قديمة): ${total}</div>
-                    </div>
-                    <div style="text-align:left; display:flex; gap:8px;">
-                        <span class="badge badge-ready">منجزة: ${ready}</span>
-                        <span class="badge badge-overdue">متأخرة: ${overdue}</span>
-                    </div>
-                </div>
-            `;
-        });
-        document.getElementById('contractorScorecardModal').style.display = 'flex';
-    }
-    function closeContractorScorecardModal() { document.getElementById('contractorScorecardModal').style.display = 'none'; }
-
-    function openTimelineModal(id) {
-        const rec = houseRecords.find(r => r.id === id);
-        if (!rec) return;
-        document.getElementById('timeline-modal-title').innerText = `⏳ السجل التاريخي وجسيم التدقيق: ${esc(rec.houseNo)}`;
-        let html = `
-            <p>👤 <strong>اسم المستفيد:</strong> ${esc(rec.ownerName)} | الهاتف: ${esc(rec.phoneNo || '-')}</p>
-            <p>📍 <strong>القطاع:</strong> ${esc(rec.sectorNo)} | نوع التنفيذ: ${esc(rec.executionType || '-')}</p>
-            <hr style="border-color:var(--glass-border); margin:12px 0;">
-            <p>📅 <strong>تاريخ الحضور:</strong> ${rec.arrivalDate || '-'}</p>
-            <p>🛡️ <strong>حالة التدقيق:</strong> بيانات موثقة وصفرية الأخطاء</p>
-        `;
-        if (rec.cleaningStartDate) html += `<p>🧹 <strong>تاريخ بدء التنظيف:</strong> ${rec.cleaningStartDate}</p>`;
-        if (rec.cleaningEndDate) html += `<p>⏳ <strong>تاريخ انتهاء التنظيف (يومين):</strong> ${rec.cleaningEndDate}</p>`;
-        if (rec.inspectionDate) html += `<p>🔍 <strong>تاريخ الكشف:</strong> ${rec.inspectionDate}</p>`;
-        if (rec.handoverDate) html += `<p>⏱️ <strong>موعد التسليم النهائي (10 أيام):</strong> ${rec.handoverDate}</p>`;
-        if (rec.secondHandoverDate) html += `<p style="color:#fbbf24;">🔄 <strong>موعد التسليم الثاني:</strong> ${rec.secondHandoverDate} (السبب: ${esc(rec.notReadyReason)})</p>`;
-        if (rec.signatureImg) html += `<p style="color:#10b981;">✍️ <strong>يوجد توقيع رقمي معتمد</strong></p>`;
-        document.getElementById('timeline-content-box').innerHTML = html;
-        document.getElementById('timelineModal').style.display = 'flex';
-    }
-    function closeTimelineModal() { document.getElementById('timelineModal').style.display = 'none'; }
-
-    function generateOldHouseReport(id) {
-        const rec = oldHouseRecords.find(r => r.id === id);
-        if (!rec) return;
-
-        let msgText = `📄 *تقرير تفصيلي لدار تسليم قديمة*\n` +
-                      `-------------------------------\n` +
-                      `🏠 رقم الدار والبلوك: *${rec.houseNo}*\n` +
-                      `📍 القطاع: *${rec.sectorNo}*\n` +
-                      `📊 الحالة: *${rec.status}* ${rec.handoverDate ? `(تاريخ موعد التسليم: ${rec.handoverDate})` : ''}\n` +
-                      `🛠️ نوع التنفيذ: *${rec.executionType}* ${rec.contractorName ? `(${rec.contractorName})` : ''}\n` +
-                      `📅 تاريخ المراجعة: *${rec.reviewDate || '-'}*\n` +
-                      `⏳ تاريخ إنهاء الملاحظات: *${rec.notesEndDate || '-'}*\n` +
-                      `📝 الملاحظات المسجلة:\n${rec.notes || 'لا توجد ملاحظات'}\n` +
-                      `-------------------------------\n` +
-                      `_صادر عن مكتب التسليم الفني - مجمع الأميرات 2_`;
-
-        openWhatsappNotifyDialog(msgText, "07840971766");
-    }
-
-    function exportOldHousesExcelReport(selectedKeys) {
-        if (oldHouseRecords.length === 0) {
-            alert("⚠️ لا توجد دور قديمة مسجلة لتصديرها إلى Excel!");
-            return;
-        }
-        const keys = selectedKeys && selectedKeys.length ? selectedKeys : ['all', 'overdue'];
-
-        function buildRows(list) {
-            return list.map((rec, idx) => ({
-                "ت": idx + 1,
-                "رقم الدار والبلوك": rec.houseNo || '-',
-                "الحالة": rec.status || '-',
-                "تاريخ التسليم": rec.handoverDate || '-',
-                "نوع التنفيذ": rec.executionType || '-',
-                "المقاول": rec.contractorName || '-',
-                "القطاع": rec.sectorNo || '-',
-                "الملاحظات": rec.notes || '-',
-                "تاريخ المراجعة": rec.reviewDate || '-',
-                "تاريخ إنهاء الملاحظات": rec.notesEndDate || '-',
-                "هل تم إكمال الملاحظات؟": rec.notesCompleted ? 'تم' : 'لم يتم',
-                "تاريخ إكمال الملاحظات": rec.notesCompletedDate || '-'
-            }));
-        }
-
-        // الدور التي عبرت موعد إنهاء ملاحظاتها ولم تُكمل لحد الآن (نفس تعريف "متأخرة" المستخدم بباقي النظام)
-        const isNotesOverdue = rec => !!(rec.notesEndDate && !rec.notesCompleted && rec.notesEndDate < todayStr);
-
-        const allRows = buildRows(oldHouseRecords);
-        const overdueRows = buildRows(oldHouseRecords.filter(isNotesOverdue));
-
-        const colWidths = [
-            { wch: 6 }, { wch: 20 }, { wch: 14 }, { wch: 14 }, { wch: 16 },
-            { wch: 16 }, { wch: 14 }, { wch: 34 }, { wch: 14 }, { wch: 18 },
-            { wch: 20 }, { wch: 20 }
-        ];
-
-        function buildSheet(titleText, rows) {
-            const ws = XLSX.utils.aoa_to_sheet([[titleText]]);
-            XLSX.utils.sheet_add_json(ws, rows.length ? rows : [{ "ملاحظة": "لا توجد دور ضمن هذا التصنيف حالياً" }], { origin: 'A3' });
-            ws['!cols'] = colWidths;
-            return ws;
-        }
-
-        const workbook = XLSX.utils.book_new();
-        if (keys.includes('all')) XLSX.utils.book_append_sheet(workbook, buildSheet("كل الدور التي بها ملاحظات", allRows), "كل الدور");
-        if (keys.includes('overdue')) XLSX.utils.book_append_sheet(workbook, buildSheet("الدور التي عبرت موعد ملاحظاتها", overdueRows), "عبرت موعد الملاحظات");
-
-        if (!workbook.SheetNames.length) { alert("⚠️ اختر قسم واحد على الأقل للتصدير."); return; }
-        XLSX.writeFile(workbook, `AlAmirat_تقرير_الدور_القديمة_${todayStr}.xlsx`);
-    }
-
-    function exportNewHousesExcelReport(selectedKeys) {
-        if (houseRecords.length === 0) {
-            alert("⚠️ لا توجد دور جديدة مسجلة لتصديرها إلى Excel!");
-            return;
-        }
-        const keys = selectedKeys && selectedKeys.length ? selectedKeys : ['all', '3days', 'overdue'];
-
-        function buildNewRows(list) {
-            return list.map((rec, idx) => {
-                const logic = calculateRecordStatus(rec);
-                return {
-                    "ت": idx + 1,
-                    "رقم الدار والبلوك": rec.houseNo || '-',
-                    "اسم المستفيد": rec.ownerName || '-',
-                    "رقم الهاتف": rec.phoneNo || '-',
-                    "القطاع": rec.sectorNo || '-',
-                    "نوع التنفيذ": rec.executionType || '-',
-                    "المقاول": rec.contractorName || '-',
-                    "الحالة الحالية": logic.statusText,
-                    "تاريخ الحضور": rec.arrivalDate || '-',
-                    "موعد التسليم الـ 10 أيام": rec.handoverDate || rec.houseReadyDate || '-',
-                    "هل تم الإكمال؟": rec.isReady ? 'تم' : 'لم يتم',
-                    "موعد التسليم الثاني": rec.secondHandoverDate || '-',
-                    "سبب تأخير التسليم الثاني": rec.notReadyReason || '-'
-                };
-            });
-        }
-
-        // لم يتم الإكمال + تجاوزت الموعد الفعلي (10 أيام أو الموعد الثاني) = معناها متجاوزة فعلاً
-        const isOverdueNotReady = rec => calculateRecordStatus(rec).isHandoverOverdue;
-        const is3DaysLeft = rec => calculateRecordStatus(rec).is3DaysRemaining;
-
-        const allRows = buildNewRows(houseRecords);
-        const threeDaysRows = buildNewRows(houseRecords.filter(is3DaysLeft));
-        const overdueRows = buildNewRows(houseRecords.filter(isOverdueNotReady));
-
-        const colWidthsNew = [
-            { wch: 6 }, { wch: 20 }, { wch: 22 }, { wch: 16 }, { wch: 16 },
-            { wch: 16 }, { wch: 18 }, { wch: 26 }, { wch: 15 }, { wch: 20 },
-            { wch: 16 }, { wch: 20 }, { wch: 30 }
-        ];
-
-        function buildNewSheet(titleText, rows) {
-            const ws = XLSX.utils.aoa_to_sheet([[titleText]]);
-            XLSX.utils.sheet_add_json(ws, rows.length ? rows : [{ "ملاحظة": "لا توجد دور ضمن هذا التصنيف حالياً" }], { origin: 'A3' });
-            ws['!cols'] = colWidthsNew;
-            return ws;
-        }
-
-        const workbook = XLSX.utils.book_new();
-        if (keys.includes('all')) XLSX.utils.book_append_sheet(workbook, buildNewSheet("كل الدور", allRows), "كل الدور");
-        if (keys.includes('3days')) XLSX.utils.book_append_sheet(workbook, buildNewSheet("الدور المتبقي لموعدها 3 أيام", threeDaysRows), "متبقي 3 أيام");
-        if (keys.includes('overdue')) XLSX.utils.book_append_sheet(workbook, buildNewSheet("الدور التي تجاوزت 10 أيام ولم تكتمل بعد", overdueRows), "تجاوزت 10 أيام");
-
-        if (!workbook.SheetNames.length) { alert("⚠️ اختر قسم واحد على الأقل للتصدير."); return; }
-        XLSX.writeFile(workbook, `AlAmirat_تقرير_الدور_الجديدة_${todayStr}.xlsx`);
-    }
-
-    // نافذة اختيار أقسام التقرير المخصص (دور جديدة/قديمة) قبل تصدير الإكسل
-    function openCustomReportModal(type) {
-        window.customReportType = type;
-        const title = document.getElementById('customReportTitle');
-        const body = document.getElementById('customReportOptions');
-        if (type === 'new') {
-            title.textContent = '📊 تقرير مخصص - الدور الجديدة (اختر الأقسام)';
-            body.innerHTML =
-                '<label class="custom-report-option"><input type="checkbox" value="all" checked> كل الدور</label>' +
-                '<label class="custom-report-option"><input type="checkbox" value="3days" checked> متبقي 3 أيام</label>' +
-                '<label class="custom-report-option"><input type="checkbox" value="overdue" checked> تجاوزت 10 أيام</label>';
-        } else {
-            title.textContent = '📊 تقرير مخصص - الدور القديمة (اختر الأقسام)';
-            body.innerHTML =
-                '<label class="custom-report-option"><input type="checkbox" value="all" checked> كل الدور</label>' +
-                '<label class="custom-report-option"><input type="checkbox" value="overdue" checked> عبرت موعد الملاحظات</label>';
-        }
-        document.getElementById('customReportModal').style.display = 'flex';
-    }
-    function closeCustomReportModal() {
-        document.getElementById('customReportModal').style.display = 'none';
-    }
-    function runCustomReportExport() {
-        const checked = Array.from(document.querySelectorAll('#customReportOptions input:checked')).map(cb => cb.value);
-        if (!checked.length) { alert("⚠️ اختر قسم واحد على الأقل للتصدير."); return; }
-        if (window.customReportType === 'new') exportNewHousesExcelReport(checked);
-        else exportOldHousesExcelReport(checked);
-        closeCustomReportModal();
-    }
 
     function buildBackupObject() {
         return {
@@ -2793,41 +2089,6 @@
         reader.readAsText(file);
     }
 
-    function sendDailySummaryWhatsApp() {
-        function fmtList(list) {
-            if (!list.length) return 'لا يوجد';
-            return list.map(rec => `🏠 ${rec.houseNo || '-'} (${rec.sectorNo || 'غير محدد'} - ${rec.contractorName || (rec.executionType === 'تنفيذ مباشر' ? 'تنفيذ مباشر' : 'غير محدد')})`).join('\n');
-        }
-
-        // الدور الجديدة
-        const newAll = houseRecords;
-        const new3Days = houseRecords.filter(rec => calculateRecordStatus(rec).is3DaysRemaining);
-        const new10DaysOverdue = houseRecords.filter(rec => calculateRecordStatus(rec).isHandoverOverdue);
-
-        // الدور القديمة
-        const oldAll = oldHouseRecords;
-        const old2Days = oldHouseRecords.filter(rec => rec.notesEndDate && !rec.notesCompleted && daysBetween(todayStr, rec.notesEndDate) >= 0 && daysBetween(todayStr, rec.notesEndDate) <= 2);
-        const old5DaysOverdue = oldHouseRecords.filter(rec => rec.notesEndDate && !rec.notesCompleted && daysBetween(todayStr, rec.notesEndDate) < 0);
-
-        let msgText = `📊 *التقرير اليومي الشامل - مجمع الأميرات 2*\n` +
-                      `📅 التاريخ: ${todayStr}\n\n` +
-                      `🏠 *الدور الجديدة*\n\n` +
-
-                      `📌 العدد الكلي: (${newAll.length})\n${fmtList(newAll)}\n\n` +
-                      `⏳ باقي 3 أيام على التسليم: (${new3Days.length})\n${fmtList(new3Days)}\n\n` +
-                      `🚨 تجاوزت 10 أيام: (${new10DaysOverdue.length})\n${fmtList(new10DaysOverdue)}\n\n` +
-
-                      `-------------------------------\n` +
-                      `🏛️ *الدور القديمة*\n\n` +
-
-                      `📌 عدد الدور الكلي: (${oldAll.length})\n${fmtList(oldAll)}\n\n` +
-                      `📌 باقي يومين عن الملاحظات: (${old2Days.length})\n${fmtList(old2Days)}\n\n` +
-                      `⚠️ تجاوزت 5 أيام: (${old5DaysOverdue.length})\n${fmtList(old5DaysOverdue)}\n\n` +
-
-                      `_صادر عن مكتب التسليم الفني_`;
-
-        openWhatsappNotifyDialog(msgText, '07840971766');
-    }
 
     function toggleToolsGroup(id) {
         const el = document.getElementById(id);
@@ -2835,37 +2096,6 @@
         el.style.display = (el.style.display === 'none' || !el.style.display) ? 'flex' : 'none';
     }
 
-    function onExecutionTypeChange() {
-        const type = document.getElementById('executionType').value;
-        const contractorGroup = document.getElementById('contractor-group');
-        const directDates = document.getElementById('direct-dates-group');
-        const contractorDates = document.getElementById('contractor-dates-group');
-
-        if (!type) { contractorGroup.classList.add('hidden-field'); directDates.classList.add('hidden-field'); contractorDates.classList.add('hidden-field'); return; }
-        
-        const arrival = document.getElementById('arrivalDate').value || todayStr;
-        const isPreCleaned = preCleanedHouses.some(item => item.trim() === document.getElementById('houseNo').value.trim());
-
-        if (type === "تنفيذ مباشر") {
-            contractorGroup.classList.add('hidden-field');
-            contractorDates.classList.add('hidden-field');
-            if (isPreCleaned) { 
-                directDates.classList.add('hidden-field'); 
-            } else { 
-                directDates.classList.remove('hidden-field'); 
-                document.getElementById('cleaningStartDate').value = arrival; 
-                document.getElementById('cleaningEndDate').value = addDays(arrival, 2);
-            }
-        } else if (type === "تنفيذ مقاولين") {
-            contractorGroup.classList.remove('hidden-field');
-            contractorDates.classList.remove('hidden-field'); 
-            directDates.classList.add('hidden-field');
-            document.getElementById('contractorStartDate').value = addDays(arrival, 1); 
-            document.getElementById('houseReadyDate').value = addDays(arrival, 10);
-        }
-    }
-
-    function handleArrivalDateChange() { onExecutionTypeChange(); }
 
     function calculateRecordStatus(rec) {
         let statusText = "", badgeClass = "", isCleaningOverdue = false, isHandoverOverdue = false, is3DaysRemaining = false, is2DayCleaningNeeded = false;
@@ -2973,236 +2203,20 @@
         }
     }
 
-    function triggerWhatsAppNotifyById(id) {
-        const rec = houseRecords.find(r => r.id === id);
-        if (!rec) return;
-        triggerWhatsAppNotify(rec.phoneNo, rec.ownerName, rec.houseNo, rec.sectorNo);
-    }
 
     function triggerWhatsAppNotify(phone, name, houseNo, sectorNo) {
         let msg = `السلام عليكم ورحمة الله وبركاته\nالأخ المستفيد: ${name}\nنود إعلامكم بأن الدار رقم (${houseNo}) في ${sectorNo} أصبح جاهزاً للإنهاء والتسليم.\nيرجى المراجعة لإكمال الإجراءات.`;
         openWhatsappNotifyDialog(msg, phone ? phone : "07840971766");
     }
 
-    function setFilterStatus(status) {
-        window.currentStatusFilter = status;
-        renderTable();
-    }
 
-    function setOldFilterStatus(status) {
-        window.currentOldStatusFilter = status;
-        if (activeTab !== 'old') {
-            switchMainTab('old');
-        } else {
-            renderTable();
-        }
-    }
 
-    function toggleNotification(id, index, event) {
-        event.stopPropagation();
-        const rec = houseRecords.find(r => r.id === id);
-        if (rec) {
-            const value = event.target.checked ? todayStr : null;
-            // تحديث خانة التبليغ الواحدة فقط (حتى لا يمسح شخص آخر خانة علّمها بنفس الوقت)
-            const arr = [null, null, null];
-            for (let i = 0; i < 3; i++) arr[i] = (rec.notifications && rec.notifications[i]) || null;
-            arr[index] = value;
-            rec.notifications = arr;
-            syncRecordFields(rec.id, { ['notifications/' + index]: value });
-        }
-    }
 
-    function toggleOldNotesCompleted(id, event) {
-        event.stopPropagation();
-        const rec = oldHouseRecords.find(r => r.id === id);
-        if (!rec) return;
-        if (event.target.checked) {
-            rec.notesCompleted = true;
-            rec.notesCompletedDate = todayStr;
-            syncOldRecordFields(rec.id, { notesCompleted: true, notesCompletedDate: todayStr });
-        } else {
-            // إزالة العلامة = إعادة الدار بملاحظات وتاريخ جديدين، فتبقى العلامة كما هي إلى أن يتم إدخالهما
-            event.preventDefault();
-            openReopenNotesModal(id);
-        }
-    }
 
-    // عدّاد "عدد مراجعات المستفيد" — عمود دائم الظهور بالجديدة والقديمة معاً؛ كل ضغطة ➕ تزيد العدد وتُحفظ بالسحابة
-    function bumpReviewCount(kind, id, event) {
-        if (event) event.stopPropagation();
-        if (kind === 'new') {
-            const rec = houseRecords.find(r => r.id === id);
-            if (!rec) return;
-            rec.reviewCount = (rec.reviewCount || 0) + 1;
-            syncRecordFields(rec.id, { reviewCount: rec.reviewCount });
-        } else {
-            const rec = oldHouseRecords.find(r => r.id === id);
-            if (!rec) return;
-            rec.reviewCount = (rec.reviewCount || 0) + 1;
-            syncOldRecordFields(rec.id, { reviewCount: rec.reviewCount });
-        }
-        renderTable();
-    }
-
-    function openReopenNotesModal(id) {
-        const rec = oldHouseRecords.find(r => r.id === id);
-        if (!rec) return;
-        document.getElementById('reopen-notes-id').value = id;
-        document.getElementById('reopen-notes-house').innerText = 'الدار: ' + (rec.houseNo || '-') + ' - ' + (rec.sectorNo || '-');
-        document.getElementById('reopen-notes-text').value = '';
-        document.getElementById('reopen-review-date').value = todayStr;
-        document.getElementById('reopen-notes-end').value = addDays(todayStr, 5);
-        document.getElementById('reopenNotesModal').style.display = 'flex';
-    }
-    function closeReopenNotesModal() {
-        document.getElementById('reopenNotesModal').style.display = 'none';
-        renderTable();
-    }
-    function confirmReopenNotes() {
-        const idStr = document.getElementById('reopen-notes-id').value;
-        const rec = oldHouseRecords.find(r => String(r.id) === String(idStr));
-        if (!rec) { closeReopenNotesModal(); return; }
-        const newNotes = document.getElementById('reopen-notes-text').value.trim();
-        const reviewDate = document.getElementById('reopen-review-date').value || todayStr;
-        const notesEndDate = document.getElementById('reopen-notes-end').value || addDays(todayStr, 5);
-        if (!newNotes) { alert('⚠️ اكتب الملاحظات الجديدة على الدار أولاً.'); return; }
-        if (notesEndDate < reviewDate) { alert('⚠️ تاريخ إنهاء الملاحظات لا يمكن أن يسبق تاريخ المراجعة.'); return; }
-        rec.notesCompleted = false;
-        rec.notesCompletedDate = '';
-        rec.notes = newNotes;
-        rec.reviewDate = reviewDate;
-        rec.notesEndDate = notesEndDate;
-        syncOldRecordFields(rec.id, {
-            notesCompleted: false, notesCompletedDate: null,
-            notes: newNotes, reviewDate: reviewDate, notesEndDate: notesEndDate
-        });
-        document.getElementById('reopenNotesModal').style.display = 'none';
-    }
-
-    function triggerCamera(id) {
-        activeRecordIdForCamera = id;
-        document.getElementById('cameraFileInput').click();
-    }
-
-    function handleImageCapture(event) {
-        const file = event.target.files[0];
-        if (file && activeRecordIdForCamera) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const rec = houseRecords.find(r => r.id === activeRecordIdForCamera);
-                if (rec) {
-                    rec.noteImage = e.target.result;
-                    syncRecordFields(rec.id, { noteImage: rec.noteImage });
-                    alert("✅ تم إرفاق صورة الملاحظات بنجاح!");
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-    function viewRecordImage(id, kind) {
-        const rec = houseRecords.find(r => r.id === id);
-        if (!rec) return;
-        const src = kind === 'sig' ? rec.signatureImg : rec.noteImage;
-        if (src) viewImage(src);
-    }
-
-    function viewImage(imgUrl) {
-        document.getElementById('previewImgElement').src = imgUrl;
-        document.getElementById('imagePreviewModal').style.display = 'flex';
-    }
-
-    function closeImageModal() {
-        document.getElementById('imagePreviewModal').style.display = 'none';
-    }
-
-    function openStatusModal(id) {
-        const rec = houseRecords.find(r => r.id === id);
-        if (!rec) return;
-
-        let detailsHtml = `
-            <p><strong>رقم الدار:</strong> ${esc(rec.houseNo)} | <strong>المستفيد:</strong> ${esc(rec.ownerName)}</p>
-            <p><strong>نوع التنفيذ:</strong> ${esc(rec.executionType)} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</p>
-            <p><strong>تاريخ الحضور:</strong> ${rec.arrivalDate || '-'}</p>
-        `;
-        document.getElementById('status-modal-details').innerHTML = detailsHtml;
-
-        let questionsHtml = `<div class="modal-action-grid">`;
-
-        const isPreCleaned = preCleanedHouses.some(item => item.trim() === (rec.houseNo || '').trim());
-
-        if (rec.executionType === "تنفيذ مباشر" && !isPreCleaned && !rec.isCleaned) {
-            questionsHtml += `
-                <button class="btn-action-success" onclick="updateRecordState(${rec.id}, 'clean_success')">🧹 تم تنظيف الدار بنجاح</button>
-            `;
-        }
-
-        if (!rec.isReady) {
-            questionsHtml += `
-                <button class="btn-action-success" onclick="updateRecordState(${rec.id}, 'ready_success')">✅ الدار جاهزة للإنهاء والتسليم</button>
-                <button class="btn-action-danger" onclick="updateRecordState(${rec.id}, 'not_ready_delay')">⚠️ الدار غير جاهزة (تسجيل موعد ثاني)</button>
-            `;
-        } else {
-            questionsHtml += `
-                <button class="btn-action-danger" onclick="updateRecordState(${rec.id}, 'revert_ready')">🔄 إلغاء حالة الجهوزية</button>
-            `;
-        }
-
-        questionsHtml += `</div>
-            <br>
-            <button class="btn-primary" style="background: rgba(18, 58, 99, 0.2); border-color: var(--primary-blue);" onclick="openTimelineModal(${rec.id})">⏳ عرض السجل التاريخي الشامل</button>
-        `;
-
-        document.getElementById('status-interactive-questions').innerHTML = questionsHtml;
-        document.getElementById('statusCheckModal').style.display = 'flex';
-    }
-
-    function closeStatusModal() {
-        document.getElementById('statusCheckModal').style.display = 'none';
-    }
 
     // تحديد سريع لحالة "هل تم الإكمال" مباشرة من شريط الجدول بدون فتح النافذة؛
     // نفس الحقل isReady المستخدم بباقي النظام (لو ما تحدد ليوم العاشر تُحسب تلقائياً "تجاوزت الموعد")
-    function toggleReadyQuick(id, event) {
-        if (event) event.stopPropagation();
-        const rec = houseRecords.find(r => r.id === id);
-        if (!rec) return;
-        rec.isReady = !rec.isReady;
-        syncRecordFields(rec.id, { isReady: rec.isReady });
-        renderTable();
-    }
 
-    function updateRecordState(id, action) {
-        const rec = houseRecords.find(r => r.id === id);
-        if (!rec) return;
-
-        if (action === 'clean_success') {
-            rec.isCleaned = true;
-            syncRecordFields(rec.id, { isCleaned: true });
-            alert("✨ تم تسجيل تنظيف الدار بنجاح!");
-        } else if (action === 'ready_success') {
-            rec.isReady = true;
-            syncRecordFields(rec.id, { isReady: true });
-            alert("✅ تم تسجيل الدار كـ جاهزة للإنهاء والجاهزية!");
-        } else if (action === 'revert_ready') {
-            rec.isReady = false;
-            syncRecordFields(rec.id, { isReady: false });
-            alert("🔄 تم إلغاء حالة الجهوزية وإرجاع الدار للمتابعة.");
-        } else if (action === 'not_ready_delay') {
-            const reason = prompt("يرجى كتابة سبب عدم الجهوزية:");
-            if (reason) {
-                const nextDate = prompt("أدخل تاريخ التسليم الثاني المتوقع (YYYY-MM-DD):", addDays(todayStr, 7));
-                if (nextDate) {
-                    rec.notReadyReason = reason;
-                    rec.secondHandoverDate = nextDate;
-                    rec.isReady = false;
-                    syncRecordFields(rec.id, { notReadyReason: reason, secondHandoverDate: nextDate, isReady: false });
-                    alert("⚠️ تم حفظ السبب وتأجيل الموعد بنجاح.");
-                }
-            }
-        }
-        closeStatusModal();
-    }
 
     const PAGE_SIZE = 30;
     window.renderLimit = PAGE_SIZE;
@@ -3210,11 +2224,6 @@
 
     // إظهار/إخفاء عمودي القطاع ونوع التنفيذ بالجدول (تبقى محفوظة بالبيانات دائماً، هذا فقط للعرض بالشريط)
     window.showExtraCols = localStorage.getItem('showExtraCols') === '1';
-    function toggleExtraCols() {
-        window.showExtraCols = document.getElementById('show-extra-cols-toggle').checked;
-        try { localStorage.setItem('showExtraCols', window.showExtraCols ? '1' : '0'); } catch (e) {}
-        renderTable();
-    }
     (function () {
         const cb = document.getElementById('show-extra-cols-toggle');
         if (cb) cb.checked = window.showExtraCols;
@@ -3227,7 +2236,6 @@
         renderQueued = true;
         requestAnimationFrame(() => { renderQueued = false; renderTableCore(); });
     }
-    function loadMoreRows() { window.renderLimit += PAGE_SIZE; renderTable(); }
     function renderLoadMore(total) {
         const box = document.getElementById('load-more-container');
         if (!box) return;
