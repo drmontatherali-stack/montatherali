@@ -748,6 +748,9 @@
         </div>
     </header>
 
+    <!-- بطلب المستخدم: تنبيه "بيت جديد" يبقى ظاهراً دائماً فوق الصفحة مباشرة (لا يحتاج فتح "📁 إدارة") حتى يُلفت النظر فوراً -->
+    <div id="new-house-alerts-panel"></div>
+
     <div class="tools-toolbar">
         <div class="tools-toolbar-group">
             <button class="tools-group-toggle" onclick="toggleToolsGroup('admin-reports-group')">📁 إدارة ▾</button>
@@ -1083,6 +1086,14 @@
             <div class="form-group">
                 <label>رقم البلوك والدار</label>
                 <input type="text" id="old-houseNo" class="form-control" required placeholder="مثال: B2.4" oninput="tryAutoFillHandoverDate()">
+            </div>
+            <div class="form-group">
+                <label>تاريخ الوارد (تلقائي من قيد التسليم إن وُجد، قابل للتعديل)</label>
+                <input type="date" id="old-incomingDate" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>تاريخ التسليم (تلقائي من قيد التسليم إن وُجد، قابل للتعديل)</label>
+                <input type="date" id="old-deliveryDate" class="form-control">
             </div>
             <div class="form-group">
                 <label>حالة الدار</label>
@@ -1598,6 +1609,8 @@
             document.getElementById('old-reviewDate').value = todayStr;
             document.getElementById('old-notesEndDate').value = addDays(todayStr, 5);
             document.getElementById('old-handoverDate').value = '';
+            document.getElementById('old-incomingDate').value = '';
+            document.getElementById('old-deliveryDate').value = '';
             onOldStatusChange();
         }
     }
@@ -1612,6 +1625,8 @@
         window.editBaseline = Object.assign({}, rec);
         document.getElementById('old-edit-id').value = rec.id;
         document.getElementById('old-houseNo').value = rec.houseNo || '';
+        document.getElementById('old-incomingDate').value = rec.incomingDate || '';
+        document.getElementById('old-deliveryDate').value = rec.deliveryDate || '';
         document.getElementById('old-status').value = rec.status || 'مستلم';
         document.getElementById('old-handoverDate').value = rec.handoverDate || '';
         document.getElementById('old-executionType').value = rec.executionType || 'تنفيذ مباشر';
@@ -1721,6 +1736,8 @@
         e.preventDefault();
         const editId = document.getElementById('old-edit-id').value;
         const houseNo = document.getElementById('old-houseNo').value.trim();
+        const incomingDate = document.getElementById('old-incomingDate').value;
+        const deliveryDate = document.getElementById('old-deliveryDate').value;
         const status = document.getElementById('old-status').value;
         const handoverDate = document.getElementById('old-handoverDate').value;
         const executionType = document.getElementById('old-executionType').value;
@@ -1746,6 +1763,8 @@
         const baselineOld = (editId && window.editBaseline && String(window.editBaseline.id) === String(editId)) ? window.editBaseline : undefined;
 
         rec.houseNo = houseNo;
+        rec.incomingDate = incomingDate;
+        rec.deliveryDate = deliveryDate;
         rec.status = status;
         rec.handoverDate = handoverDate;
         rec.executionType = executionType;
@@ -3494,6 +3513,82 @@
     try { wsDismissed = JSON.parse(localStorage.getItem('weeklyStatusDismissed') || '{}'); } catch (e) { wsDismissed = {}; }
     var wsDeliveredAlerts = []; // قائمة الدور التي ظهرت "مسلّمة" وتنتظر موافقة الحذف من قيد التسليم/المراجعة
 
+    // ---------- بيت جديد انضاف بالإكسل (شيت "الموقف الاسبوعي") — تنبيه + إرسال واتساب ----------
+    // قائمة أرقام الدور/البلوكات المعروفة من آخر مزامنة (لمعرفة أي دار "جديدة" لم تكن موجودة سابقاً)
+    var wsKnownUnits = {};
+    try { wsKnownUnits = JSON.parse(localStorage.getItem('weeklyStatusKnownUnits') || 'null'); } catch (e) { wsKnownUnits = null; }
+    var wsKnownUnitsIsFirstRun = (wsKnownUnits === null); // أول مزامنة إطلاقاً: لا نُنبّه على كل الدور كأنها "جديدة" دفعة واحدة
+    if (!wsKnownUnits) wsKnownUnits = {};
+    // دور جديدة أُعلِم المستخدم بها وضغط "تم الإعلام" فتُخفى من لوحة التحديثات (لا تُحذف من قيد التسليم نفسه)
+    var wsNewHouseDismissed = {};
+    try { wsNewHouseDismissed = JSON.parse(localStorage.getItem('weeklyStatusNewHouseDismissed') || '{}'); } catch (e) { wsNewHouseDismissed = {}; }
+    // قائمة الدور الجديدة المكتشفة وبانتظار الإعلام — تُحفظ محلياً فتبقى ظاهرة حتى لو أُعيد تحميل الصفحة قبل الضغط على "تم الإعلام"
+    var wsNewHouseAlerts = [];
+    try { wsNewHouseAlerts = JSON.parse(localStorage.getItem('weeklyStatusNewHouseAlerts') || '[]'); } catch (e) { wsNewHouseAlerts = []; }
+    function wsSaveKnownUnits() { try { localStorage.setItem('weeklyStatusKnownUnits', JSON.stringify(wsKnownUnits)); } catch (e) {} }
+    function wsSaveNewHouseDismissed() { try { localStorage.setItem('weeklyStatusNewHouseDismissed', JSON.stringify(wsNewHouseDismissed)); } catch (e) {} }
+    function wsSaveNewHouseAlerts() { try { localStorage.setItem('weeklyStatusNewHouseAlerts', JSON.stringify(wsNewHouseAlerts)); } catch (e) {} }
+    // يحسب الدور الجديدة (موجودة بالمزامنة الحالية وغير موجودة بقائمة الدور المعروفة سابقاً) ويحدّث القائمة المعروفة
+    function wsDetectNewHouses(units) {
+        var freshlyNew = [];
+        units.forEach(function (u) {
+            var key = normHouseNo(u.unit);
+            if (!key) return;
+            if (!wsKnownUnits[key]) {
+                if (!wsKnownUnitsIsFirstRun) freshlyNew.push(u);
+                wsKnownUnits[key] = true;
+            }
+        });
+        wsKnownUnitsIsFirstRun = false;
+        wsSaveKnownUnits();
+        if (freshlyNew.length) {
+            freshlyNew.forEach(function (u) {
+                var key = normHouseNo(u.unit);
+                if (!wsNewHouseAlerts.some(function (x) { return normHouseNo(x.unit) === key; })) wsNewHouseAlerts.push(u);
+            });
+            wsSaveNewHouseAlerts();
+        }
+    }
+    function renderNewHouseAlerts() {
+        var box = document.getElementById('new-house-alerts-panel');
+        if (!box) return;
+        var visible = wsNewHouseAlerts.filter(function (u) { return !wsNewHouseDismissed[normHouseNo(u.unit)]; });
+        if (!visible.length) { box.innerHTML = ''; return; }
+        box.innerHTML = '<div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.35);border-radius:14px;padding:14px 16px;margin-bottom:14px;line-height:1.9;">' +
+            '<div style="font-weight:900;color:#1d4ed8;margin-bottom:8px;">🏠 ' + visible.length + ' دار جديدة انضافت بشيت "الموقف الاسبوعي" (قيد التسليم):</div>' +
+            visible.map(function (u) {
+                var key = normHouseNo(u.unit);
+                return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 0;border-top:1px dashed rgba(37,99,235,.25);">' +
+                    '<span style="font-size:.9rem;">🏠 <strong>' + esc(u.unit) + '</strong>' +
+                    ' — 📅 تاريخ الوارد: ' + esc(u.incomingDate || '-') +
+                    ' — 🚚 تاريخ التسليم: ' + esc(u.deliveryDate || '-') +
+                    (u.sector ? ' — 📍 ' + esc(u.sector) : '') +
+                    '</span>' +
+                    '<span style="display:flex;gap:8px;flex-wrap:wrap;">' +
+                    '<button onclick="window.__wsNotifyNewHouseWhatsApp(' + JSON.stringify(key) + ')" style="padding:6px 16px;border-radius:12px;border:1px solid rgba(21,128,61,.5);background:rgba(21,128,61,.12);color:#15803d;cursor:pointer;font-weight:800;">📨 إرسال واتساب</button>' +
+                    '<button onclick="window.__wsDismissNewHouseAlert(' + JSON.stringify(key) + ')" style="padding:6px 16px;border-radius:12px;border:1px solid rgba(100,116,139,.4);background:rgba(100,116,139,.1);color:#475569;cursor:pointer;font-weight:700;">✖️ تم الإعلام</button>' +
+                    '</span>' +
+                    '</div>';
+            }).join('') + '</div>';
+    }
+    window.__wsNotifyNewHouseWhatsApp = function (key) {
+        var u = wsNewHouseAlerts.filter(function (x) { return normHouseNo(x.unit) === key; })[0];
+        if (!u) return;
+        var msg = 'السلام عليكم ورحمة الله وبركاته\n🏠 بيت جديد انضاف لقائمة "قيد التسليم":\nرقم البلوك والدار: ' + u.unit +
+            '\nتاريخ الوارد: ' + (u.incomingDate || '-') +
+            '\nتاريخ التسليم: ' + (u.deliveryDate || '-') +
+            (u.sector ? '\nالقطاع: ' + u.sector : '') +
+            (u.contractor ? '\nالمقاول: ' + u.contractor : '');
+        if (typeof openWhatsappNotifyDialog === 'function') openWhatsappNotifyDialog(msg);
+    };
+    window.__wsDismissNewHouseAlert = function (key) {
+        wsNewHouseDismissed[key] = true;
+        wsSaveNewHouseDismissed();
+        wsNewHouseAlerts = wsNewHouseAlerts.filter(function (x) { return normHouseNo(x.unit) !== key; });
+        wsSaveNewHouseAlerts();
+        renderNewHouseAlerts();
+    };
+
     // حالة "جاهز/غير جاهز" لكل دار بقيد التسليم — تبديل يدوي يُحفظ محلياً
     var wsReadyMap = {};
     try { wsReadyMap = JSON.parse(localStorage.getItem('weeklyStatusReadyMap') || '{}'); } catch (e) { wsReadyMap = {}; }
@@ -3662,19 +3757,21 @@
     }
 
     // لوحة ألوان خفيفة ومتناسقة (غير غامقة) تُستخدم لتمييز كل قطاع/مقاول بلون ثابت خاص به بجدول "قيد التسليم"
+    // بطلب المستخدم: أُبعِد الأحمر والأصفر/البرتقالي عمداً عن هذه اللوحة لأن لهما دلالة أخرى بالنظام (أحمر = تجاوز/خطر، أصفر = تنبيه مُعلّق)
+    // فبقيت اللوحة بين الأزرق/النيلي/البنفسجي/الموف/الفوشيا/الوردي من جهة، والأخضر/الزمردي/التركواز/السماوي من جهة، وحياد رمادي-أزرق
     var WS_COLOR_PALETTE = [
-        { bg: '#fde8e8', text: '#b91c1c' },
-        { bg: '#fef3e2', text: '#b45309' },
-        { bg: '#fdf6d0', text: '#92730a' },
-        { bg: '#e8f5df', text: '#3f7d20' },
-        { bg: '#dcf3ec', text: '#0f766e' },
-        { bg: '#ddeefb', text: '#0369a1' },
-        { bg: '#e6e8fb', text: '#4338ca' },
-        { bg: '#f0e3fb', text: '#7e22ce' },
-        { bg: '#fbe3ef', text: '#be185d' },
-        { bg: '#f1e7da', text: '#92572a' },
-        { bg: '#e3f7f7', text: '#0e7490' },
-        { bg: '#f3f0e3', text: '#78716c' }
+        { bg: '#dbeafe', text: '#1d4ed8' }, // أزرق
+        { bg: '#e0f2fe', text: '#0369a1' }, // سماوي فاتح
+        { bg: '#cffafe', text: '#0e7490' }, // سماوي-تركواز
+        { bg: '#ccfbf1', text: '#0f766e' }, // تركواز
+        { bg: '#d1fae5', text: '#047857' }, // زمردي
+        { bg: '#dcfce7', text: '#15803d' }, // أخضر
+        { bg: '#e0e7ff', text: '#4338ca' }, // نيلي
+        { bg: '#ede9fe', text: '#6d28d9' }, // بنفسجي
+        { bg: '#f3e8ff', text: '#9333ea' }, // موف
+        { bg: '#fae8ff', text: '#a21caf' }, // فوشيا
+        { bg: '#fce7f3', text: '#be185d' }, // وردي
+        { bg: '#e2e8f0', text: '#334155' }  // رمادي-أزرق (حيادي)
     ];
 
     function wsSortList(list, mode) {
@@ -3882,10 +3979,12 @@
                 localStorage.setItem('weeklyStatusCache', JSON.stringify(wsUnits));
                 localStorage.setItem('weeklyStatusLastSync', wsLastSync);
             } catch (e) { console.warn('تعذر حفظ كاش قيد التسليم محلياً', e); }
+            wsDetectNewHouses(wsUnits);
             populateFilterOptions();
             purgeOrphanLegacyNewHouses();
             wsRender();
             wsStatusText();
+            renderNewHouseAlerts();
             checkDeliveredCrossovers();
         } catch (e) {
             console.error('weekly-status sync', e);
@@ -3918,6 +4017,7 @@
         populateFilterOptions();
         wsRender();
         wsStatusText();
+        renderNewHouseAlerts();
         if (wsUrl && !wsUnits.length) wsSync(false);
     };
 
@@ -3997,6 +4097,7 @@
         populateFilterOptions();
         purgeOrphanLegacyNewHouses(); // تنظيف فوري من الكاش المحلي (إن وُجد) حتى قبل اكتمال أول مزامنة
         wsRender(); // عرض فوري من الكاش المحلي (إن وُجد) قبل اكتمال المزامنة
+        renderNewHouseAlerts(); // عرض أي تنبيهات "بيت جديد" محفوظة من جلسة سابقة ولم يُضغط عليها "تم الإعلام" بعد
         setTimeout(function () { wsSync(false); }, 4000); // مزامنة أولى بالخلفية بعد تحميل الصفحة
         setTimeout(checkDeliveredCrossovers, 7000); // تحقق أول من التقاطع مع شيت المسلّمة بعد إتاحة الوقت لمزامنته هو أيضاً
     });
@@ -4030,12 +4131,20 @@
         if (typeof window.__rvRefresh === 'function') window.__rvRefresh();
     };
 
+    // بطلب المستخدم: حالة الدار بالمراجعة تُحسب من تاريخ المراجعة + 5 أيام مقارنة باليوم الحالي:
+    // ضمن المدة / باقي يومين / باقي يوم / اليوم آخر يوم / تجاوزت المدة بـ كذا يوم
     function rvStatusBadge(rec) {
         if (rec.notesCompleted === true) return '<span style="color:#059669;font-weight:700;">✅ جاهز (اكتملت الملاحظات)</span><br><button onclick="window.__rvUndoNotesComplete(' + rec.id + ')" style="margin-top:4px;padding:4px 8px;border-radius:8px;border:1px solid rgba(100,116,139,.4);background:rgba(100,116,139,.1);color:#475569;cursor:pointer;font-weight:700;font-size:0.75rem;">↩️ تراجع</button>';
-        var nextDate = rec.thirdHandoverDate || rec.secondHandoverDate || rec.notesEndDate;
-        var overdue = !!(nextDate && nextDate < todayStr);
-        var label = (rec.handoverRound && rec.handoverRound > 1) ? ('بانتظار موعد رقم ' + rec.handoverRound + ': ' + (nextDate || '-')) : ('بانتظار انتهاء الملاحظات: ' + (rec.notesEndDate || '-'));
-        return '<span style="color:' + (overdue ? '#e11d48' : '#d97706') + ';font-weight:700;">' + (overdue ? '⚠️ تجاوزت المدة — ' : '⏳ ') + label + '</span>';
+        var deadline = (typeof addDays === 'function' && rec.reviewDate) ? addDays(rec.reviewDate, 5) : rec.notesEndDate;
+        var daysLeft = wsDaysDiff(deadline);
+        if (daysLeft === null) return '<span style="color:var(--text-muted);font-weight:700;">⏳ ضمن المدة</span>';
+        var label, color;
+        if (daysLeft < 0) { label = '⚠️ تجاوزت المدة بـ ' + (-daysLeft) + ' يوم'; color = '#e11d48'; }
+        else if (daysLeft === 0) { label = '⏰ اليوم آخر يوم'; color = '#d97706'; }
+        else if (daysLeft === 1) { label = '⏳ باقي يوم'; color = '#d97706'; }
+        else if (daysLeft === 2) { label = '⏳ باقي يومين'; color = '#d97706'; }
+        else { label = '🟢 ضمن المدة'; color = '#059669'; }
+        return '<span style="color:' + color + ';font-weight:700;">' + label + '</span>';
     }
 
     function renderReviewTab() {
@@ -4065,6 +4174,12 @@
                     if (!inc) inc = match.incomingDate || '';
                     if (!dlv) dlv = match.deliveryDate || '';
                 }
+            }
+            // بطلب المستخدم: الدار "مسلّمة فعلاً" (isDeliveredRec) غالباً خرجت من قيد التسليم فلا تُلقى بـ wsUnits أعلاه؛
+            // كمحاولة أخيرة تُسحب تاريخ التسليم من شيت "الدور المسلّمة" نفسه إن وُجد (getSheetDate) — لا يوجد به تاريخ وارد
+            if (!dlv && typeof window.getSheetDate === 'function') {
+                var sheetD = window.getSheetDate(rec.houseNo);
+                if (sheetD) dlv = sheetD;
             }
             return { incomingDate: inc, deliveryDate: dlv };
         }
