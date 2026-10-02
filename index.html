@@ -291,8 +291,8 @@
 
         .nav-tabs {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
             margin-bottom: 24px;
         }
         .nav-tab-btn {
@@ -300,10 +300,10 @@
             border: 1px solid var(--glass-border);
             color: var(--text-muted);
             width: 100%;
-            padding: 12px 10px;
+            padding: 12px 8px;
             border-radius: 12px;
             font-weight: 800;
-            font-size: 0.92rem;
+            font-size: 0.86rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -318,7 +318,7 @@
         }
         /* على شاشات ضيقة جداً (أصغر من تابلت) تتكسر الـ5 مستطيلات إلى صفين بدل سطر واحد مضغوط */
         @media (max-width: 640px) {
-            .nav-tabs { grid-template-columns: repeat(2, 1fr); }
+            .nav-tabs { grid-template-columns: repeat(3, 1fr); }
         }
 
         .old-houses-alert-banner {
@@ -752,12 +752,13 @@
         <div class="tools-toolbar-group">
             <button class="tools-group-toggle" onclick="toggleToolsGroup('admin-reports-group')">📁 إدارة ▾</button>
             <div class="tools-toolbar-buttons" id="admin-reports-group" style="display:none; gap:10px; flex-wrap:wrap;">
-                <button class="btn-precleaned-manage" onclick="openPreCleanedModal()">🏠 المنظفة مسبقاً</button>
                 <button class="btn-excel-export" onclick="exportFullBackup()">💾 نسخة احتياطية كاملة</button>
                 <button class="btn-excel-export" onclick="document.getElementById('backupFileInput').click()">♻️ استرجاع نسخة احتياطية</button>
                 <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none;" onchange="handleBackupFile(event)">
                 <!-- لوحة "🔔 تحديثات" موحّدة: تجمع تنبيهات المواعيد (renderDeadlineAlerts) وتنبيه التأكيد المعلّق من الشيت (renderPendingAlert) بمكان واحد داخل "📁 إدارة" -->
                 <div class="updates-panel" id="updates-panel" style="width:100%;">
+                    <!-- شريط حالة الاتصال بشيت الموقف الاسبوعي (كان سابقاً عائماً فوق التبويبات مباشرة، نُقل بالكامل هنا) -->
+                    <div id="sheetLinkBar"></div>
                     <!-- التنبيهات العلوية: عد تنازلي لمواعيد قيد التسليم والمراجعة + تنبيهات تجاوز المدة -->
                     <div id="deadline-alerts-banner" style="display:none;"></div>
                     <!-- تنبيه التأكيد المعلّق: دور ظهرت بالشيت وتحتاج تأكيد الاستلام (renderPendingAlert) -->
@@ -779,6 +780,7 @@
         <button id="tab-weekly-status" class="nav-tab-btn active" onclick="switchMainTab('weekly')">📋 قيد التسليم</button>
         <button id="tab-review" class="nav-tab-btn" onclick="switchMainTab('review')">🔍 المراجعة</button>
         <button id="tab-delivered" class="nav-tab-btn" onclick="switchMainTab('delivered')">🏠 الدور المسلّمة</button>
+        <button id="tab-precleaned" class="nav-tab-btn" onclick="switchMainTab('precleaned')">🧹 المنظفة مسبقاً</button>
         <button id="tab-annual" class="nav-tab-btn" onclick="switchMainTab('annual')">📅 الجرد السنوي</button>
         <button id="tab-contractors" class="nav-tab-btn" onclick="switchMainTab('contractors')">📊 الموقف الأسبوعي</button>
     </div>
@@ -929,6 +931,18 @@
     <div id="delivered-houses-body" style="font-size:0.85rem; color:var(--text-muted); width:100%;">لا توجد بيانات بعد — بانتظار مزامنة الشيت.</div>
 </div>
 
+<!-- "المنظفة مسبقاً" أصبح مستطيل/تبويب أساسي مستقل بالصف الثاني بطلب المستخدم، بدل كونه نافذة منبثقة (modal)
+     تُفتح من زر داخل "📁 إدارة" — بقيت كل الـ ids والدوال (bulkPreCleanedInput, preCleanedListContainer,
+     addBulkPreCleanedHouses, renderPreCleanedList) كما هي بدون أي تغيير بالمنطق -->
+<div id="precleaned-section" style="display:none;">
+    <h3 style="margin-bottom: 15px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">🏠 الدور المنظفة مسبقاً</h3>
+    <div class="form-group">
+        <textarea id="bulkPreCleanedInput" class="form-control" rows="4" placeholder="أدخل الدور (كل دار بسطر)..."></textarea>
+    </div>
+    <button class="btn-primary" style="margin-bottom: 20px;" onclick="addBulkPreCleanedHouses()">إضافة للسجل</button>
+    <div id="preCleanedListContainer" style="max-height: 250px; overflow-y: auto; background: #f4f6f9; padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border);"></div>
+</div>
+
 <!-- تبويب "الجرد السنوي" — كانت قائمة منسدلة بشريط الأدوات، أصبحت تبويباً كامل العرض بنفس المحتوى والمعرّفات دون تغيير -->
 <div id="annual-section" style="display:none;">
     <div id="annual-inventory-body" style="font-size:0.85rem; color:var(--text-muted); width:100%;">لا توجد بيانات بعد — بانتظار مزامنة الشيت.</div>
@@ -993,18 +1007,6 @@
         <p id="handover-dates-meta" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;"></p>
         <input type="text" id="handover-dates-search" class="form-control" placeholder="ابحث برقم الدار..." oninput="onHandoverDatesSearch()" style="margin-bottom: 14px;">
         <div id="handover-dates-list" style="max-height: 360px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); border-radius: 14px; border: 1px solid var(--glass-border);"></div>
-    </div>
-</div>
-
-<div id="preCleanedModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closePreCleanedModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: var(--primary-blue); font-weight:900; border-bottom:1px solid var(--glass-border); padding-bottom:10px;">إدارة الدور المنظفة مسبقاً</h3>
-        <div class="form-group">
-            <textarea id="bulkPreCleanedInput" class="form-control" rows="4" placeholder="أدخل الدور (كل دار بسطر)..."></textarea>
-        </div>
-        <button class="btn-primary" style="margin-bottom: 20px;" onclick="addBulkPreCleanedHouses()">إضافة للسجل</button>
-        <div id="preCleanedListContainer" style="max-height: 250px; overflow-y: auto; background: #f4f6f9; padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border);"></div>
     </div>
 </div>
 
@@ -1562,6 +1564,7 @@
         { tab: 'weekly', tabId: 'tab-weekly-status', sectionId: 'weekly-status-section' },
         { tab: 'review', tabId: 'tab-review', sectionId: 'review-section' },
         { tab: 'delivered', tabId: 'tab-delivered', sectionId: 'delivered-section' },
+        { tab: 'precleaned', tabId: 'tab-precleaned', sectionId: 'precleaned-section' },
         { tab: 'annual', tabId: 'tab-annual', sectionId: 'annual-section' },
         { tab: 'contractors', tabId: 'tab-contractors', sectionId: 'contractors-section' }
     ];
@@ -1577,6 +1580,8 @@
         // تبويبات المسلّمة/الجرد السنوي/الموقف الأسبوعي تُحدَّث بالخلفية باستمرار بغض النظر عن ظهورها، فتبديل display فقط يكفي
         if (tab === 'weekly' && window.__wsShowTab) window.__wsShowTab();
         if (tab === 'review' && window.__rvShowTab) window.__rvShowTab();
+        // تبويب "المنظفة مسبقاً" يُعاد رسمه عند كل ظهور لضمان تحديث القائمة (كان سابقاً يُرسم فقط عند فتح النافذة المنبثقة)
+        if (tab === 'precleaned' && typeof renderPreCleanedList === 'function') renderPreCleanedList();
     }
 
     function selectHouseCategory(cat) {
@@ -2729,24 +2734,18 @@
     var AR_MONTHS = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 
     // ---------- الشريط والتنبيه فوق الجدول ----------
-    // المرساة كانت .table-container (الجدول القديم المخفي الآن) فتظهر هذي اللوحة بمكان غير واضح؛ نُرسيها عند .nav-tabs
-    // (أعلى الصفحة مباشرة، ظاهرة بكل الأحوال بغض النظر عن التبويب النشط)
-    var anchor = document.querySelector('.nav-tabs');
-    var bar = document.createElement('div');
-    bar.id = 'sheetLinkBar';
-    bar.style.cssText = 'display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px;font-size:.85rem;color:var(--text-muted);';
-    bar.innerHTML =
-        '<span id="slStatus">🔗 جاري الاتصال بالشيت...</span>' +
-        '<button id="slSync" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21, 128, 61,.5);background:rgba(21, 128, 61,.12);color:#15803d;cursor:pointer;font-weight:700;">🔄 تحديث من الشيت</button>' +
-        '<button id="slUrl" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(18, 58, 99,.4);background:rgba(18, 58, 99,.1);color:#1d5384;cursor:pointer;font-weight:700;">🔗 تغيير رابط الشيت</button>' +
-        '<button id="slDiag" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;">🔍 توضيح فرق العدّاد</button>';
-    // slAlert أصبح عنصراً ثابتاً بالـ HTML داخل لوحة "🔔 تحديثات" (ضمن "📁 إدارة") بدل إنشائه وإدراجه هنا ديناميكياً
-    var alertBox = document.getElementById('slAlert');
-    if (anchor && anchor.parentNode) {
-        anchor.parentNode.insertBefore(bar, anchor);
-    } else {
-        document.body.insertBefore(bar, document.body.firstChild);
+    // بطلب المستخدم: sheetLinkBar و slAlert أصبحا عنصرين ثابتين بالـ HTML داخل لوحة "🔔 تحديثات" (ضمن "📁 إدارة")
+    // بدل إنشائهما ديناميكياً وإدراجهما عائمين فوق التبويبات مباشرة
+    var bar = document.getElementById('sheetLinkBar');
+    if (bar) {
+        bar.style.cssText = 'display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px;font-size:.85rem;color:var(--text-muted);';
+        bar.innerHTML =
+            '<span id="slStatus">🔗 جاري الاتصال بالشيت...</span>' +
+            '<button id="slSync" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21, 128, 61,.5);background:rgba(21, 128, 61,.12);color:#15803d;cursor:pointer;font-weight:700;">🔄 تحديث من الشيت</button>' +
+            '<button id="slUrl" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(18, 58, 99,.4);background:rgba(18, 58, 99,.1);color:#1d5384;cursor:pointer;font-weight:700;">🔗 تغيير رابط الشيت</button>' +
+            '<button id="slDiag" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;">🔍 توضيح فرق العدّاد</button>';
     }
+    var alertBox = document.getElementById('slAlert');
     function status() {
         var el = document.getElementById('slStatus');
         if (!el) return;
@@ -3662,6 +3661,22 @@
         if (contractors.indexOf(curCon) >= 0) conSel.value = curCon;
     }
 
+    // لوحة ألوان خفيفة ومتناسقة (غير غامقة) تُستخدم لتمييز كل قطاع/مقاول بلون ثابت خاص به بجدول "قيد التسليم"
+    var WS_COLOR_PALETTE = [
+        { bg: '#fde8e8', text: '#b91c1c' },
+        { bg: '#fef3e2', text: '#b45309' },
+        { bg: '#fdf6d0', text: '#92730a' },
+        { bg: '#e8f5df', text: '#3f7d20' },
+        { bg: '#dcf3ec', text: '#0f766e' },
+        { bg: '#ddeefb', text: '#0369a1' },
+        { bg: '#e6e8fb', text: '#4338ca' },
+        { bg: '#f0e3fb', text: '#7e22ce' },
+        { bg: '#fbe3ef', text: '#be185d' },
+        { bg: '#f1e7da', text: '#92572a' },
+        { bg: '#e3f7f7', text: '#0e7490' },
+        { bg: '#f3f0e3', text: '#78716c' }
+    ];
+
     function wsSortList(list, mode) {
         var arr = list.slice();
         if (mode === 'execution') arr.sort(function (a, b) { return cell(a.executionType).localeCompare(cell(b.executionType), 'ar'); });
@@ -3706,18 +3721,28 @@
         var rowsHtml = '';
         var lastSector = null;
         var lastContractorKey = null;
+        // بطلب المستخدم: كل قطاع يأخذ لون خفيف ثابت خاص به، وكل مقاول/نوع تنفيذ يأخذ لون خفيف ثابت خاص به (ألوان متناسقة وغير غامقة)
+        var sectorColorMap = {}, sectorColorNext = { n: 0 };
+        var contractorColorMap = {}, contractorColorNext = { n: 0 };
+        function wsPickColor(map, nextRef, key) {
+            var k = key || 'غير محدد';
+            if (!map[k]) { map[k] = WS_COLOR_PALETTE[nextRef.n % WS_COLOR_PALETTE.length]; nextRef.n++; }
+            return map[k];
+        }
         list.forEach(function (u, idx) {
+            var secColor = wsPickColor(sectorColorMap, sectorColorNext, u.sector);
+            var contractorKey = (u.executionType || '') + '||' + (u.contractor || '');
+            var conColor = wsPickColor(contractorColorMap, contractorColorNext, contractorKey);
             if (groupBySector && u.sector !== lastSector) {
                 lastSector = u.sector;
                 lastContractorKey = null; // كل قطاع جديد يعيد إظهار سطر المقاول/التنفيذ من جديد
-                rowsHtml += '<tr><td colspan="7" style="padding:10px 8px; font-weight:900; background:var(--bg-primary); color:var(--primary-blue); border-top:2px solid var(--glass-border);">📍 ' + esc(u.sector || 'غير محدد') + '</td></tr>';
+                rowsHtml += '<tr><td colspan="7" style="padding:10px 8px; font-weight:900; background:' + secColor.bg + '; color:' + secColor.text + '; border-top:2px solid var(--glass-border);">📍 ' + esc(u.sector || 'غير محدد') + '</td></tr>';
             }
             // بطلب المستخدم: نوع التنفيذ واسم المقاول لا يتكرران بكل بيت — يظهران مرة واحدة فقط فوق كل مجموعة بيوت لنفس المقاول (تماماً كالإكسل)
             // هذا التجميع يعمل بكل أنماط الفرز (ليس فقط الافتراضي) لأن أي فرز بمعيار معين يجمع القيم المتشابهة أصلاً بالتسلسل
-            var contractorKey = (u.executionType || '') + '||' + (u.contractor || '');
             if (contractorKey !== lastContractorKey) {
                 lastContractorKey = contractorKey;
-                rowsHtml += '<tr><td colspan="7" style="padding:7px 10px; font-weight:800; background:rgba(99,102,241,.07); color:var(--primary-indigo); border-top:1px solid var(--glass-border);">🛠️ ' + esc(u.executionType || 'غير محدد') + (u.contractor ? ' — ' + esc(u.contractor) : '') + '</td></tr>';
+                rowsHtml += '<tr><td colspan="7" style="padding:7px 10px; font-weight:800; background:' + conColor.bg + '; color:' + conColor.text + '; border-top:1px solid var(--glass-border);">🛠️ ' + esc(u.executionType || 'غير محدد') + (u.contractor ? ' — ' + esc(u.contractor) : '') + '</td></tr>';
             }
             var inReview = (oldHouseRecords || []).some(function (r) { return normHouseNo(r.houseNo) === normHouseNo(u.unit); });
             var reviewCell = inReview
@@ -3727,7 +3752,7 @@
             var readyCell = '<button onclick="window.__wsToggleReady(\'' + esc(u.unit).replace(/'/g, "\\'") + '\')" style="padding:5px 10px;border-radius:10px;border:1px solid ' + (isReady ? 'rgba(5,150,105,.5);background:rgba(5,150,105,.12);color:#059669' : 'rgba(225,29,72,.4);background:rgba(225,29,72,.08);color:#e11d48') + ';cursor:pointer;font-weight:700;font-size:0.8rem;">' + (isReady ? '✅ جاهز' : '⛔ غير جاهز') + '</button>';
             var overdue = wsOverdueDays(u.deliveryDate);
             var overdueCell = (overdue === null) ? '-' : (overdue > 0 ? '<span style="color:#e11d48;font-weight:800;">' + overdue + ' يوم</span>' : '<span style="color:var(--text-muted);">0</span>');
-            rowsHtml += '<tr style="border-top:1px solid var(--glass-border);">' +
+            rowsHtml += '<tr style="border-top:1px solid var(--glass-border); background:' + secColor.bg + '; border-right:5px solid ' + conColor.text + ';">' +
                 '<td style="padding:6px;">' + (idx + 1) + '</td>' +
                 '<td style="padding:6px; font-weight:700;">' + esc(u.unit) + '</td>' +
                 '<td style="padding:6px;">' + esc(u.incomingDate || '-') + '</td>' +
