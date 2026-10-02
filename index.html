@@ -748,8 +748,11 @@
         </div>
     </header>
 
-    <!-- بطلب المستخدم: تنبيه "بيت جديد" يبقى ظاهراً دائماً فوق الصفحة مباشرة (لا يحتاج فتح "📁 إدارة") حتى يُلفت النظر فوراً -->
+    <!-- بطلب المستخدم: كل التنبيهات/التحديثات تبقى ظاهرة دائماً فوق الصفحة مباشرة (لا تحتاج فتح "📁 إدارة") حتى تُلفت النظر فوراً -->
     <div id="new-house-alerts-panel"></div>
+    <div id="sheetLinkBar"></div>
+    <div id="deadline-alerts-banner" style="display:none;"></div>
+    <div id="slAlert"></div>
 
     <div class="tools-toolbar">
         <div class="tools-toolbar-group">
@@ -758,15 +761,6 @@
                 <button class="btn-excel-export" onclick="exportFullBackup()">💾 نسخة احتياطية كاملة</button>
                 <button class="btn-excel-export" onclick="document.getElementById('backupFileInput').click()">♻️ استرجاع نسخة احتياطية</button>
                 <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none;" onchange="handleBackupFile(event)">
-                <!-- لوحة "🔔 تحديثات" موحّدة: تجمع تنبيهات المواعيد (renderDeadlineAlerts) وتنبيه التأكيد المعلّق من الشيت (renderPendingAlert) بمكان واحد داخل "📁 إدارة" -->
-                <div class="updates-panel" id="updates-panel" style="width:100%;">
-                    <!-- شريط حالة الاتصال بشيت الموقف الاسبوعي (كان سابقاً عائماً فوق التبويبات مباشرة، نُقل بالكامل هنا) -->
-                    <div id="sheetLinkBar"></div>
-                    <!-- التنبيهات العلوية: عد تنازلي لمواعيد قيد التسليم والمراجعة + تنبيهات تجاوز المدة -->
-                    <div id="deadline-alerts-banner" style="display:none;"></div>
-                    <!-- تنبيه التأكيد المعلّق: دور ظهرت بالشيت وتحتاج تأكيد الاستلام (renderPendingAlert) -->
-                    <div id="slAlert"></div>
-                </div>
             </div>
         </div>
     </div>
@@ -1089,11 +1083,13 @@
             </div>
             <div class="form-group">
                 <label>تاريخ الوارد (تلقائي من قيد التسليم إن وُجد، قابل للتعديل)</label>
-                <input type="date" id="old-incomingDate" class="form-control">
+                <!-- نوع الحقل "نص" لا "تاريخ" عمداً: التاريخ محفوظ حرفياً كما بالإكسل (قد لا يكون بصيغة yyyy-mm-dd)،
+                     وحقل type=date يرفض صامتاً أي صيغة غير مطابقة ويُفرّغ القيمة فعلياً عند الحفظ — وهذا ما كان يمسح التاريخ -->
+                <input type="text" id="old-incomingDate" class="form-control" placeholder="مثال: 2026-09-10">
             </div>
             <div class="form-group">
                 <label>تاريخ التسليم (تلقائي من قيد التسليم إن وُجد، قابل للتعديل)</label>
-                <input type="date" id="old-deliveryDate" class="form-control">
+                <input type="text" id="old-deliveryDate" class="form-control" placeholder="مثال: 2026-09-15">
             </div>
             <div class="form-group">
                 <label>حالة الدار</label>
@@ -3659,6 +3655,18 @@
             if (daysLeftOf5 >= 0 && daysLeftOf5 <= 2) rvCountdown.push({ houseNo: rec.houseNo, contractor: rec.contractorName, sector: rec.sectorNo, detail: (daysLeftOf5 === 0 ? 'اليوم آخر يوم (تجاوزت المراجعة 5 أيام غداً)' : 'متبقي ' + daysLeftOf5 + ' يوم على تجاوز 5 أيام من المراجعة') + (rec.notes ? ' — ' + rec.notes : '') });
             else if (daysLeftOf5 < 0) rvOverdue5.push({ houseNo: rec.houseNo, contractor: rec.contractorName, sector: rec.sectorNo, detail: 'تجاوزت 5 أيام من تاريخ المراجعة بـ ' + (-daysLeftOf5) + ' يوم' + (rec.notes ? ' — ' + rec.notes : '') });
         });
+
+        // بطلب المستخدم: ترتيب كل قسم تنبيهات حسب القطاع ثم المقاول (لا بترتيب ظهورها العشوائي بالقائمة)
+        function byseccontractor(a, b) {
+            var sa = cell(a.sector), sb = cell(b.sector);
+            if (sa !== sb) return sa.localeCompare(sb, 'ar');
+            var ca = cell(a.contractor), cb = cell(b.contractor);
+            return ca.localeCompare(cb, 'ar');
+        }
+        wsCountdown.sort(byseccontractor);
+        wsOverdue10.sort(byseccontractor);
+        rvCountdown.sort(byseccontractor);
+        rvOverdue5.sort(byseccontractor);
 
         // بطلب المستخدم: التنبيهات تكون عناوين مطوية مبدئياً (مغلقة) — الضغط على العنوان فقط يفتح تفاصيله
         // وتبقى الأقسام الأربعة ظاهرة دائماً (حتى لو كان العدد صفر) حتى لا يظهر وكأن أحدها "اختفى" أو "نُسي"
