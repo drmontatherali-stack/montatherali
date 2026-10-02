@@ -612,11 +612,29 @@
         #splash-screen img {
             width: 150px;
             height: 150px;
-            object-fit: contain;
+            object-fit: cover;
+            border-radius: 50%;
             opacity: 0;
             transform: scale(0.4);
             animation: splashPopIn 1s cubic-bezier(.22, 1.4, .36, 1) forwards;
         }
+        #splash-screen .splash-enter-btn {
+            margin-top: 8px;
+            padding: 12px 34px;
+            border-radius: 30px;
+            border: none;
+            background: var(--primary-blue, #1e40af);
+            color: #fff;
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(8px);
+            animation: splashFadeIn 0.6s ease forwards;
+            animation-delay: 1.1s;
+            box-shadow: 0 6px 18px rgba(30,64,175,.35);
+        }
+        #splash-screen .splash-enter-btn:active { transform: scale(0.96); }
         #splash-screen .splash-text {
             text-align: center;
             opacity: 0;
@@ -667,6 +685,7 @@
         <p>مكتب التسليم الفني</p>
         <small>يرحب بكم</small>
     </div>
+    <button type="button" class="splash-enter-btn" onclick="window.__enterSystem && window.__enterSystem()">🔑 الدخول</button>
 </div>
 
 <div class="app-container" id="printable-area">
@@ -928,6 +947,20 @@
     </div>
 </div>
 
+<!-- نافذة خياري حذف سجل المراجعة: نهائي أو فقط من المراجعة (تبقى بقيد التسليم) -->
+<div id="rvDeleteChoiceModal" class="modal">
+    <div class="modal-content" style="max-width: 440px; text-align:center;">
+        <span class="close-btn" onclick="document.getElementById('rvDeleteChoiceModal').style.display='none';">&times;</span>
+        <h3 style="margin-bottom: 10px; color: var(--primary-blue); font-weight:900;">🗑️ حذف سجل المراجعة</h3>
+        <p id="rvDeleteChoiceText" style="color: var(--text-muted); margin-bottom: 18px;"></p>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <button class="btn-action-danger" onclick="window.__rvDeleteChoice && window.__rvDeleteChoice('full')">🗑️ حذف نهائي (من المراجعة وقيد التسليم)</button>
+            <button onclick="window.__rvDeleteChoice && window.__rvDeleteChoice('reviewOnly')" style="background:#d97706;color:#fff;border:1px solid #d97706;padding:14px;border-radius:12px;font-weight:800;cursor:pointer;">📋 حذف من المراجعة فقط (تبقى بقيد التسليم)</button>
+            <button onclick="document.getElementById('rvDeleteChoiceModal').style.display='none';" style="padding:8px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-muted);cursor:pointer;font-weight:700;">إلغاء</button>
+        </div>
+    </div>
+</div>
+
 <!-- Modals -->
 <div id="handoverDatesModal" class="modal">
     <div class="modal-content" style="max-width: 560px;">
@@ -1123,14 +1156,6 @@
             <div class="form-group">
                 <label>رقم البلوك والدار</label>
                 <input type="text" id="old-houseNo" class="form-control" required placeholder="مثال: B2.4" oninput="tryAutoFillHandoverDate()">
-            </div>
-            <div class="form-group">
-                <label>اسم المستفيد</label>
-                <input type="text" id="old-ownerName" class="form-control" placeholder="اسم المستفيد (إن وُجد)">
-            </div>
-            <div class="form-group">
-                <label>رقم الهاتف</label>
-                <input type="text" id="old-phoneNo" class="form-control" placeholder="رقم الهاتف (إن وُجد)">
             </div>
             <div class="form-group">
                 <label>حالة الدار</label>
@@ -1731,8 +1756,6 @@
         window.editBaseline = Object.assign({}, rec);
         document.getElementById('old-edit-id').value = rec.id;
         document.getElementById('old-houseNo').value = rec.houseNo || '';
-        document.getElementById('old-ownerName').value = rec.ownerName || '';
-        document.getElementById('old-phoneNo').value = rec.phoneNo || '';
         document.getElementById('old-status').value = rec.status || 'مستلم';
         document.getElementById('old-handoverDate').value = rec.handoverDate || '';
         document.getElementById('old-executionType').value = rec.executionType || 'تنفيذ مباشر';
@@ -1758,14 +1781,34 @@
         }
     }
 
+    // بطلب المستخدم: عند حذف سجل من المراجعة يُعرض خيارين داخل النظام — حذف نهائي (من المراجعة وقيد التسليم معاً)
+    // أو حذف من المراجعة فقط مع إبقاء الدار ظاهرة بقيد التسليم
+    var rvPendingDeleteId = null;
     function deleteOldRecord(id) {
-        if (confirm("⚠️ هل أنت تأكد من حذف هذا السجل بشكل نهائي؟")) {
-            oldHouseRecords = oldHouseRecords.filter(r => r.id !== id);
-            deleteOldRecordFromDB(id);
-            if (typeof window.__rvRefresh === 'function') window.__rvRefresh();
-            if (typeof window.__wsRefresh === 'function') window.__wsRefresh();
-        }
+        rvPendingDeleteId = id;
+        var rec = (oldHouseRecords || []).find(r => r.id === id);
+        var txt = document.getElementById('rvDeleteChoiceText');
+        if (txt) txt.textContent = 'الدار رقم (' + (rec ? rec.houseNo : '') + ') — اختر طريقة الحذف:';
+        var modal = document.getElementById('rvDeleteChoiceModal');
+        if (modal) modal.style.display = 'flex';
     }
+
+    window.__rvDeleteChoice = function (mode) {
+        var modal = document.getElementById('rvDeleteChoiceModal');
+        if (modal) modal.style.display = 'none';
+        var id = rvPendingDeleteId;
+        rvPendingDeleteId = null;
+        if (!id) return;
+        var rec = (oldHouseRecords || []).find(r => r.id === id);
+        oldHouseRecords = oldHouseRecords.filter(r => r.id !== id);
+        if (typeof deleteOldRecordFromDB === 'function') deleteOldRecordFromDB(id);
+        if (mode === 'full' && rec && rec.houseNo && typeof window.__wsDismissHouse === 'function') {
+            // حذف نهائي: تُستبعد الدار أيضاً من قيد التسليم (لا تعود تظهر هناك)
+            window.__wsDismissHouse(rec.houseNo);
+        }
+        if (typeof window.__rvRefresh === 'function') window.__rvRefresh();
+        if (typeof window.__wsRefresh === 'function') window.__wsRefresh();
+    };
 
     function onOldStatusChange() {
         const status = document.getElementById('old-status').value;
@@ -1828,8 +1871,6 @@
         e.preventDefault();
         const editId = document.getElementById('old-edit-id').value;
         const houseNo = document.getElementById('old-houseNo').value.trim();
-        const ownerName = document.getElementById('old-ownerName').value.trim();
-        const phoneNo = document.getElementById('old-phoneNo').value.trim();
         const status = document.getElementById('old-status').value;
         const handoverDate = document.getElementById('old-handoverDate').value;
         const executionType = document.getElementById('old-executionType').value;
@@ -1855,8 +1896,6 @@
         const baselineOld = (editId && window.editBaseline && String(window.editBaseline.id) === String(editId)) ? window.editBaseline : undefined;
 
         rec.houseNo = houseNo;
-        rec.ownerName = ownerName;
-        rec.phoneNo = phoneNo;
         rec.status = status;
         rec.handoverDate = handoverDate;
         rec.executionType = executionType;
@@ -1877,14 +1916,13 @@
         // إرسال تفاصيل المراجعة عبر واتساب (رسالة مختصرة: رقم الدار، تاريخ المراجعة، موعد انتهاء الملاحظات، والملاحظات)
         let msgText = `تسجيل مراجعة دار\n` +
                       `رقم الدار والبلوك: ${rec.houseNo}\n` +
-                      (rec.ownerName ? `اسم المستفيد: ${rec.ownerName}\n` : '') +
                       `تاريخ مراجعة المستفيد: ${rec.reviewDate}\n` +
                       `موعد إنهاء الملاحظات: ${rec.notesEndDate}\n` +
                       `الملاحظات: ${rec.notes || 'لا يوجد'}` +
                       `\n\nمكتب التسليم الفني - مجمع الأميرات 2`;
 
         setTimeout(() => {
-            openWhatsappNotifyDialog(msgText, rec.phoneNo ? rec.phoneNo : "07840971766");
+            openWhatsappNotifyDialog(msgText, "07840971766");
         }, 300);
     }
 
@@ -4405,6 +4443,37 @@
     try { wsDismissed = JSON.parse(localStorage.getItem('weeklyStatusDismissed') || '{}'); } catch (e) { wsDismissed = {}; }
     var wsDeliveredAlerts = []; // قائمة الدور التي ظهرت "مسلّمة" وتنتظر موافقة الحذف من قيد التسليم/المراجعة
 
+    // حالة "جاهز/غير جاهز" لكل دار بقيد التسليم — تبديل يدوي يُحفظ محلياً
+    var wsReadyMap = {};
+    try { wsReadyMap = JSON.parse(localStorage.getItem('weeklyStatusReadyMap') || '{}'); } catch (e) { wsReadyMap = {}; }
+    function wsSaveReadyMap() { try { localStorage.setItem('weeklyStatusReadyMap', JSON.stringify(wsReadyMap)); } catch (e) {} }
+    window.__wsToggleReady = function (houseNo) {
+        var key = normHouseNo(houseNo);
+        wsReadyMap[key] = !wsReadyMap[key];
+        wsSaveReadyMap();
+        wsRender();
+    };
+    // عدد الأيام المتجاوزة عن تاريخ التسليم (بالاعتماد على تاريخ التسليم كما هو بالإكسل حرفياً) — 0 إن لم يتجاوز بعد
+    function wsOverdueDays(deliveryDateStr) {
+        var d = parseArabicOrIsoDate(deliveryDateStr);
+        if (!d) return null;
+        var today = new Date(); today.setHours(0, 0, 0, 0);
+        d.setHours(0, 0, 0, 0);
+        var diff = Math.round((today - d) / 86400000);
+        return diff > 0 ? diff : 0;
+    }
+    // يحاول قراءة تاريخ بصيغ شائعة (yyyy-mm-dd أو dd-mm-yyyy أو dd/mm/yyyy) بدون أي حساب أو تقريب لمحتوى التاريخ نفسه
+    function parseArabicOrIsoDate(s) {
+        s = cell(s);
+        if (!s) return null;
+        var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+        m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (m) return new Date(+m[3], +m[2] - 1, +m[1]);
+        var d = new Date(s);
+        return isNaN(d.getTime()) ? null : d;
+    }
+
     function cell(v) { return (v == null) ? '' : String(v).trim(); }
 
     // يحلل صفوف شيت "الموقف الاسبوعي" الخام (رؤوس قطاع/مقاول مُدمجة الخلايا أصلاً بالشيت) إلى قائمة دور مفردة
@@ -4519,20 +4588,23 @@
                 lastSector = u.sector;
                 rowsHtml += '<tr><td colspan="9" style="padding:10px 8px; font-weight:900; background:var(--bg-primary); color:var(--primary-blue); border-top:2px solid var(--glass-border);">📍 ' + esc(u.sector || 'غير محدد') + '</td></tr>';
             }
-            var b = matchBeneficiary(u.unit);
             var inReview = (oldHouseRecords || []).some(function (r) { return normHouseNo(r.houseNo) === normHouseNo(u.unit); });
             var reviewCell = inReview
                 ? '<button onclick="window.__wsStartReview(' + idx + ')" style="padding:5px 10px;border-radius:10px;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.12);color:#b45309;cursor:pointer;font-weight:700;font-size:0.8rem;">📋 قيد المراجعة أيضاً (فتح)</button>'
                 : '<button onclick="window.__wsStartReview(' + idx + ')" style="padding:5px 10px;border-radius:10px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;font-size:0.8rem;">👁️ هل راجع المستفيد؟</button>';
+            var isReady = !!wsReadyMap[normHouseNo(u.unit)];
+            var readyCell = '<button onclick="window.__wsToggleReady(\'' + esc(u.unit).replace(/'/g, "\\'") + '\')" style="padding:5px 10px;border-radius:10px;border:1px solid ' + (isReady ? 'rgba(5,150,105,.5);background:rgba(5,150,105,.12);color:#059669' : 'rgba(225,29,72,.4);background:rgba(225,29,72,.08);color:#e11d48') + ';cursor:pointer;font-weight:700;font-size:0.8rem;">' + (isReady ? '✅ جاهز' : '⛔ غير جاهز') + '</button>';
+            var overdue = wsOverdueDays(u.deliveryDate);
+            var overdueCell = (overdue === null) ? '-' : (overdue > 0 ? '<span style="color:#e11d48;font-weight:800;">' + overdue + ' يوم</span>' : '<span style="color:var(--text-muted);">0</span>');
             rowsHtml += '<tr style="border-top:1px solid var(--glass-border);">' +
                 '<td style="padding:6px;">' + (idx + 1) + '</td>' +
                 '<td style="padding:6px; font-weight:700;">' + esc(u.unit) + '</td>' +
-                '<td style="padding:6px;">' + esc(b.name || '-') + '</td>' +
-                '<td style="padding:6px;">' + esc(b.phone || '-') + '</td>' +
                 '<td style="padding:6px;">' + esc(u.executionType || '-') + '</td>' +
                 '<td style="padding:6px;">' + esc(u.contractor || '-') + '</td>' +
                 '<td style="padding:6px;">' + esc(u.incomingDate || '-') + '</td>' +
                 '<td style="padding:6px;">' + esc(u.deliveryDate || '-') + '</td>' +
+                '<td style="padding:6px;">' + readyCell + '</td>' +
+                '<td style="padding:6px; text-align:center;">' + overdueCell + '</td>' +
                 '<td style="padding:6px;">' + reviewCell + '</td>' +
                 '</tr>';
         });
@@ -4540,9 +4612,9 @@
         var html = '<table style="width:100%; border-collapse:collapse;">' +
             '<thead><tr style="background:var(--bg-primary); text-align:right; position:sticky; top:0;">' +
             '<th style="padding:8px;">ت</th><th style="padding:8px;">رقم البلوك والدار</th>' +
-            '<th style="padding:8px;">اسم المستفيد</th><th style="padding:8px;">رقم الهاتف</th>' +
             '<th style="padding:8px;">نوع التنفيذ</th><th style="padding:8px;">اسم المقاول</th>' +
             '<th style="padding:8px;">تاريخ الوارد</th><th style="padding:8px;">تاريخ التسليم</th>' +
+            '<th style="padding:8px;">جاهز/غير جاهز</th><th style="padding:8px;">أيام التجاوز</th>' +
             '<th style="padding:8px;">المراجعة</th>' +
             '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
         box.innerHTML = html;
@@ -4609,13 +4681,10 @@
             return;
         }
 
-        var b = matchBeneficiary(u.unit);
         var mappedType = mapExecutionTypeForOld(u.executionType);
         var rec = {
             id: Date.now(),
             houseNo: u.unit,
-            ownerName: b.name || '',
-            phoneNo: b.phone || '',
             status: 'قيد التسليم',
             handoverDate: '',
             executionType: mappedType,
@@ -4703,6 +4772,7 @@
     // يفحص دور "قيد التسليم" و"المراجعة" مقابل شيت "الدور المسلّمة" الموجود أصلاً — أي تطابق يعني الدار صارت مستلمة
     // فعلياً رغم بقائها بالقائمتين، فيُعرض إشعار للموافقة على حذف النسختين معاً (لا حذف تلقائي بدون موافقة)
     function checkDeliveredCrossovers() {
+        return; // بطلب المستخدم: تنبيهات "تحوّلت إلى مستلم" أُلغيت ولا داعي لها بعد الآن
         if (typeof window.getSheetDate !== 'function') return;
         var seen = {};
         var alerts = [];
@@ -4738,6 +4808,14 @@
                     '</div>';
             }).join('') + '</div>';
     }
+
+    // دالة عامة تتيح لأي جزء آخر من النظام (مثل خيار "حذف نهائي" بالمراجعة) إخفاء دار نهائياً من قيد التسليم
+    window.__wsDismissHouse = function (houseNo) {
+        var key = normHouseNo(houseNo);
+        wsDismissed[key] = true;
+        try { localStorage.setItem('weeklyStatusDismissed', JSON.stringify(wsDismissed)); } catch (e) {}
+        wsRender();
+    };
 
     window.__wsDeleteBothCopies = function (houseNo) {
         var key = normHouseNo(houseNo);
@@ -4787,8 +4865,19 @@
         return arr;
     }
 
+    // بطلب المستخدم: إمكانية التراجع عن علامة "✅ جاهز" وإرجاعها لحالة "بانتظار" من جديد
+    window.__rvUndoNotesComplete = function (id) {
+        var rec = (oldHouseRecords || []).find(function (r) { return r.id === id; });
+        if (!rec) return;
+        if (!confirm('↩️ هل تريد التراجع عن علامة "جاهز" وإرجاع هذه الدار لحالة الانتظار؟')) return;
+        rec.notesCompleted = null;
+        if (typeof syncOldRecord === 'function') syncOldRecord(rec);
+        if (typeof scheduleLocalSave === 'function') scheduleLocalSave();
+        if (typeof window.__rvRefresh === 'function') window.__rvRefresh();
+    };
+
     function rvStatusBadge(rec) {
-        if (rec.notesCompleted === true) return '<span style="color:#059669;font-weight:700;">✅ جاهز (اكتملت الملاحظات)</span>';
+        if (rec.notesCompleted === true) return '<span style="color:#059669;font-weight:700;">✅ جاهز (اكتملت الملاحظات)</span><br><button onclick="window.__rvUndoNotesComplete(' + rec.id + ')" style="margin-top:4px;padding:4px 8px;border-radius:8px;border:1px solid rgba(100,116,139,.4);background:rgba(100,116,139,.1);color:#475569;cursor:pointer;font-weight:700;font-size:0.75rem;">↩️ تراجع</button>';
         var nextDate = rec.thirdHandoverDate || rec.secondHandoverDate || rec.notesEndDate;
         var overdue = !!(nextDate && nextDate < todayStr);
         var label = (rec.handoverRound && rec.handoverRound > 1) ? ('بانتظار موعد رقم ' + rec.handoverRound + ': ' + (nextDate || '-')) : ('بانتظار انتهاء الملاحظات: ' + (rec.notesEndDate || '-'));
@@ -4800,7 +4889,7 @@
         if (!box) return;
         var q = normHouseNo(rvSearchVal);
         var all = (oldHouseRecords || []).filter(function (r) {
-            if (q && normHouseNo(r.houseNo).indexOf(q) < 0 && normHouseNo(r.ownerName || '').indexOf(q) < 0 && normHouseNo(r.contractorName || '').indexOf(q) < 0) return false;
+            if (q && normHouseNo(r.houseNo).indexOf(q) < 0 && normHouseNo(r.contractorName || '').indexOf(q) < 0) return false;
             return true;
         });
         // بطلب المستخدم: أي دار حالتها "مستلم" (سواء كانت أصلاً من الدور القديمة أو أُضيفت يدوياً) تُعزل
@@ -4833,8 +4922,6 @@
                 return '<tr style="border-top:1px solid var(--glass-border);">' +
                     '<td style="padding:6px;">' + (idx + 1) + '</td>' +
                     '<td style="padding:6px; font-weight:700;">' + esc(rec.houseNo) + '</td>' +
-                    '<td style="padding:6px;">' + esc(rec.ownerName || '-') + '</td>' +
-                    '<td style="padding:6px;">' + esc(rec.phoneNo || '-') + '</td>' +
                     '<td style="padding:6px;">' + esc(rec.executionType || '-') + '</td>' +
                     '<td style="padding:6px;">' + esc(rec.contractorName || '-') + '</td>' +
                     '<td style="padding:6px;">' + esc(dts.incomingDate || '-') + '</td>' +
@@ -4961,29 +5048,17 @@
 })();
 </script>
 <script>
-/* ===== إخفاء الشاشة الافتتاحية بعد اكتمال تحميل التطبيق فعلياً ===== */
+/* ===== الشاشة الافتتاحية: تبقى ظاهرة حتى يضغط المستخدم زر "🔑 الدخول" بنفسه ===== */
 (function () {
     'use strict';
-    var MIN_SPLASH_MS = 1500; // أقل مدة ظهور حتى لا تومض بسرعة عند التحميل الخاطف
-    var shownAt = Date.now();
-    function hideSplash() {
+    function doHide() {
         var el = document.getElementById('splash-screen');
         if (!el) return;
-        var elapsed = Date.now() - shownAt;
-        var wait = Math.max(0, MIN_SPLASH_MS - elapsed);
-        setTimeout(function () {
-            el.classList.add('splash-hide');
-            setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 700);
-        }, wait);
+        el.classList.add('splash-hide');
+        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 700);
     }
-    // نعتبر التطبيق "جاهزاً" إما عند اكتمال تحميل الصفحة بالكامل (window load)
-    // أو بعد مهلة أقصى 4 ثوانٍ احتياطاً (حتى لا تعلق الشاشة الافتتاحية لو تأخر تحميل مورد ما)
-    if (document.readyState === 'complete') {
-        hideSplash();
-    } else {
-        window.addEventListener('load', hideSplash);
-    }
-    setTimeout(hideSplash, 4000);
+    // الدخول اليدوي: يُستدعى من زر "🔑 الدخول" بالشاشة الافتتاحية
+    window.__enterSystem = function () { doHide(); };
 })();
 </script>
 
