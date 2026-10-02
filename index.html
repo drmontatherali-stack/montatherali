@@ -24,28 +24,28 @@
 
     <style>
         :root {
-            /* ثيم مبسّط جداً: خلفية بيضاء/رمادية فاتحة مسطّحة، لون واحد رئيسي (كحلي رسمي)، بدون تدرجات أو ظلال أو تمويه */
-            --bg-primary: #eef1f5;
-            --glass-bg: #ffffff;
-            --glass-bg-hover: #ffffff;
-            --glass-card: #ffffff;
-            --glass-border: #e1e6ec;
-            --glass-border-glow: #123a63;
+            /* ثيم نيلي غامق مع ألوان نيون حيوية: خلفية نيلي غامقة، لون رئيسي أزرق نيون، توهج سماوي، بدون تغيير بالأسماء */
+            --bg-primary: #0b1120;
+            --glass-bg: #111a2e;
+            --glass-bg-hover: #16213f;
+            --glass-card: #141f38;
+            --glass-border: #26334d;
+            --glass-border-glow: #38bdf8;
 
-            --primary-blue: #123a63;
-            --primary-indigo: #1d5384;
-            --text-main: #16233a;
-            --text-muted: #5b6b7c;
+            --primary-blue: #3b82f6;
+            --primary-indigo: #6366f1;
+            --text-main: #e8edf7;
+            --text-muted: #94a3b8;
 
-            --status-waiting: #b45309;
-            --status-overdue: #b91c1c;
-            --status-ready: #15803d;
-            --status-direct: #0e7490;
-            --status-contractor: #6d28d9;
-            --status-warning: #c2410c;
+            --status-waiting: #f59e0b;
+            --status-overdue: #f43f5e;
+            --status-ready: #34d399;
+            --status-direct: #22d3ee;
+            --status-contractor: #a78bfa;
+            --status-warning: #fb923c;
 
-            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-            --shadow-md: 0 2px 8px rgba(15, 23, 42, 0.10);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+            --shadow-md: 0 4px 14px rgba(0,0,0,0.55);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
@@ -94,7 +94,7 @@
             font-size: 1.15rem;
             font-weight: 900;
             color: var(--primary-blue);
-            background: #eef4fa;
+            background: #182338;
             border: 1px solid var(--glass-border);
             padding: 9px 20px;
             border-radius: 12px;
@@ -121,9 +121,9 @@
             font-size: 0.85rem;
             padding: 10px 18px;
             border-radius: 12px;
-            background: #ecfdf5;
-            color: #047857;
-            border: 1px solid #a7f3d0;
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.35);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -185,10 +185,10 @@
         .metric-card:hover::before { background: var(--primary-blue); }
         .metric-card .title { font-size: 0.8rem; color: var(--text-muted); margin: 2px 0 6px; font-weight: 700; line-height: 1.3; }
         .metric-card .value { font-size: 1.9rem; font-weight: 900; letter-spacing: -0.5px; }
-        .metric-card.alert-card { border-color: #fecdd3; background: #fff1f2; }
+        .metric-card.alert-card { border-color: rgba(244,63,94,0.4); background: rgba(244,63,94,0.08); }
         .metric-card.alert-card:hover { border-color: var(--status-overdue); }
         .metric-card.alert-card:hover::before { background: var(--status-overdue); }
-        .metric-card.warning-card { border-color: #fed7aa; background: #fff7ed; }
+        .metric-card.warning-card { border-color: rgba(251,146,60,0.4); background: rgba(251,146,60,0.08); }
         .metric-card.warning-card:hover { border-color: var(--status-warning); }
         .metric-card.warning-card:hover::before { background: var(--status-warning); }
         .metric-card .icon { font-size: 1.2rem; opacity: 0.9; line-height: 1; }
@@ -209,13 +209,13 @@
             display: flex; align-items: center; gap: 6px;
             padding: 12px 18px;
             border-radius: 12px;
-            background: #f7f9fb;
+            background: #141f38;
             border: 1px solid var(--glass-border);
             cursor: pointer;
             transition: border-color 0.2s, background 0.2s;
             font-weight: 800;
         }
-        .mini-stat:hover { border-color: var(--primary-blue); background: #eef4fa; }
+        .mini-stat:hover { border-color: var(--primary-blue); background: #1c2b4a; }
         .mini-stat .ic { font-size: 0.95rem; line-height: 1; }
         .mini-stat .val { font-size: 1rem; font-weight: 900; }
         .mini-stat .lbl { font-size: 0.76rem; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
@@ -255,7 +255,7 @@
         .filter-group label { font-weight: 700; color: var(--text-muted); font-size: 0.88rem; }
 
         select, input[type="text"], input[type="date"], input[type="number"] {
-            background: #f4f6f9;
+            background: #182338;
             border: 1px solid var(--glass-border);
             color: var(--text-main);
             padding: 11px 18px;
@@ -264,13 +264,13 @@
             outline: none;
             transition: border-color 0.2s;
         }
-        select:focus, input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(18, 58, 99, 0.12); }
+        select:focus, input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); }
 
         .btn-action-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
         .btn-daily-checklist, .btn-precleaned-manage, .btn-contractors-score, .btn-calendar-view, .btn-whatsapp-daily, .btn-excel-export, .tools-group-toggle {
-            background: #eef4fa;
-            color: #123a63;
+            background: #182338;
+            color: var(--text-main);
             border: 1px solid var(--glass-border);
             padding: 12px 18px;
             border-radius: 12px;
@@ -285,9 +285,9 @@
 
         .btn-daily-checklist:hover, .btn-precleaned-manage:hover, .btn-contractors-score:hover, .btn-calendar-view:hover, .btn-whatsapp-daily:hover, .btn-excel-export:hover {
             border-color: var(--primary-blue);
-            background: #e3ecf6;
+            background: #223457;
         }
-        .btn-add:hover { background: #0d2c4d; }
+        .btn-add:hover { background: #2563eb; }
 
         .nav-tabs {
             display: grid;
@@ -322,15 +322,15 @@
         }
 
         .old-houses-alert-banner {
-            background: #fffbeb;
-            border: 1px solid #fde68a;
+            background: rgba(245,158,11,0.12);
+            border: 1px solid rgba(245,158,11,0.4);
             border-radius: 14px;
             padding: 16px 22px;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 12px;
-            color: #92400e;
+            color: #fbbf24;
             font-weight: 700;
         }
 
@@ -344,18 +344,18 @@
         }
         .alerts-panel-title { font-size: 1rem; font-weight: 800; color: var(--text-muted); margin-bottom: 14px; display:flex; align-items:center; gap:8px; }
         .alerts-columns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: start; }
-        .alerts-column { background: #f7f9fb; border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; }
+        .alerts-column { background: #141f38; border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; }
         .alerts-column-title { font-weight: 900; font-size: 0.88rem; color: var(--text-main); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--glass-border); display:flex; align-items:center; justify-content:space-between; gap:6px; }
-        .alerts-column-title .count { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: #eef1f5; border-radius: 10px; padding: 1px 9px; }
+        .alerts-column-title .count { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: rgba(255,255,255,0.08); border-radius: 10px; padding: 1px 9px; }
         .alerts-group { margin-bottom: 12px; }
         .alerts-group:last-child { margin-bottom: 0; }
-        .alerts-group-header { font-weight: 800; font-size: 0.82rem; color: #1d5384; margin-bottom: 6px; display:flex; align-items:center; gap:6px; }
-        .alerts-group-header .count { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); background: #eef1f5; border-radius: 10px; padding: 1px 9px; }
+        .alerts-group-header { font-weight: 800; font-size: 0.82rem; color: var(--primary-indigo); margin-bottom: 6px; display:flex; align-items:center; gap:6px; }
+        .alerts-group-header .count { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); background: rgba(255,255,255,0.08); border-radius: 10px; padding: 1px 9px; }
         .alerts-sector-block { margin: 0 0 8px 10px; }
         .alerts-sector-label { font-size: 0.76rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
-        .alert-item { display:flex; align-items:center; gap:5px; font-size:0.82rem; background: #ffffff; border: 1px solid var(--glass-border); border-radius: 8px; padding: 4px 10px; margin: 0 0 6px 0; }
-        .alert-item.sev-overdue { border-color: #fecdd3; color: #be123c; }
-        .alert-item.sev-warning { border-color: #fed7aa; color: #c2410c; }
+        .alert-item { display:flex; align-items:center; gap:5px; font-size:0.82rem; background: var(--glass-card); border: 1px solid var(--glass-border); border-radius: 8px; padding: 4px 10px; margin: 0 0 6px 0; }
+        .alert-item.sev-overdue { border-color: rgba(244,63,94,0.4); color: #fb7185; }
+        .alert-item.sev-warning { border-color: rgba(251,146,60,0.4); color: var(--status-warning); }
         .alerts-empty { font-size: 0.85rem; color: var(--text-muted); text-align:center; padding: 10px 0; }
         @media (max-width: 1100px) { .alerts-columns { grid-template-columns: repeat(2, 1fr); } }
 
@@ -372,7 +372,7 @@
         .notes-popup {
             display: none;
             position: fixed;
-            background: #ffffff;
+            background: var(--glass-card);
             border: 1px solid var(--primary-blue);
             border-radius: 10px;
             padding: 12px 16px;
@@ -404,26 +404,26 @@
         }
 
         table { width: 100%; border-collapse: collapse; text-align: right; white-space: normal; word-break: break-word; }
-        thead { background: #f4f6f9; border-bottom: 2px solid var(--glass-border); }
+        thead { background: #141f38; border-bottom: 2px solid var(--glass-border); }
         th { padding: 6px 8px; font-size: 0.72rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.2px; }
         tbody tr { border-bottom: 1px solid var(--glass-border); transition: background 0.15s ease; cursor: pointer; }
-        tbody tr:hover { background: #f4f6f9; }
-        tbody tr.row-overdue-alert { background: #fff1f2 !important; border-right: 4px solid var(--status-overdue) !important; }
-        tbody tr.row-warning-3days { background: #fff7ed !important; border-right: 4px solid var(--status-warning) !important; }
+        tbody tr:hover { background: #182338; }
+        tbody tr.row-overdue-alert { background: rgba(244,63,94,0.12) !important; border-right: 4px solid var(--status-overdue) !important; }
+        tbody tr.row-warning-3days { background: rgba(251,146,60,0.12) !important; border-right: 4px solid var(--status-warning) !important; }
         td { padding: 5px 8px; font-size: 0.76rem; vertical-align: middle; }
 
         .badge { display: inline-block; padding: 4px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2px; }
-        .badge-waiting { background-color: #fef3c7; color: var(--status-waiting); border: 1px solid #fde68a; }
-        .badge-overdue { background-color: #ffe4e6; color: var(--status-overdue); border: 1px solid #fecdd3; }
-        .badge-ready { background-color: #dcfce7; color: var(--status-ready); border: 1px solid #bbf7d0; }
-        .badge-direct { background-color: #cffafe; color: var(--status-direct); border: 1px solid #a5f3fc; }
-        .badge-contractor { background-color: #f3e8ff; color: var(--status-contractor); border: 1px solid #e9d5ff; }
-        .badge-warning { background-color: #ffedd5; color: var(--status-warning); border: 1px solid #fed7aa; }
+        .badge-waiting { background-color: rgba(245,158,11,0.15); color: var(--status-waiting); border: 1px solid rgba(245,158,11,0.4); }
+        .badge-overdue { background-color: rgba(244,63,94,0.15); color: var(--status-overdue); border: 1px solid rgba(244,63,94,0.4); }
+        .badge-ready { background-color: rgba(52,211,153,0.15); color: var(--status-ready); border: 1px solid rgba(52,211,153,0.4); }
+        .badge-direct { background-color: rgba(34,211,238,0.15); color: var(--status-direct); border: 1px solid rgba(34,211,238,0.4); }
+        .badge-contractor { background-color: rgba(167,139,250,0.15); color: var(--status-contractor); border: 1px solid rgba(167,139,250,0.4); }
+        .badge-warning { background-color: rgba(251,146,60,0.15); color: var(--status-warning); border: 1px solid rgba(251,146,60,0.4); }
 
-        .whatsapp-icon { color: #15803d; font-size: 1.3rem; text-decoration: none; margin-left: 10px; display: inline-block; cursor: pointer; transition: transform 0.2s; }
+        .whatsapp-icon { color: #34d399; font-size: 1.3rem; text-decoration: none; margin-left: 10px; display: inline-block; cursor: pointer; transition: transform 0.2s; }
         .whatsapp-icon:hover { transform: scale(1.15); }
 
-        .camera-icon-btn { background: #eef4fa; border: 1px solid var(--glass-border); color: var(--primary-blue); padding: 7px 14px; border-radius: 10px; cursor: pointer; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .camera-icon-btn { background: #182338; border: 1px solid var(--glass-border); color: var(--primary-blue); padding: 7px 14px; border-radius: 10px; cursor: pointer; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
         .camera-icon-btn:hover { background: var(--primary-blue); color: #fff; }
 
         .checkbox-container { display: inline-flex; gap: 8px; align-items: center; }
@@ -433,7 +433,7 @@
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.55);
+            background: rgba(2, 6, 23, 0.75);
             z-index: 10000;
             align-items: center;
             justify-content: center;
@@ -443,7 +443,7 @@
 
         /* خلفية النافذة بسيطة وصلبة (بدون تمويه) لتقليل الإحساس بالدوخة عند فتح تفاصيل كثيرة */
         .modal-content {
-            background: #ffffff;
+            background: var(--glass-card);
             border: 1px solid var(--glass-border);
             padding: 32px;
             border-radius: 16px;
@@ -462,11 +462,11 @@
 
         .form-group { margin-bottom: 20px; text-align: right; }
         .form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.88rem; font-weight: 700; }
-        .form-control { width: 100%; background: #f4f6f9; border: 1px solid var(--glass-border); color: var(--text-main); padding: 13px 18px; border-radius: 12px; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
-        .form-control:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(18, 58, 99, 0.12); }
+        .form-control { width: 100%; background: #182338; border: 1px solid var(--glass-border); color: var(--text-main); padding: 13px 18px; border-radius: 12px; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+        .form-control:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); }
 
         .btn-primary { width: 100%; background: var(--primary-blue); color: #fff; border: 1px solid var(--primary-blue); padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: background 0.2s; }
-        .btn-primary:hover { background: #0d2c4d; }
+        .btn-primary:hover { background: #2563eb; }
 
         .hidden-field { display: none; }
         .action-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.15rem; margin: 0 4px; transition: color 0.2s; }
@@ -480,7 +480,7 @@
         .btn-action-danger:hover { background: #be123c; }
 
         .excel-option-btn {
-            background: #ffffff;
+            background: var(--glass-card);
             border: 1px solid var(--glass-border);
             color: var(--text-main);
             padding: 16px 20px;
@@ -496,7 +496,7 @@
         }
         .excel-option-btn:hover {
             border-color: var(--primary-blue);
-            background: #eef4fa;
+            background: #1c2b4a;
         }
 
         .precleaned-item {
@@ -531,10 +531,10 @@
             .modal { background: rgba(15, 23, 42, 0.75) !important; }
         }
 
-        .signature-pad { border: 2px dashed var(--glass-border-glow); background: #f4f6f9; width: 100%; height: 160px; border-radius: 12px; cursor: crosshair; }
+        .signature-pad { border: 2px dashed var(--glass-border-glow); background: #182338; width: 100%; height: 160px; border-radius: 12px; cursor: crosshair; }
 
         .calendar-day-box {
-            background: #f4f6f9;
+            background: #182338;
             border: 1px solid var(--glass-border);
             padding: 10px;
             border-radius: 12px;
@@ -544,13 +544,13 @@
         }
         .calendar-day-box:hover {
             border-color: var(--primary-blue);
-            background: #eef4fa;
+            background: #1c2b4a;
         }
 
         .calendar-nav-btn {
-            background: #eef4fa;
+            background: #182338;
             border: 1px solid var(--primary-blue);
-            color: #075985;
+            color: var(--glass-border-glow);
             padding: 8px 16px;
             border-radius: 10px;
             cursor: pointer;
@@ -566,7 +566,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: #f4f6f9;
+            background: #182338;
             border: 1px solid var(--glass-border);
             padding: 10px 16px;
             border-radius: 12px;
@@ -587,7 +587,7 @@
             padding: 14px;
             border-radius: 12px;
             border: 1px solid var(--glass-border);
-            background: #f4f6f9;
+            background: #182338;
             color: var(--text-main);
             font-weight: 800;
             cursor: pointer;
@@ -889,8 +889,8 @@
                 <option value="contractor">المقاول</option>
             </select>
 
-            <button onclick="window.__wsAskUrl && window.__wsAskUrl()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;">🔗 ربط/تغيير رابط شيت الموقف الاسبوعي</button>
-            <button onclick="window.__wsSync && window.__wsSync(true)" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21,128,61,.5);background:rgba(21,128,61,.12);color:#059669;cursor:pointer;font-weight:700;">🔄 تحديث</button>
+            <button onclick="window.__wsAskUrl && window.__wsAskUrl()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#a78bfa;cursor:pointer;font-weight:700;">🔗 ربط/تغيير رابط شيت الموقف الاسبوعي</button>
+            <button onclick="window.__wsSync && window.__wsSync(true)" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21,128,61,.5);background:rgba(21,128,61,.12);color:#34d399;cursor:pointer;font-weight:700;">🔄 تحديث</button>
             <span id="wsStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
         </div>
     </div>
@@ -916,7 +916,7 @@
                 <option value="contractor">المقاول</option>
             </select>
 
-            <button onclick="window.__rvManualAdd && window.__rvManualAdd()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21,128,61,.5);background:rgba(21,128,61,.12);color:#059669;cursor:pointer;font-weight:700;">+ إضافة دار (مسلّمة وبها ملاحظات)</button>
+            <button onclick="window.__rvManualAdd && window.__rvManualAdd()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21,128,61,.5);background:rgba(21,128,61,.12);color:#34d399;cursor:pointer;font-weight:700;">+ إضافة دار (مسلّمة وبها ملاحظات)</button>
             <span id="rvStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
         </div>
     </div>
@@ -937,7 +937,7 @@
         <textarea id="bulkPreCleanedInput" class="form-control" rows="4" placeholder="أدخل الدور (كل دار بسطر)..."></textarea>
     </div>
     <button class="btn-primary" style="margin-bottom: 20px;" onclick="addBulkPreCleanedHouses()">إضافة للسجل</button>
-    <div id="preCleanedListContainer" style="max-height: 250px; overflow-y: auto; background: #f4f6f9; padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border);"></div>
+    <div id="preCleanedListContainer" style="max-height: 250px; overflow-y: auto; background: #182338; padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border);"></div>
 </div>
 
 <!-- تبويب "الجرد السنوي" — كانت قائمة منسدلة بشريط الأدوات، أصبحت تبويباً كامل العرض بنفس المحتوى والمعرّفات دون تغيير -->
@@ -949,9 +949,9 @@
 <div id="contractors-section" style="display:none;">
     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; font-size:0.85rem; color:var(--text-muted); width:100%;">
         <span id="cwStatus">🔗 لم يتم ربط ملف موقف المقاولين الأسبوعي بعد</span>
-        <button onclick="window.__cwAskUrl && window.__cwAskUrl()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;">🔗 ربط/تغيير رابط الشيت</button>
-        <button onclick="window.__cwSync && window.__cwSync(true)" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21, 128, 61,.5);background:rgba(21, 128, 61,.12);color:#059669;cursor:pointer;font-weight:700;">🔄 تحديث</button>
-        <button onclick="window.__cwShowDiag && window.__cwShowDiag()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.12);color:#b45309;cursor:pointer;font-weight:700;">🔍 تشخيص الأعمدة</button>
+        <button onclick="window.__cwAskUrl && window.__cwAskUrl()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#a78bfa;cursor:pointer;font-weight:700;">🔗 ربط/تغيير رابط الشيت</button>
+        <button onclick="window.__cwSync && window.__cwSync(true)" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21, 128, 61,.5);background:rgba(21, 128, 61,.12);color:#34d399;cursor:pointer;font-weight:700;">🔄 تحديث</button>
+        <button onclick="window.__cwShowDiag && window.__cwShowDiag()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.12);color:#f59e0b;cursor:pointer;font-weight:700;">🔍 تشخيص الأعمدة</button>
     </div>
     <div id="contractors-weekly-body" style="font-size:0.85rem; color:var(--text-muted); width:100%;">لا توجد بيانات بعد — اربط ملف الموقف الأسبوعي أولاً.</div>
 </div>
@@ -990,7 +990,7 @@
         <p id="rvDeleteChoiceText" style="color: var(--text-muted); margin-bottom: 18px;"></p>
         <div style="display:flex; flex-direction:column; gap:10px;">
             <button class="btn-action-danger" onclick="window.__rvDeleteChoice && window.__rvDeleteChoice('full')">🗑️ حذف نهائي (من المراجعة وقيد التسليم)</button>
-            <button onclick="window.__rvDeleteChoice && window.__rvDeleteChoice('reviewOnly')" style="background:#d97706;color:#fff;border:1px solid #d97706;padding:14px;border-radius:12px;font-weight:800;cursor:pointer;">📋 حذف من المراجعة فقط (تبقى بقيد التسليم)</button>
+            <button onclick="window.__rvDeleteChoice && window.__rvDeleteChoice('reviewOnly')" style="background:#fb923c;color:#fff;border:1px solid #fb923c;padding:14px;border-radius:12px;font-weight:800;cursor:pointer;">📋 حذف من المراجعة فقط (تبقى بقيد التسليم)</button>
             <button onclick="document.getElementById('rvDeleteChoiceModal').style.display='none';" style="padding:8px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-muted);cursor:pointer;font-weight:700;">إلغاء</button>
         </div>
     </div>
@@ -1000,7 +1000,7 @@
 <div id="handoverDatesModal" class="modal">
     <div class="modal-content" style="max-width: 560px;">
         <span class="close-btn" onclick="closeHandoverDatesModal()">&times;</span>
-        <h3 style="margin-bottom: 8px; color: #1d5384; font-weight: 900;">📋 تواريخ الاستلام المرفوعة</h3>
+        <h3 style="margin-bottom: 8px; color: #6366f1; font-weight: 900;">📋 تواريخ الاستلام المرفوعة</h3>
         <p id="handover-dates-meta" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;"></p>
         <input type="text" id="handover-dates-search" class="form-control" placeholder="ابحث برقم الدار..." oninput="onHandoverDatesSearch()" style="margin-bottom: 14px;">
         <div id="handover-dates-list" style="max-height: 360px; overflow-y: auto; background: rgba(226, 232, 240, 0.7); border-radius: 14px; border: 1px solid var(--glass-border);"></div>
@@ -1025,7 +1025,7 @@
                 <label>رقم البلوك والدار (يُمنع التكرار)</label>
                 <input type="text" id="houseNo" class="form-control" required placeholder="مثال: A1.1" oninput="checkPreCleanedMatch()">
             </div>
-            <div id="preCleanedAlertBox" style="display:none; background: #ecfdf5; border: 1px solid #10b981; padding: 14px; border-radius: 12px; margin-bottom: 18px; color: #047857; font-weight: 700;">
+            <div id="preCleanedAlertBox" style="display:none; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(52, 211, 153, 0.4); padding: 14px; border-radius: 12px; margin-bottom: 18px; color: #34d399; font-weight: 700;">
                 ✨ هذا الدار مطابق ضمن "الدور المنظفة مسبقاً"! تم تعيين حالته "نظيف" مباشرة وتخطي تواريخ التنظيف لمنع الأخطاء.
             </div>
             <div class="form-group">
@@ -1101,7 +1101,7 @@
             <div class="form-group" id="old-handover-date-group">
                 <label id="old-handover-date-label">تاريخ موعد التسليم</label>
                 <input type="date" id="old-handoverDate" class="form-control" oninput="document.getElementById('old-handover-date-hint').innerHTML='';">
-                <small id="old-handover-date-hint" style="color:#10b981; display:block; margin-top:4px;"></small>
+                <small id="old-handover-date-hint" style="color:#34d399; display:block; margin-top:4px;"></small>
             </div>
             <div class="form-group">
                 <label>نوع التنفيذ</label>
@@ -1146,7 +1146,7 @@
 <div id="whatsappNotifyModal" class="modal">
     <div class="modal-content" style="text-align: center; max-width: 600px;">
         <span class="close-btn" onclick="closeWhatsappNotifyModal()">&times;</span>
-        <h3 style="margin-bottom: 10px; color: #10b981;">💬 إرسال عبر الواتساب المباشر</h3>
+        <h3 style="margin-bottom: 10px; color: #34d399;">💬 إرسال عبر الواتساب المباشر</h3>
         <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.88rem;" id="whatsapp-notify-subtitle">حدد الأشخاص المراد إرسال الرسالة لهم أو أضف عضواً جديداً للارسال الفوري المباشر دون فتح المتصفح:</p>
         
         <div id="target-team-checkboxes" style="max-height: 220px; overflow-y: auto; text-align: right; margin-bottom: 15px;"></div>
@@ -2057,7 +2057,7 @@
         listEl.innerHTML = list.map(x => `
             <div style="display:flex; justify-content:space-between; padding:8px 12px; border-bottom:1px solid var(--glass-border); font-size:0.9rem;">
                 <span>🏠 ${esc(x.houseNo)}</span>
-                <span style="color:#1d5384;">📅 ${esc(x.date)}</span>
+                <span style="color:#6366f1;">📅 ${esc(x.date)}</span>
             </div>
         `).join('');
     }
@@ -2212,7 +2212,7 @@
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(sectorsCount),
-                    datasets: [{ data: sectorData, backgroundColor: ['#1d5384', '#1d5384', '#10b981', '#fbbf24', '#f43f5e', '#a855f7'], borderWidth: 0 }]
+                    datasets: [{ data: sectorData, backgroundColor: ['#6366f1', '#6366f1', '#34d399', '#fbbf24', '#f43f5e', '#c084fc'], borderWidth: 0 }]
                 },
                 options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'left', labels: { color: '#94a3b8', font: { family: 'Cairo', weight: '600' } } } } }
             });
@@ -2228,7 +2228,7 @@
                 type: 'bar',
                 data: {
                     labels: barLabels,
-                    datasets: [{ label: 'دور منجزة', data: barData, backgroundColor: '#10b981', borderRadius: 6 }]
+                    datasets: [{ label: 'دور منجزة', data: barData, backgroundColor: '#34d399', borderRadius: 6 }]
                 },
                 options: { animation: false, responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: '#94a3b8' }, grid: { display: false } }, y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } } }, plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Cairo' } } } } }
             });
@@ -2460,7 +2460,7 @@
                 }
                 // علامة "مسلّمة حسب الشيت" (مستقلة عن مربع "✔ هل تم الإكمال؟") تظهر عند تأكيد ورودها بشيت تواريخ الاستلام
                 if (rec.sheetDelivered) {
-                    handoverHtml += `<br><small style="color:#059669;">📦 مسلّمة (حسب الشيت) - ${esc(rec.sheetDeliveredDate || '')}</small>`;
+                    handoverHtml += `<br><small style="color:#34d399;">📦 مسلّمة (حسب الشيت) - ${esc(rec.sheetDeliveredDate || '')}</small>`;
                 }
 
                 const rowCells = [
@@ -2517,7 +2517,7 @@
                             ${showExtra ? `<div>📍 القطاع: ${esc(rec.sectorNo)}</div><div>🛠️ التنفيذ: ${esc(rec.executionType)} ${rec.contractorName ? `(${esc(rec.contractorName)})` : ''}</div>` : ''}
                             <div>📅 الحضور: ${rec.arrivalDate || '-'}</div>
                             <div>⏱️ التسليم: ${rec.handoverDate || rec.houseReadyDate || '-'}${rec.secondHandoverDate && st.isHandoverOverdue ? ` <span style="color:#fbbf24;">(موعد ثاني: ${rec.secondHandoverDate})</span>` : ''}</div>
-                            ${rec.sheetDelivered ? `<div style="color:#059669;">📦 مسلّمة (حسب الشيت) - ${esc(rec.sheetDeliveredDate || '')}</div>` : ''}
+                            ${rec.sheetDelivered ? `<div style="color:#34d399;">📦 مسلّمة (حسب الشيت) - ${esc(rec.sheetDeliveredDate || '')}</div>` : ''}
                             <div onclick="event.stopPropagation();">🔁 عدد مراجعات المستفيد: <strong>${rec.reviewCount || 0}</strong> <button class="action-btn" onclick="bumpReviewCount('new', ${rec.id}, event)" title="إضافة مراجعة">➕</button></div>
                             <div onclick="event.stopPropagation();"><label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" class="ready-check" ${rec.isReady ? 'checked' : ''} onclick="toggleReadyQuick(${rec.id}, event)"> ✔ هل تم الإكمال؟</label></div>
                         </div>
@@ -2618,7 +2618,7 @@
                     `<td>${rec.notesEndDate || '-'}</td>`,
                     `<td onclick="event.stopPropagation();" style="text-align:center;">
                         <input type="checkbox" class="notif-box" ${rec.notesCompleted ? 'checked' : ''} onclick="toggleOldNotesCompleted(${rec.id}, event)">
-                        ${rec.notesCompleted && rec.notesCompletedDate ? `<br><small style="color:#10b981;">✅ ${rec.notesCompletedDate}</small>` : ''}
+                        ${rec.notesCompleted && rec.notesCompletedDate ? `<br><small style="color:#34d399;">✅ ${rec.notesCompletedDate}</small>` : ''}
                     </td>`
                 );
                 // بطلب المستخدم: الملاحظات والإجراءات فقط تبقى خلف مفتاح "👁️ إظهار كل الأعمدة"
@@ -2756,9 +2756,9 @@
         bar.style.cssText = 'display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px;font-size:.85rem;color:var(--text-muted);';
         bar.innerHTML =
             '<span id="slStatus">🔗 جاري الاتصال بالشيت...</span>' +
-            '<button id="slSync" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21, 128, 61,.5);background:rgba(21, 128, 61,.12);color:#15803d;cursor:pointer;font-weight:700;">🔄 تحديث من الشيت</button>' +
-            '<button id="slUrl" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(18, 58, 99,.4);background:rgba(18, 58, 99,.1);color:#1d5384;cursor:pointer;font-weight:700;">🔗 تغيير رابط الشيت</button>' +
-            '<button id="slDiag" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;">🔍 توضيح فرق العدّاد</button>';
+            '<button id="slSync" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(21, 128, 61,.5);background:rgba(21, 128, 61,.12);color:#34d399;cursor:pointer;font-weight:700;">🔄 تحديث من الشيت</button>' +
+            '<button id="slUrl" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(18, 58, 99,.4);background:rgba(18, 58, 99,.1);color:#6366f1;cursor:pointer;font-weight:700;">🔗 تغيير رابط الشيت</button>' +
+            '<button id="slDiag" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#a78bfa;cursor:pointer;font-weight:700;">🔍 توضيح فرق العدّاد</button>';
     }
     var alertBox = document.getElementById('slAlert');
     function status() {
@@ -2772,7 +2772,7 @@
     // ---------- 1) الدور القديمة: إظهار تاريخ الاستلام للمستلم ----------
     function dateNote(houseNo) {
         var d = sheetDates[norm(houseNo)];
-        if (d) return '<small style="color:#15803d;white-space:nowrap;">📅 ' + esc(d) + '</small>';
+        if (d) return '<small style="color:#34d399;white-space:nowrap;">📅 ' + esc(d) + '</small>';
         return Object.keys(sheetDates).length ? '<small style="color:#94a3b8;">📅 غير موجودة بالشيت</small>' : '';
     }
     function decorateOld() {
@@ -2832,13 +2832,13 @@
         if (!list.length) { alertBox.innerHTML = ''; return; }
         alertBox.innerHTML =
             '<div style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.6);border-radius:14px;padding:14px 16px;margin-bottom:14px;line-height:1.9;">' +
-            '<div style="font-weight:900;color:#b45309;margin-bottom:8px;">🔔 ' + list.length + ' دار ظهرت بشيت تواريخ الاستلام — تحتاج تأكيدك:</div>' +
+            '<div style="font-weight:900;color:#f59e0b;margin-bottom:8px;">🔔 ' + list.length + ' دار ظهرت بشيت تواريخ الاستلام — تحتاج تأكيدك:</div>' +
             list.map(function (x) {
                 return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 0;border-top:1px dashed rgba(180,83,9,.3);">' +
                     '<span style="font-size:.9rem;">🏠 <strong>' + esc(x.houseNo) + '</strong> — ' + esc(x.owner) + ' — القطاع: ' + esc(x.sector) + ' — 📅 ' + esc(x.date) +
-                    (x.type === 'old' ? ' <span style="color:#b45309;">(دار قديمة قيد التسليم ← ستتحول إلى "مستلم")</span>' : ' <span style="color:#b45309;">(دار جديدة ← ستُعلّم "مسلّمة")</span>') +
+                    (x.type === 'old' ? ' <span style="color:#f59e0b;">(دار قديمة قيد التسليم ← ستتحول إلى "مستلم")</span>' : ' <span style="color:#f59e0b;">(دار جديدة ← ستُعلّم "مسلّمة")</span>') +
                     '</span>' +
-                    '<button onclick="window.__slConfirm(\'' + x.type + '\',' + JSON.stringify(String(x.id)) + ')" style="padding:6px 16px;border-radius:12px;border:1px solid rgba(5,150,105,.5);background:rgba(5,150,105,.15);color:#047857;cursor:pointer;font-weight:800;">✅ موافق - تأكيد الاستلام</button>' +
+                    '<button onclick="window.__slConfirm(\'' + x.type + '\',' + JSON.stringify(String(x.id)) + ')" style="padding:6px 16px;border-radius:12px;border:1px solid rgba(5,150,105,.5);background:rgba(5,150,105,.15);color:#34d399;cursor:pointer;font-weight:800;">✅ موافق - تأكيد الاستلام</button>' +
                     '</div>';
             }).join('') + '</div>';
     }
@@ -2910,7 +2910,7 @@
         var totalMatched = items.length;
         var shown = items.slice(0, deliveredVisibleCount);
         var moreBtn = totalMatched > shown.length
-            ? '<button onclick="window.__deliveredLoadMore && window.__deliveredLoadMore()" style="margin-top:8px; padding:8px 16px; border-radius:10px; border:1px solid var(--glass-border); background:#eef4fa; color:var(--primary-blue); cursor:pointer; font-weight:700;">⬇️ تحميل المزيد (' + shown.length + ' من ' + totalMatched + ')</button>'
+            ? '<button onclick="window.__deliveredLoadMore && window.__deliveredLoadMore()" style="margin-top:8px; padding:8px 16px; border-radius:10px; border:1px solid var(--glass-border); background:#182338; color:var(--primary-blue); cursor:pointer; font-weight:700;">⬇️ تحميل المزيد (' + shown.length + ' من ' + totalMatched + ')</button>'
             : '';
         listBox.innerHTML =
             '<div style="max-height:700px; overflow-y:auto;">' +
@@ -2961,7 +2961,7 @@
         var data = computeAnnualGroups();
         if (!data.items.length) { box.innerHTML = 'لا توجد بيانات بعد — بانتظار مزامنة الشيت.'; return; }
         var groups = data.groups, keys = data.keys, cats = data.cats;
-        var html = '<div style="margin-bottom:10px;"><button onclick="window.__exportAnnualInventory && window.__exportAnnualInventory()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(2,132,199,.4);background:rgba(2,132,199,.1);color:#0284c7;cursor:pointer;font-weight:700;">📥 تصدير Excel</button></div>' +
+        var html = '<div style="margin-bottom:10px;"><button onclick="window.__exportAnnualInventory && window.__exportAnnualInventory()" style="padding:6px 14px;border-radius:12px;border:1px solid rgba(2,132,199,.4);background:rgba(2,132,199,.1);color:#22d3ee;cursor:pointer;font-weight:700;">📥 تصدير Excel</button></div>' +
             '<div style="max-height:700px; overflow-y:auto;"><table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
             '<thead><tr style="text-align:right;"><th style="padding:6px;">الشهر/السنة</th>' +
             cats.map(function (c) { return '<th style="padding:6px;">فئة ' + esc(c) + '</th>'; }).join('') +
@@ -3202,16 +3202,16 @@
         if (!cwRows.length) { box.innerHTML = 'لا توجد بيانات بعد — بانتظار أول مزامنة.'; return; }
         var html = '<div style="max-height:700px; overflow-y:auto;">' +
             '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">' +
-            '<thead><tr style="text-align:right; position:sticky; top:0; background:#fff; z-index:1;">' +
+            '<thead><tr style="text-align:right; position:sticky; top:0; background:#141f38; z-index:1;">' +
             '<th style="padding:6px;">المقاول</th><th style="padding:6px;">القطاع</th><th style="padding:6px;">الكلي</th><th style="padding:6px;">مسلّمة</th><th style="padding:6px;">قيد التسليم</th><th style="padding:6px;">متبقية</th></tr></thead><tbody>' +
             cwRows.map(function (r) {
                 return '<tr style="border-top:1px solid var(--glass-border);">' +
                     '<td style="padding:6px; font-weight:700; color:var(--primary-indigo);">' + esc(r.contractor || 'غير محدد') + '</td>' +
                     '<td style="padding:6px;">' + esc(r.sector) + '</td>' +
                     '<td style="padding:6px;">' + esc(r.total) + '</td>' +
-                    '<td style="padding:6px; color:#059669;">' + esc(r.delivered) + '</td>' +
-                    '<td style="padding:6px; color:#d97706;">' + esc(r.inProgress) + '</td>' +
-                    '<td style="padding:6px; color:#e11d48;">' + esc(r.remaining) + '</td></tr>';
+                    '<td style="padding:6px; color:#34d399;">' + esc(r.delivered) + '</td>' +
+                    '<td style="padding:6px; color:#fb923c;">' + esc(r.inProgress) + '</td>' +
+                    '<td style="padding:6px; color:#f43f5e;">' + esc(r.remaining) + '</td></tr>';
             }).join('') + '</tbody></table></div>';
         box.innerHTML = html;
     }
@@ -3551,7 +3551,7 @@
         var visible = wsNewHouseAlerts.filter(function (u) { return !wsNewHouseDismissed[normHouseNo(u.unit)]; });
         if (!visible.length) { box.innerHTML = ''; return; }
         box.innerHTML = '<div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.35);border-radius:14px;padding:14px 16px;margin-bottom:14px;line-height:1.9;">' +
-            '<div style="font-weight:900;color:#1d4ed8;margin-bottom:8px;">🏠 ' + visible.length + ' دار جديدة انضافت بشيت "الموقف الاسبوعي" (قيد التسليم):</div>' +
+            '<div style="font-weight:900;color:#6366f1;margin-bottom:8px;">🏠 ' + visible.length + ' دار جديدة انضافت بشيت "الموقف الاسبوعي" (قيد التسليم):</div>' +
             visible.map(function (u) {
                 var key = normHouseNo(u.unit);
                 return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 0;border-top:1px dashed rgba(37,99,235,.25);">' +
@@ -3561,8 +3561,8 @@
                     (u.sector ? ' — 📍 ' + esc(u.sector) : '') +
                     '</span>' +
                     '<span style="display:flex;gap:8px;flex-wrap:wrap;">' +
-                    '<button onclick="window.__wsNotifyNewHouseWhatsApp(' + JSON.stringify(key) + ')" style="padding:6px 16px;border-radius:12px;border:1px solid rgba(21,128,61,.5);background:rgba(21,128,61,.12);color:#15803d;cursor:pointer;font-weight:800;">📨 إرسال واتساب</button>' +
-                    '<button onclick="window.__wsDismissNewHouseAlert(' + JSON.stringify(key) + ')" style="padding:6px 16px;border-radius:12px;border:1px solid rgba(100,116,139,.4);background:rgba(100,116,139,.1);color:#475569;cursor:pointer;font-weight:700;">✖️ تم الإعلام</button>' +
+                    '<button onclick="window.__wsNotifyNewHouseWhatsApp(' + JSON.stringify(key) + ')" style="padding:6px 16px;border-radius:12px;border:1px solid rgba(21,128,61,.5);background:rgba(21,128,61,.12);color:#34d399;cursor:pointer;font-weight:800;">📨 إرسال واتساب</button>' +
+                    '<button onclick="window.__wsDismissNewHouseAlert(' + JSON.stringify(key) + ')" style="padding:6px 16px;border-radius:12px;border:1px solid rgba(100,116,139,.4);background:rgba(100,116,139,.1);color:var(--text-muted);cursor:pointer;font-weight:700;">✖️ تم الإعلام</button>' +
                     '</span>' +
                     '</div>';
             }).join('') + '</div>';
@@ -3689,10 +3689,10 @@
                 '</div>';
         }
 
-        var html = section('⏳ قيد التسليم — اقترب موعد التسليم', '#d97706', wsCountdown) +
-            section('⚠️ قيد التسليم — تجاوزت 10 أيام', '#e11d48', wsOverdue10) +
-            section('⏳ المراجعة — اقترب الموعد', '#d97706', rvCountdown) +
-            section('⚠️ المراجعة — تجاوزت 5 أيام', '#e11d48', rvOverdue5);
+        var html = section('⏳ قيد التسليم — اقترب موعد التسليم', '#fb923c', wsCountdown) +
+            section('⚠️ قيد التسليم — تجاوزت 10 أيام', '#f43f5e', wsOverdue10) +
+            section('⏳ المراجعة — اقترب الموعد', '#fb923c', rvCountdown) +
+            section('⚠️ المراجعة — تجاوزت 5 أيام', '#f43f5e', rvOverdue5);
 
         box.style.cssText = 'display:block; margin:0 0 14px; padding:12px 16px; border-radius:14px; background:var(--glass-bg); border:1px solid var(--glass-border);';
         box.innerHTML = html;
@@ -3851,12 +3851,12 @@
             }
             var inReview = (oldHouseRecords || []).some(function (r) { return normHouseNo(r.houseNo) === normHouseNo(u.unit); });
             var reviewCell = inReview
-                ? '<button onclick="window.__wsStartReview(' + idx + ')" style="padding:5px 10px;border-radius:10px;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.12);color:#b45309;cursor:pointer;font-weight:700;font-size:0.8rem;">📋 قيد المراجعة أيضاً (فتح)</button>'
-                : '<button onclick="window.__wsStartReview(' + idx + ')" style="padding:5px 10px;border-radius:10px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#7e22ce;cursor:pointer;font-weight:700;font-size:0.8rem;">👁️ هل راجع المستفيد؟</button>';
+                ? '<button onclick="window.__wsStartReview(' + idx + ')" style="padding:5px 10px;border-radius:10px;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.12);color:#f59e0b;cursor:pointer;font-weight:700;font-size:0.8rem;">📋 قيد المراجعة أيضاً (فتح)</button>'
+                : '<button onclick="window.__wsStartReview(' + idx + ')" style="padding:5px 10px;border-radius:10px;border:1px solid rgba(147,51,234,.4);background:rgba(147,51,234,.1);color:#a78bfa;cursor:pointer;font-weight:700;font-size:0.8rem;">👁️ هل راجع المستفيد؟</button>';
             var isReady = !!wsReadyMap[normHouseNo(u.unit)];
-            var readyCell = '<button onclick="window.__wsToggleReady(\'' + esc(u.unit).replace(/'/g, "\\'") + '\')" style="padding:5px 10px;border-radius:10px;border:1px solid ' + (isReady ? 'rgba(5,150,105,.5);background:rgba(5,150,105,.12);color:#059669' : 'rgba(225,29,72,.4);background:rgba(225,29,72,.08);color:#e11d48') + ';cursor:pointer;font-weight:700;font-size:0.8rem;">' + (isReady ? '✅ جاهز' : '⛔ غير جاهز') + '</button>';
+            var readyCell = '<button onclick="window.__wsToggleReady(\'' + esc(u.unit).replace(/'/g, "\\'") + '\')" style="padding:5px 10px;border-radius:10px;border:1px solid ' + (isReady ? 'rgba(5,150,105,.5);background:rgba(5,150,105,.12);color:#34d399' : 'rgba(225,29,72,.4);background:rgba(225,29,72,.08);color:#f43f5e') + ';cursor:pointer;font-weight:700;font-size:0.8rem;">' + (isReady ? '✅ جاهز' : '⛔ غير جاهز') + '</button>';
             var overdue = wsOverdueDays(u.deliveryDate);
-            var overdueCell = (overdue === null) ? '-' : (overdue > 0 ? '<span style="color:#e11d48;font-weight:800;">' + overdue + ' يوم</span>' : '<span style="color:var(--text-muted);">0</span>');
+            var overdueCell = (overdue === null) ? '-' : (overdue > 0 ? '<span style="color:#f43f5e;font-weight:800;">' + overdue + ' يوم</span>' : '<span style="color:var(--text-muted);">0</span>');
             rowsHtml += '<tr style="border-top:1px solid var(--glass-border); background:' + secColor.bg + '; border-right:5px solid ' + conColor.text + ';">' +
                 '<td style="padding:6px;">' + (idx + 1) + '</td>' +
                 '<td style="padding:6px; font-weight:700;">' + esc(u.unit) + '</td>' +
@@ -4060,12 +4060,12 @@
         if (!wsDeliveredAlerts.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
         box.style.display = 'block';
         box.style.cssText = 'display:block; margin:0 0 14px; padding:12px 16px; border-radius:14px; background:rgba(5,150,105,.08); border:1px solid rgba(5,150,105,.35);';
-        box.innerHTML = '<div style="font-weight:900; color:#059669; margin-bottom:8px;">🔔 دور تحوّلت إلى "مستلم" — موجودة بعد بقيد التسليم و/أو المراجعة، تحذف النسختين؟</div>' +
+        box.innerHTML = '<div style="font-weight:900; color:#34d399; margin-bottom:8px;">🔔 دور تحوّلت إلى "مستلم" — موجودة بعد بقيد التسليم و/أو المراجعة، تحذف النسختين؟</div>' +
             wsDeliveredAlerts.map(function (a) {
                 return '<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:6px 0; border-top:1px dashed rgba(5,150,105,.25);">' +
                     '<span style="font-weight:700;">🏠 ' + esc(a.houseNo) + '</span>' +
                     '<span style="color:var(--text-muted); font-size:0.85rem;">تاريخ الاستلام: ' + esc(a.date) + '</span>' +
-                    '<button onclick="window.__wsDeleteBothCopies(\'' + esc(a.houseNo).replace(/'/g, "\\'") + '\')" style="padding:4px 10px;border-radius:8px;border:1px solid rgba(225,29,72,.5);background:rgba(225,29,72,.1);color:#e11d48;cursor:pointer;font-weight:700;font-size:0.8rem;">🗑️ حذف النسختين</button>' +
+                    '<button onclick="window.__wsDeleteBothCopies(\'' + esc(a.houseNo).replace(/'/g, "\\'") + '\')" style="padding:4px 10px;border-radius:8px;border:1px solid rgba(225,29,72,.5);background:rgba(225,29,72,.1);color:#f43f5e;cursor:pointer;font-weight:700;font-size:0.8rem;">🗑️ حذف النسختين</button>' +
                     '<button onclick="window.__wsSnoozeAlert(\'' + esc(a.houseNo).replace(/'/g, "\\'") + '\')" style="padding:4px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-muted);cursor:pointer;font-weight:700;font-size:0.8rem;">🙈 تجاهل الآن</button>' +
                     '</div>';
             }).join('') + '</div>';
@@ -4142,16 +4142,16 @@
     // بطلب المستخدم: حالة الدار بالمراجعة تُحسب من تاريخ المراجعة + 5 أيام مقارنة باليوم الحالي:
     // ضمن المدة / باقي يومين / باقي يوم / اليوم آخر يوم / تجاوزت المدة بـ كذا يوم
     function rvStatusBadge(rec) {
-        if (rec.notesCompleted === true) return '<span style="color:#059669;font-weight:700;">✅ جاهز (اكتملت الملاحظات)</span><br><button onclick="window.__rvUndoNotesComplete(' + rec.id + ')" style="margin-top:4px;padding:4px 8px;border-radius:8px;border:1px solid rgba(100,116,139,.4);background:rgba(100,116,139,.1);color:#475569;cursor:pointer;font-weight:700;font-size:0.75rem;">↩️ تراجع</button>';
+        if (rec.notesCompleted === true) return '<span style="color:#34d399;font-weight:700;">✅ جاهز (اكتملت الملاحظات)</span><br><button onclick="window.__rvUndoNotesComplete(' + rec.id + ')" style="margin-top:4px;padding:4px 8px;border-radius:8px;border:1px solid rgba(100,116,139,.4);background:rgba(100,116,139,.1);color:var(--text-muted);cursor:pointer;font-weight:700;font-size:0.75rem;">↩️ تراجع</button>';
         var deadline = (typeof addDays === 'function' && rec.reviewDate) ? addDays(rec.reviewDate, 5) : rec.notesEndDate;
         var daysLeft = wsDaysDiff(deadline);
         if (daysLeft === null) return '<span style="color:var(--text-muted);font-weight:700;">⏳ ضمن المدة</span>';
         var label, color;
-        if (daysLeft < 0) { label = '⚠️ تجاوزت المدة بـ ' + (-daysLeft) + ' يوم'; color = '#e11d48'; }
-        else if (daysLeft === 0) { label = '⏰ اليوم آخر يوم'; color = '#d97706'; }
-        else if (daysLeft === 1) { label = '⏳ باقي يوم'; color = '#d97706'; }
-        else if (daysLeft === 2) { label = '⏳ باقي يومين'; color = '#d97706'; }
-        else { label = '🟢 ضمن المدة'; color = '#059669'; }
+        if (daysLeft < 0) { label = '⚠️ تجاوزت المدة بـ ' + (-daysLeft) + ' يوم'; color = '#f43f5e'; }
+        else if (daysLeft === 0) { label = '⏰ اليوم آخر يوم'; color = '#fb923c'; }
+        else if (daysLeft === 1) { label = '⏳ باقي يوم'; color = '#fb923c'; }
+        else if (daysLeft === 2) { label = '⏳ باقي يومين'; color = '#fb923c'; }
+        else { label = '🟢 ضمن المدة'; color = '#34d399'; }
         return '<span style="color:' + color + ';font-weight:700;">' + label + '</span>';
     }
 
@@ -4214,7 +4214,7 @@
                             : '<span style="color:var(--text-muted);">-</span>') +
                     '</td>' +
                     '<td style="padding:6px; text-align:center;">' + (rec.reviewCount || 0) + ' <button onclick="window.__rvBumpCount(' + rec.id + ')" style="margin-right:4px;cursor:pointer;border:none;background:none;color:var(--primary-indigo);font-weight:900;">➕</button></td>' +
-                    '<td style="padding:6px;">' + rvStatusBadge(rec) + (rec.notesCompleted !== true ? '<br><button onclick="window.__rvOpenNotesComplete(' + rec.id + ')" style="margin-top:4px;padding:4px 8px;border-radius:8px;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.12);color:#b45309;cursor:pointer;font-weight:700;font-size:0.75rem;">📝 تحديث حالة الملاحظات</button>' : '') + '</td>' +
+                    '<td style="padding:6px;">' + rvStatusBadge(rec) + (rec.notesCompleted !== true ? '<br><button onclick="window.__rvOpenNotesComplete(' + rec.id + ')" style="margin-top:4px;padding:4px 8px;border-radius:8px;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.12);color:#f59e0b;cursor:pointer;font-weight:700;font-size:0.75rem;">📝 تحديث حالة الملاحظات</button>' : '') + '</td>' +
                     '<td style="padding:6px; white-space:nowrap;">' +
                         '<button onclick="editOldRecord(' + rec.id + ')" title="تعديل" style="cursor:pointer;border:none;background:none;font-size:1rem;">✏️</button> ' +
                         '<button onclick="triggerWhatsAppNotify(\'' + esc(rec.phoneNo || '') + '\', \'' + esc(rec.ownerName || '') + '\', \'' + esc(rec.houseNo || '') + '\', \'' + esc(rec.sectorNo || '') + '\')" title="واتساب" style="cursor:pointer;border:none;background:none;font-size:1rem;">💬</button> ' +
