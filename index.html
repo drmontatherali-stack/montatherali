@@ -4545,19 +4545,19 @@
         });
 
         // بطلب المستخدم: التنبيهات تكون عناوين مطوية مبدئياً (مغلقة) — الضغط على العنوان فقط يفتح تفاصيله
+        // وتبقى الأقسام الأربعة ظاهرة دائماً (حتى لو كان العدد صفر) حتى لا يظهر وكأن أحدها "اختفى" أو "نُسي"
         var secIdx = 0;
         function section(title, color, list) {
-            if (!list.length) return '';
             secIdx++;
             var bodyId = 'deadline-alert-sec-' + secIdx;
-            var rows = list.map(function (x) {
+            var rows = list.length ? list.map(function (x) {
                 return '<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:5px 0; border-top:1px dashed rgba(100,116,139,.2);">' +
                     '<span style="font-weight:800;">🏠 ' + esc(x.houseNo) + '</span>' +
                     '<span style="color:var(--text-muted); font-size:0.85rem;">🛠️ ' + esc(x.contractor || '-') + '</span>' +
                     '<span style="color:var(--text-muted); font-size:0.85rem;">📍 ' + esc(x.sector || '-') + '</span>' +
                     '<span style="color:' + color + '; font-weight:700; font-size:0.85rem;">' + esc(x.detail) + '</span>' +
                     '</div>';
-            }).join('');
+            }).join('') : '<div style="padding:6px 0; color:var(--text-muted); font-size:0.85rem;">لا توجد حالياً</div>';
             return '<div style="margin-bottom:8px;">' +
                 '<button type="button" onclick="window.__toggleAlertSection(\'' + bodyId + '\')" style="width:100%; text-align:right; display:flex; justify-content:space-between; align-items:center; cursor:pointer; border:1px solid ' + color + '55; background:' + color + '14; color:' + color + '; font-weight:900; padding:8px 12px; border-radius:10px;">' +
                 '<span>' + title + ' (' + list.length + ')</span><span>▾</span></button>' +
@@ -4570,7 +4570,6 @@
             section('⏳ المراجعة — اقترب الموعد', '#d97706', rvCountdown) +
             section('⚠️ المراجعة — تجاوزت 5 أيام', '#e11d48', rvOverdue5);
 
-        if (!html) { box.style.display = 'none'; box.innerHTML = ''; return; }
         box.style.cssText = 'display:block; margin:0 0 14px; padding:12px 16px; border-radius:14px; background:var(--glass-bg); border:1px solid var(--glass-border);';
         box.innerHTML = html;
     }
