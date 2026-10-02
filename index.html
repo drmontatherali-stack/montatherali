@@ -646,6 +646,20 @@
             animation: splashFadeIn 0.8s ease forwards;
             animation-delay: 0.9s;
         }
+        #splash-screen .splash-enter-btn {
+            margin-top: 10px;
+            padding: 12px 36px;
+            border-radius: 10px;
+            border: none;
+            background: var(--primary-blue, #1e40af);
+            color: #fff;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0;
+            animation: splashFadeIn 0.8s ease forwards;
+            animation-delay: 1.1s;
+        }
         @keyframes splashPopIn {
             0% { opacity: 0; transform: scale(0.4); }
             60% { opacity: 1; transform: scale(1.08); }
@@ -694,6 +708,7 @@
         <p>مكتب التسليم الفني</p>
         <small>يرحب بكم</small>
     </div>
+    <button type="button" class="splash-enter-btn" onclick="window.__enterSystem && window.__enterSystem()">➡️ اضغط للدخول</button>
 </div>
 
 <div id="rotate-overlay">
@@ -726,6 +741,9 @@
 
     <!-- شريط إشعار: دور موجودة بـ"قيد التسليم" و/أو "المراجعة" لكنها ظهرت كمسلّمة بشيت دور المسلّمة — تحتاج موافقتك لحذف نسختيها -->
     <div id="delivered-crossover-banner" style="display:none;"></div>
+
+    <!-- التنبيهات العلوية: عد تنازلي لمواعيد قيد التسليم والمراجعة + تنبيهات تجاوز المدة -->
+    <div id="deadline-alerts-banner" style="display:none;"></div>
 
     <div class="tools-toolbar">
         <div class="tools-toolbar-group">
@@ -4487,6 +4505,61 @@
         var d = new Date(s);
         return isNaN(d.getTime()) ? null : d;
     }
+    // الفرق الموقّع بالأيام بين تاريخ مُعطى واليوم: موجب = أيام متبقية، سالب = أيام تجاوز، null إن تعذّرت قراءة التاريخ
+    function wsDaysDiff(dateStr) {
+        var d = parseArabicOrIsoDate(dateStr);
+        if (!d) return null;
+        var today = new Date(); today.setHours(0, 0, 0, 0);
+        d.setHours(0, 0, 0, 0);
+        return Math.round((d - today) / 86400000);
+    }
+
+    /* ===== التنبيهات العلوية: عد تنازلي لمواعيد قيد التسليم (3/2/1/0) والمراجعة (2/1/0) + تنبيهات تجاوز المدة ===== */
+    function renderDeadlineAlerts() {
+        var box = document.getElementById('deadline-alerts-banner');
+        if (!box) return;
+
+        var wsCountdown = [], wsOverdue10 = [];
+        (wsUnits || []).forEach(function (u) {
+            if (wsDismissed[normHouseNo(u.unit)]) return;
+            var diff = wsDaysDiff(u.deliveryDate);
+            if (diff === null) return;
+            if (diff >= 0 && diff <= 3) wsCountdown.push({ houseNo: u.unit, contractor: u.contractor, sector: u.sector, detail: (diff === 0 ? 'اليوم هو موعد التسليم' : 'متبقي ' + diff + ' يوم') });
+            else if (diff <= -10) wsOverdue10.push({ houseNo: u.unit, contractor: u.contractor, sector: u.sector, detail: 'تجاوزت الموعد بـ ' + (-diff) + ' يوم' });
+        });
+
+        var rvCountdown = [], rvOverdue5 = [];
+        (oldHouseRecords || []).forEach(function (rec) {
+            if (rec.notesCompleted === true) return;
+            var nextDate = rec.thirdHandoverDate || rec.secondHandoverDate || rec.notesEndDate;
+            var diff = wsDaysDiff(nextDate);
+            if (diff === null) return;
+            if (diff >= 0 && diff <= 2) rvCountdown.push({ houseNo: rec.houseNo, contractor: rec.contractorName, sector: rec.sectorNo, detail: (diff === 0 ? 'اليوم هو الموعد' : 'متبقي ' + diff + ' يوم') + (rec.notes ? ' — ' + rec.notes : '') });
+            else if (diff <= -5) rvOverdue5.push({ houseNo: rec.houseNo, contractor: rec.contractorName, sector: rec.sectorNo, detail: 'تجاوزت المدة بـ ' + (-diff) + ' يوم' + (rec.notes ? ' — ' + rec.notes : '') });
+        });
+
+        function section(title, color, list) {
+            if (!list.length) return '';
+            var rows = list.map(function (x) {
+                return '<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:5px 0; border-top:1px dashed rgba(100,116,139,.2);">' +
+                    '<span style="font-weight:800;">🏠 ' + esc(x.houseNo) + '</span>' +
+                    '<span style="color:var(--text-muted); font-size:0.85rem;">🛠️ ' + esc(x.contractor || '-') + '</span>' +
+                    '<span style="color:var(--text-muted); font-size:0.85rem;">📍 ' + esc(x.sector || '-') + '</span>' +
+                    '<span style="color:' + color + '; font-weight:700; font-size:0.85rem;">' + esc(x.detail) + '</span>' +
+                    '</div>';
+            }).join('');
+            return '<div style="margin-bottom:10px;"><div style="font-weight:900; color:' + color + '; margin-bottom:4px;">' + title + ' (' + list.length + ')</div>' + rows + '</div>';
+        }
+
+        var html = section('⏳ قيد التسليم — اقترب موعد التسليم', '#d97706', wsCountdown) +
+            section('⚠️ قيد التسليم — تجاوزت 10 أيام', '#e11d48', wsOverdue10) +
+            section('⏳ المراجعة — اقترب الموعد', '#d97706', rvCountdown) +
+            section('⚠️ المراجعة — تجاوزت 5 أيام', '#e11d48', rvOverdue5);
+
+        if (!html) { box.style.display = 'none'; box.innerHTML = ''; return; }
+        box.style.cssText = 'display:block; margin:0 0 14px; padding:12px 16px; border-radius:14px; background:var(--glass-bg); border:1px solid var(--glass-border);';
+        box.innerHTML = html;
+    }
 
     function cell(v) { return (v == null) ? '' : String(v).trim(); }
 
@@ -4638,6 +4711,7 @@
             '<th style="padding:8px;">المراجعة</th>' +
             '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
         box.innerHTML = html;
+        renderDeadlineAlerts();
     }
 
     // بطلب المستخدم: دور كانت مسجلة بالنظام السابق باسم "الدور الجديدة" (houseRecords) ولا تملك سطراً مطابقاً
@@ -4979,6 +5053,7 @@
         box.style.maxHeight = '700px';
         box.style.overflow = 'auto';
         box.innerHTML = html;
+        renderDeadlineAlerts();
     }
 
     window.__rvFilter = function (v) {
@@ -5068,7 +5143,7 @@
 })();
 </script>
 <script>
-/* ===== إخفاء الشاشة الافتتاحية تلقائياً بعد تحميل التطبيق (لا تبقى عالقة أبداً مهما حصل) ===== */
+/* ===== الشاشة الافتتاحية: زر "اضغط للدخول" يفتح النظام بملء الشاشة، + إخفاء احتياطي تلقائي حتى لا تعلق أبداً ===== */
 (function () {
     'use strict';
     var MIN_SPLASH_MS = 1200; // أقل مدة ظهور حتى لا تومض بسرعة عند التحميل الخاطف
@@ -5086,15 +5161,28 @@
             setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 700);
         }, wait);
     }
+    function requestFs() {
+        try {
+            var el = document.documentElement;
+            var fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+            if (fn) fn.call(el);
+        } catch (e) { /* بعض المتصفحات (خصوصاً آيباد Safari) قد لا تدعم ملء الشاشة — نتجاهل الخطأ ونكمل عادياً */ }
+    }
+    // زر "اضغط للدخول": يطلب ملء الشاشة فوراً (يتطلب ضغطة مستخدم فعلية) ثم يخفي الشاشة الافتتاحية بلا انتظار
+    window.__enterSystem = function () {
+        requestFs();
+        hidden = false; shownAt = 0; // دخول يدوي فوري بلا أي انتظار للحد الأدنى
+        hideSplash();
+    };
     // نعتبر التطبيق "جاهزاً" إما عند اكتمال تحميل الصفحة بالكامل (window load)
     // أو بعد مهلة أقصى 3 ثوانٍ احتياطاً — حتى لا تعلق الشاشة الافتتاحية أبداً مهما تأخر تحميل أي مورد
-    // (هذا يحل مشكلة بقاء الشاشة البيضاء عالقة على بعض الأجهزة مثل الآيباد)
+    // أو تأخر ضغط المستخدم لزر الدخول (هذا يحل مشكلة بقاء الشاشة البيضاء عالقة على بعض الأجهزة مثل الآيباد)
     if (document.readyState === 'complete') {
-        hideSplash();
+        // لا نُخفيها تلقائياً فور التحميل — ننتظر ضغطة "اضغط للدخول"، لكن بحد أقصى احتياطي أدناه
     } else {
-        window.addEventListener('load', hideSplash);
+        window.addEventListener('load', function () { /* بانتظار ضغط المستخدم، مع المهلة الاحتياطية أدناه */ });
     }
-    setTimeout(hideSplash, 3000);
+    setTimeout(hideSplash, 15000); // احتياط أقصى: لو لم يُضغط الزر إطلاقاً خلال 15 ثانية، تختفي تلقائياً حتى لا تعلق
 })();
 </script>
 
