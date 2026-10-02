@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>مجمع الأميرات 2 - مكتب التسليم الفني </title>
 
-    <!-- PWA: manifest + أيقونات الشاشة الرئيسية -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icon-192.png" type="image/png">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <!-- ملاحظة فنية: لا يوجد ملف manifest.json أو ملفات أيقونات منفصلة فعلياً مرفقة مع هذا الملف الواحد (index.html فقط) —
+         أي رابط إليها كان سيُرجع 404. على أندرويد، وجود <link rel="manifest"> فاشل هو بالضبط سبب مشكلة "تثبيت كتطبيق"
+         (شعار دائري ثم مربع ثم شاشة بيضاء عالقة) لأن Chrome يحاول توليد تطبيق مُثبّت (WebAPK) من بيانات ناقصة/فاشلة.
+         لذلك أُزيلت هذه الروابط نهائياً — إضافة اختصار للشاشة الرئيسية (الطريقة العادية التي تعمل عندك تمام) تبقى تعمل بلا أي مشكلة لأنها لا تحتاج manifest إطلاقاً. -->
     <meta name="theme-color" content="#0f172a">
-    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="مكتب التسليم">
